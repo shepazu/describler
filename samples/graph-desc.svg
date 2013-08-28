@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="100%" height="100%" viewBox="10 10 510 350">
+
+  <title>Bar Chart</title>
+  <style>
+    text {
+      font-family: "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+      fill: black;
+    }
+    
+    rect {
+       stroke: black;
+    }
+  </style>
+  
+  <text id="title" font-size="14.5" font-weight="bold" text-anchor="middle" fill="red"> 
+    <tspan x="270" y="36" text-anchor="middle">Percentage of Total Noninstitutionalized Population</tspan>
+    <tspan x="270" dy="1.2em" text-anchor="middle">Age 16-64</tspan>
+    <tspan x="270" dy="1.2em" text-anchor="middle">Declaring One or More Disabilities</tspan>
+  </text>
+  
+  
+  <rect id="graph-bg" x="69" y="84" width="280" height="245" fill="#C0C0C0" />
+  
+  <g id="bars" stroke-width="1.5">
+    <rect id="bar-1" x="93" y="101" width="33" height="228" fill="#9A99FF" />
+    <rect id="bar-2" x="126" y="301" width="33" height="28" fill="#993365" />
+    <rect id="bar-3" x="159" y="253" width="33" height="76" fill="#FFFFCB" />
+    <rect id="bar-4" x="192" y="282" width="33" height="47" fill="#CCFFFF" />
+    <rect id="bar-5" x="225" y="307" width="33" height="22" fill="#660066" />
+    <rect id="bar-6" x="258" y="250" width="33" height="79" fill="#FE8081" />
+    <rect id="bar-7" x="291" y="183" width="33" height="146" fill="#0066CB" />
+  </g>
+  
+  <g id="legend">
+    <rect id="legend-1" x="361" y="99" width="6.25" height="6.25" fill="#9A99FF" />
+    <rect id="legend-2" x="361" y="132" width="6.25" height="6.25" fill="#993365" />
+    <rect id="legend-3" x="361" y="165" width="6.25" height="6.25" fill="#FFFFCB" />
+    <rect id="legend-4" x="361" y="198" width="6.25" height="6.25" fill="#CCFFFF" />
+    <rect id="legend-5" x="361" y="231" width="6.25" height="6.25" fill="#660066" />
+    <rect id="legend-6" x="361" y="264" width="6.25" height="6.25" fill="#FE8081" />
+    <rect id="legend-7" x="361" y="297" width="6.25" height="6.25" fill="#0066CB" />    
+  </g>
+  
+  <g id="labels" font-size="10">
+    <text id="label-1" x="370" y="106">
+      Total declaring one or more
+      <tspan x="370" dy="1.1em">disabilities</tspan>
+      <tspan x="109.5" y="95" text-anchor="middle">18.6%</tspan>
+    </text>
+         
+    <text id="label-2" x="370" y="139">
+      Sensory (visual and hearing)
+      <tspan x="142.5" y="295" text-anchor="middle">2.3%</tspan>
+    </text>
+     
+    <text id="label-3" x="370" y="172">
+      Physical
+      <tspan x="175.5" y="247" text-anchor="middle">6.2%</tspan>
+    </text>
+     
+    <text id="label-4" x="370" y="205">
+      Mental
+      <tspan x="208.5" y="276" text-anchor="middle">3.8%</tspan>
+    </text>
+     
+    <text id="label-5" x="370" y="238">
+      Self-care
+      <tspan x="241.5" y="301" text-anchor="middle">1.8%</tspan>
+    </text>
+     
+    <text id="label-6" x="370" y="271">
+      Difficulty going outside the 
+      <tspan x="370" dy="1.1em">home</tspan>
+      <tspan x="274.5" y="244" text-anchor="middle">6.4%</tspan>
+    </text>
+     
+    <text id="label-7" x="370" y="304">
+      Employment disability
+      <tspan x="307.5" y="177" text-anchor="middle">11.9%</tspan>
+    </text> 
+  </g>
+  
+  <g id="axes" text-anchor="middle" font-weight="bold" font-size="11">
+    <text id="x-axis_label" x="208.5" y="348">Types of Disability</text>
+    <text id="y-axis_label" x="23" y="206" transform="rotate(-90,23,206)">Percentage of Total <tspan x="23" dy="1em">U.S. Population</tspan> <tspan x="23" dy="1.1em">(178,687,234)</tspan></text>
+    
+    <text id="y-axis_ticks" font-size="10" font-weight="normal" fill="black" text-anchor="end"><tspan x="61" y="332">0</tspan><tspan x="61" y="308">2</tspan><tspan x="61" y="283">4</tspan><tspan x="61" y="258">6</tspan><tspan x="61" y="234">8</tspan><tspan x="61" y="209">10</tspan><tspan x="61" y="185">12</tspan><tspan x="61" y="160">14</tspan><tspan x="61" y="136">16</tspan><tspan x="61" y="112">18</tspan><tspan x="61" y="87">20</tspan></text> 
+     
+  </g>
+  
+  
+  
+</svg>

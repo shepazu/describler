@@ -1,0 +1,867 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <title>Describler</title>
+  <style type="text/css" media="screen">
+    @font-face {
+      font-family: 'Galberik';
+      src: url('assets/Galberik.eot');
+      src: local('☺'), 
+        url('assets/Galberik.woff') format('woff'), 
+        url('assets/Galberik.ttf') format('truetype'), 
+        url('assets/Galberik.svg') format('svg');
+      font-weight: normal;
+      font-style: normal;
+    }
+    
+    @font-face {
+      font-family: 'Overlock';
+      src: url('assets/Overlock.eot');
+      src: local('☺'), 
+        url('assets/Overlock.woff') format('woff'), 
+        url('assets/Overlock.ttf') format('truetype'), 
+        url('assets/Overlock.svg') format('svg');
+      font-weight: normal;
+      font-style: normal;
+    }    
+
+    @font-face {
+      font-family: 'icomoon';
+      src:url('assets/icomoon.eot');
+      src:url('assets/icomoon.eot?#iefix') format('embedded-opentype'),
+        url('assets/icomoon.woff') format('woff'),
+        url('assets/icomoon.ttf') format('truetype'),
+        url('assets/icomoon.svg#icomoon') format('svg');
+      font-weight: normal;
+      font-style: normal;
+    }
+    
+    body { 
+      font-family: "Overlock", sans-serif;
+      height: 100%; 
+      width: 100%; 
+      margin: 0; 
+      padding: 0; 
+      overflow: hidden; 
+    }
+
+    h1, h2 {
+      font-family: 'Galberik', cursive;      
+    }
+    
+    h1 {
+      font-style: italic;
+      font-weight: bold;
+      text-transform: lowercase;
+      font-size: 48px;
+      color: whitesmoke;
+      margin: 2px 0em 10px 0em;
+    }
+    
+    h2 {
+      margin-bottom: -0.5em;
+      padding-bottom: 0em;
+    }
+    
+    p {
+      margin-left: 1em;
+    }
+
+    section#app {
+      font-size: 18px;
+      background-image: url(assets/tweed.png);
+      margin: 0;
+      padding: 1em 3em 2em 3em;
+    }
+    
+    div#list > p:first-of-type > strong {
+      font-style: italic;
+      font-weight: normal;
+      font-size: 1.5em;
+      margin-left: -0.75em;
+    }
+        
+    section#content {
+      background-image: url(assets/pixel_weave.png);
+      border-radius: 3px;
+      box-shadow: inset 0 0 10px #333;
+    }
+    
+    section#controls {
+      float: left;
+      width: 30%;
+      margin: 1em;
+    }
+    
+    div#display-area {
+      margin: 0.7em 0.5em 0.9em 0.15em;
+      width: 100%;
+      height: 40%;
+      box-shadow: 3px 3px 5px 6px #ccc;
+      background: whitesmoke;
+      border-radius: 3px;
+    }
+    
+    div#display-area:target {
+      position: absolute;
+      transition: width 1.5s ease;
+      transition: height 1.5s ease;
+      margin: 0;
+      width: 90%;
+      height: 90%;
+      box-shadow: none;
+      background: whitesmoke;
+      border-radius: 3px;
+    }
+    
+    section#info {
+      display: block;
+      border-radius: 3px;
+      background: whitesmoke;
+      box-shadow: 3px 3px 5px 6px #ccc;
+      padding: 0.08em 0.5em 0.2em 0.5em;
+      margin-bottom: 0.7em;
+    }
+
+    output#new-filesize {
+      margin-left: 0.6em;
+      text-align: justify;
+    }
+
+    output {
+      font-style: italic;
+    }
+    
+    span#file-name {
+      display: block;
+    }
+    
+    
+    input#file {
+      
+    }
+    
+    div#list {
+      margin-left: 30%;
+      height: 85%;
+      overflow-y: scroll;
+      padding: 0em 2em 0em 1em;
+    }
+    
+    ul {
+      padding-left: 1em;
+    }
+    
+      ul li {
+        font-family: "Overlock", sans-serif;
+        font-size: 18px;
+        margin-bottom: 0.4em;
+        margin-top: 0.4em;
+        list-style-type: none;
+      }
+    
+      ul li span {
+        /*     box-shadow: 1px 1px 3px 3px #ccc;*/
+      }
+    
+    span.namespaced {
+      font-size: 14px;
+      background-color: gray;
+      border-radius: 0.7em;
+    }
+    
+    span.graphics, span.metadata, span.namespaced  {
+      color: whitesmoke;
+      padding: 0.08em 0.5em 0.2em 0.5em;
+      /*     vertical-align: top;*/
+    }
+    
+      span.graphics {
+        background-color: hsl(197, 100%, 32%);
+        border-radius: 0.7em;
+      }
+    
+      span.metadata {
+        background-color: hsl(85, 76%, 29%);
+        border-radius: 0.7em 0em 0em 0.7em;
+        padding: 0.08em 0.5em 0.2em 0.5em;
+      }
+    
+    span.id {
+      background-color: gray;
+      color: black;
+      margin-left: 0.5em;
+      padding: 0em 0.3em 0.05em 0.3em;
+      font-style: italic;
+      font-size: 16px;
+      border-radius: 0.4em;
+    }
+    
+      span.graphics span.id {
+        background-color: hsl(197, 100%, 55%);
+      }
+    
+      span.metadata span.id {
+        background-color: hsl(85, 76%, 55%);
+        margin-right: -0.25em;
+      }
+    
+    span.textvalue {
+      background-color: gainsboro;
+      background-color: white;
+      border-radius: 0em 0.7em 0.7em 0em;
+      padding: 0.08em 0.7em 0.2em 0.5em;
+      max-width: 500px;
+      display: inline-block;
+      vertical-align: top;
+      margin-top: -0.05em;
+    }
+    
+    svg {
+      /*     opacity: 0.1;*/
+    }
+
+
+    .upload {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .upload input {
+      position: absolute;
+      top: 0.5em;
+      right: 0;
+      font-size: 1em;
+      opacity: 0;
+      cursor: pointer;
+    }
+ 
+    .button, button {
+      font-family: 'icomoon', 'Overlock', sans-serif;
+      font-size: 1em;
+      display: inline-block;
+      margin: 0.15em;
+      outline: none;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      padding: .5em 2em .3em;
+      text-shadow: 0 1px 1px rgba(0,0,0,.3);
+      box-shadow: 0 1px 2px rgba(0,0,0,.2);
+      border-radius: 8px;
+    }
+
+    .button > span, button > span {
+      margin-left: 0.5em;
+    }
+
+    .button:hover {
+      text-decoration: none;
+    }
+    
+    .button:active {
+      position: relative;
+      top: 1px;
+    }
+    
+    .upload {
+	    color: #fef4e9;
+	    border: solid 1px #da7c0c;
+      background: #f78d1d; /* Old browsers */
+      background: linear-gradient(top, #faa51a 35%, #f47a20 100%)
+    }
+      
+      .upload:hover {
+        background: #f47c20;
+        background: linear-gradient(top, #f88e11 35%, #f06015 100%)
+      }
+      
+      .upload:active {
+        color: #fcd3a5;
+        background: linear-gradient(top, #f47a20 35%, #faa51a 100%)
+      }
+      
+  
+    .image-action {
+	    color: hsl(198, 65%, 91%);
+	    border: solid 1px hsl(197, 100%, 32%);
+      background: hsl(196, 100%, 40%); /* Old browsers */
+      background: linear-gradient(top, hsl(196, 100%, 47%)  35%, hsl(196, 100%, 32%) 100%)
+    }
+      
+      .image-action:hover {
+        background: hsl(196, 100%, 34%); 
+        background: linear-gradient(top, hsl(196, 100%, 40%) 35%, hsl(196, 100%, 28%) 100%)
+      }
+    
+      .image-action:active {
+        color: hsl(196, 100%, 47%);
+        background: linear-gradient(top, hsl(196, 100%, 32%) 35%, hsl(196, 100%, 47%) 100%)
+      }    
+      
+    .download {
+	    color: hsl(284, 65%, 91%);
+	    border: solid 1px hsl(283, 100%, 32%);
+      background: hsl(282, 100%, 40%); /* Old browsers */
+      background: linear-gradient(top, hsl(282, 100%, 47%) 35%, hsl(282, 100%, 32%) 100%)
+    }      
+     
+      .download:hover {
+        background: hsl(282, 100%, 34%);
+        background: linear-gradient(top, hsl(282, 100%, 40%) 35%, hsl(282, 100%, 28%) 100%)
+      }
+      
+      .download:active {
+        color: hsl(282, 100%, 47%);
+        background: linear-gradient(top, hsl(282, 100%, 32%) 35%, hsl(282, 100%, 47%) 100%)
+      }      
+  
+    .listen {
+	    color: #e8f0de;
+	    border: solid 1px hsl(85, 76%, 29%);
+      background: #64991e; /* Old browsers */
+      background: linear-gradient(top, #7db72f 35%, #4e7d0e 100%)
+    }
+      
+      .listen:hover {
+        background: #538018;
+        background: linear-gradient(top, #6b9d28 35%, #436b0c 100%)
+      }
+      
+      .listen:active {
+        color: #a9c08c;
+        background: linear-gradient(top, #4e7d0e 35%, #7db72f 100%)
+      }
+    
+    #listen:disabled {
+      background: #ccc;
+    }
+    
+    
+    .icon {
+      speak: none;
+      padding: .5em;
+    }
+      .icon-upload:before {
+        content: "\e000";
+      }
+      .icon-download:before {
+        content: "\e001";
+      }
+      .icon-play:before {
+        content: "\e002";
+      }
+      .icon-add:before {
+        content: "\e003";
+      }
+      .icon-remove:before {
+        content: "\e004";
+      }
+      .icon-cancel:before {
+        content: "\e005";
+      }
+      .icon-expand:before {
+        content: "\e006";
+      }
+      .icon-help:before {
+        content: "\e007";
+      }
+      .icon-zoom-in:before {
+        content: "\e008";
+      }
+      .icon-zoom-out:before {
+        content: "\e009";
+      }
+      .icon-zoom:before {
+        content: "\e00a";
+      }
+      .icon-view-source:before {
+        content: "\e00c";
+      }
+   
+        
+    /* Lightbox */    
+    .lightbox-image .close a { 
+      display: none;
+      position: absolute;
+      background: rgba(0, 0, 0, 0.75);
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .lightbox-image:target .close a { 
+      display: inline-block;
+/*      z-index: 1;*/
+    }
+    
+    .lightbox-image:target div#display-area { 
+      position: absolute;
+      z-index: 1;
+    }
+    
+    
+    
+    .lightbox { 
+      position: absolute; 
+      right: 100%; 
+      display: none;
+    }
+      .lightbox:target { 
+        position: absolute; 
+        bottom: 0; 
+        left: 0; 
+        right: 0; 
+        top: 0; 
+      }
+    
+        .lightbox:target .close a { 
+          background: rgba(0, 0, 0, 0.75);
+          bottom: 0;
+          left: 0;
+          right: 0;
+          top: 0;
+          position: absolute;
+          z-index: 1;
+        }
+        
+        .lightbox:target .close a:before { 
+          font-family: 'icomoon', 'Overlock', sans-serif;
+          content: "\e005";
+          color: #fff;
+          font-size: 2em;
+          text-indent: 0;
+          position: absolute;
+          right: 0.5em;
+          top: 0.5em;
+        }
+        
+        .lightbox:target .close {
+          text-indent: -999em;
+        }
+        
+    .lightbox:target div, .lightbox:target > code { 
+      z-index: 99; 
+      position: absolute;
+      top:0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      
+      margin: auto;
+      
+      
+      width: 50%;
+      height: 60%;
+      background-color: whitesmoke;
+      border-radius: 0.5em;
+      padding: 0 1em;
+    }
+    
+    #svg-view-area {
+      width: 90%;
+      height: 90%;
+      background-color: gray;
+    }
+    
+    #svg-view-area svg {
+      /*      border: 2px solid gray;*/
+      background-color: whitesmoke;
+    }
+    
+    #code-view > code {
+      white-space: pre-wrap;
+      padding: 1em 2em;
+      background-color: black;
+      color: gainsboro;
+      width: 70%;
+      height: 90%;
+      border: 2px solid hsla(0, 0%, 25%, 1.0);
+    }
+    
+    .scroll { 
+      overflow-y: scroll;
+    }
+
+
+
+
+    @media only screen and (max-width: 1024px){
+      section#info, .button, button {
+        font-size: 0.75em;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin: 0.1em;
+      }
+
+      section#app {
+        padding: 0.5em;
+      }
+
+      div#list {
+        height: 90%;
+      }
+    }
+
+    @media only screen and (max-width: 768px){
+      section#info, span#file-name  {
+        display: none;
+      }
+
+      .button, button {
+        font-size: 1em;
+        padding: 0.5em;
+      }
+
+      .button > span, button > span {
+        display: none;
+      }
+
+      section#app {
+        padding: 0;
+      }
+
+    }
+  
+  </style>
+	
+</head>
+<body>
+
+  <section id="app">
+    <h1>Describler</h1>  
+    <section id="content"> 
+      <section id="controls"> 
+        <div class="upload button icon-upload">
+            <span>Upload an SVG file…</span>
+            <input type="file" id="fileButton" accept="image/svg+xml">
+        </div>
+
+        <a href="#code-view" title="View code" class="button icon icon-view-source image-action"></a>     
+        <!-- <a href="#image-view" title="Show large image" class="button icon icon-zoom-in image-action"></a>      -->
+        <a href="#image-view-new" title="Show large image" class="button icon icon-zoom-in image-action"></a>     
+       <!-- <a href="#display-area" title="Show large image" class="button icon icon-zoom-in image-action"></a> -->
+       
+       <section class="lightbox-image" id="image-view-new">
+      	 <p class="close"><a href="#" title="Close dialog"> </a></p>
+         <div id="display-area">
+           <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 70 130">
+             <title>Describler Logo</title>
+             <desc>Three purple concentric arcs, reminiscent of a capital letter 'D' and of the icon for audio, radiating from a purple dot in the center</desc>              
+             <defs>
+               <radialGradient id="radgrad"
+               cx="10" cy="65" r="7" spreadMethod="reflect" gradientUnits="userSpaceOnUse">
+                 <stop offset="0" stop-color="hsl(282, 100%, 40%)" stop-opacity="0.3"/>
+                 <stop offset="22.5" stop-color="hsl(282, 100%, 40%)" stop-opacity="1"/>
+               </radialGradient>
+             </defs>          
+             <path stroke-width="8" stroke="url(#radgrad)" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M10,16 A48,48 0 1,1 10,114 M10,100 A30,30 0 1,0 10,30 M10,44 A16,16 0 1,1 10,86"/>
+             <circle cx="10" cy="65" r="7" fill="url(#radgrad)" />  
+           </svg>
+         </div>
+     	</section>
+     	    
+
+
+        <section id="info">
+          <span id="file-name"> </span>
+          <output id="filesize"> </output>
+          <output id="new-filesize"> </output>
+        </section>
+
+        <button id="listen" class="button icon-play listen" onclick="speak()"><span>Listen to SVG…</span></button>
+        <a href="#audio-help" title="Information on audio preview" class="button icon icon-help listen"></a>     
+        <a id="download" class="button icon-download download" href="#"><span>Download…</span></a>     
+      </section>
+    
+      <div id="list">
+        <p><strong>Describler</strong> allows you to make your SVG images accessible and reusable. It shows you all of the text content of your SVG in an editable list, including both visible text and metadata, and makes it easy for you to add descriptive content, or change the text that's already there. And you can use the “audio preview” feature to hear how your SVG sounds in common screenreaders.</p>
+        <p>Describler also makes your SVG auto-scaling by default, rather than a fixed size; this allows you to use your SVG at whatever size you need, or to change the size dynamically, and it allows users to zoom and pan easily.</p>
+        <h2>What is SVG?</h2>
+        <p>SVG stands for Scalable Vector Graphics, and it is a vector-based format, that can be created in popular drawing tools like Inkscape and Adobe Illustrator. Because each shape is made up of one or more markup elements, and the document has a DOM like HTML, it can be styled with CSS, and made interactive or animated with JavaScript.</p>
+        <p>Like HTML, the text in SVG is simply text, and so screenreaders can read it. In addition to the visible text elements, lik  <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, and <code>&lt;textPath&gt;</code> elements, SVG has special metadata elements, <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code>, which allow you to annotate your shapes for mouseover tooltips and special screenreader descriptions.</p>
+        <h2>How do I use Describler?</h2>
+        <ol>
+            <li>
+                <p><b>Upload your SVG file.</b> Click on the orange button with the up-arrow icon, and select an SVG file.</p>
+                
+            
+            </li>
+            <li><b>.</b> </li>
+        </ol>
+        <p></p>
+        <p>Describler is meant to add accessibility to SVG images, not to interactive SVG applications or GUIs; use ARIA markup for that.</p>
+        <h2>How can I make my SVG accessible?</h2>
+        <p></p>
+      </div>
+    </section>
+  </section>
+
+  <section id="lightboxes">
+<!--  
+    <section class="lightbox" id="image-view">
+      <div id="svg-view-area">
+      </div>
+      <p class="close"><a href="#" title="Close dialog"> </a></p>
+    </section>
+   -->
+  	<section class="lightbox" id="audio-help">
+  		<div>
+  			<h2>About Audio Preview</h2>
+  			<p>The audio preview of your SVG represents how a <i>screenreader</i> –an accessibility application for the visually impaired that speaks the contents of a document aloud, using a text-to-speech engine– will interpret your SVG file.</p>
+  			<p>The audible portions of your SVG document are the text contents, including that of the <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, <code>&lt;textPath&gt;</code> elements, as well as the <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code> metadata elements that you set as children of your graphics and grouping elements to help describe them.</p>
+  			<p>Describler uses the <a href="" target="_blank">Web Speech API</a> to voice your SVG. This is an  API still under development, though it has experimental implementations in Google Chrome (the Blink web engine) and some WebKit browsers. If you want to use this feature of Describler in Google Chrome, you must first enable it:</p>
+  			  <ol>
+  			    <li>Open a new browser tab</li>
+  			    <li>Navigate to Chrome's option flag for the “Enable experimental WebKit features”, at this URL: <br><code>chrome://flags/#enable-experimental-webkit-features</code></li>
+  			    <li>Select “Enable”</li>
+  			    <li>Restart your browser</li>
+  			  </ol>
+  			  <p>In the future, it's expected that the Web Speech API will be available in multiple browsers without opting into flags.</p>
+  		</div>
+  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
+  	</section>
+  
+  	<section class="lightbox" id="code-view">
+  		<code class="scroll">
+  		</code>
+  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
+  	</section>
+  </section>
+  
+  
+  
+
+  <script>
+    var eli = 0;
+    var svgEls = null;
+    var speechArray = [];
+    var filename = null;
+    
+    function init() {
+      if (!speechSynthesis) {
+        document.getElementById( "listen" ).setAttribute("disabled", "disabled");
+      }
+    }
+
+    function uploadFile(evt) {
+      var f = evt.target.files[0]; // FileList object
+      
+      // Only process image files.
+      if ("image/svg+xml" == f.type) {
+       document.getElementById('file-name').innerHTML = '<strong title="last modified: ' 
+         + (f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a')
+         + '">' + escape(f.name) + '</strong>';
+       
+       document.getElementById('filesize').innerHTML = f.size + ' bytes';
+
+
+       filename = f.name;
+        // console.log("ok")
+        var reader = new FileReader();
+        // console.log("reader")
+
+        // Closure to capture the file information.
+        reader.onload = (function(file) {
+          return function(e) {
+        // console.log("ok 2 ")
+            var displayArea = document.getElementById( "display-area" );
+            displayArea.innerHTML = (e.target.result);
+            
+            speechArray.length = 0;
+            setVB( displayArea.firstElementChild );
+            
+            drawTree();
+            
+            // console.log(displayArea.firstElementChild.textContent)
+            // console.log( speechArray.join(" \n") )
+            // speak( speechArray.join(". \n") );
+            
+          };
+        })(f);
+
+        reader.readAsBinaryString(f);
+      }
+    }
+
+    function setVB( el ){
+      var vb = el.getAttribute("viewBox");
+      if (!vb) {
+        var x = parseFloat( el.getAttribute("x") );
+        x = isNaN( x ) ? 0 : x;
+
+        var y = parseFloat( el.getAttribute("y") );
+        y = isNaN( y ) ? 0 : y;
+        
+        var w = parseFloat( el.getAttribute("width") );
+        w = isNaN( w ) ? 0 : w;
+
+        var h = parseFloat( el.getAttribute("height") );
+        h = isNaN( h ) ? 0 : h;
+        
+        el.setAttribute("viewBox", (x + " " + y + " " + w + " " + h) );
+        el.setAttribute("width", "100%" );
+        el.setAttribute("height", "100%" );
+      }
+    }
+
+    function drawTree(){    
+      var displayArea = document.getElementById( "display-area" );
+      var svgView = document.getElementById( "svg-view-area" );
+      var str = displayTree( displayArea.firstElementChild );
+      document.getElementById('list').innerHTML = str;
+      
+      svgView.replaceChild( displayArea.firstElementChild.cloneNode(true), svgView.firstChild );
+      writeSource();
+      createSaveLink( displayArea.innerHTML );
+      
+      eli = 0;
+      svgEls = displayArea.querySelectorAll( "*" );            
+    }
+
+    function displayTree( el ){
+      var name = el.tagName;
+      var namespace = el.nameSpace;
+      var id = el.getAttribute("id");
+      var idText = "";
+      if ( id ) {
+        idText = " <span class='id' title='id attribute' contenteditable onblur='updateMetadata(this)'>" + id + "</span>";
+      }
+      
+      var str = "";
+      if ( -1 != name.indexOf(":") ) {
+        str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='namespaced'>" + name + idText + "</span>";
+      } else if ( "title" == name || "desc" == name || "text" == name || "tspan" == name  || "textPath" == name  ) {
+        var text = ( 1 == el.childNodes[0].nodeType ) ? "" : el.childNodes[0].textContent;
+        str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='metadata'>" + name + idText + "</span>";
+        str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
+             
+        // store current text for speech review
+        if ( "title" == name || "desc" == name || "text" == name ) {
+          var elText = el.textContent;
+          speechArray.push( elText );
+        }  
+      } else {
+        str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='graphics'>" + name + idText + "</span>";
+      }
+ 
+      eli++;
+      
+      // recursive function to find child or sibling elements
+      var child = el.firstElementChild;
+      if ( child ) {
+        while ( child ) {
+          str += displayTree( child )
+          child = child.nextElementSibling;
+        }
+      }
+      str += "</li></ul>";
+      return str;
+    }
+
+    function updateMetadata( el ){
+      // alert(el.textContent)
+      var elCt = el.parentNode.getAttribute("data-el");
+      // console.log(elCt)
+      // console.log(el.textContent)
+      // console.log(svgEls);
+      var targetEl = svgEls[elCt];
+      // console.log(targetEl);
+      
+      var cname = el.getAttribute("class");
+      if ( "id" == cname ) {
+        var text = el.id;
+        targetEl.id = text;
+      } else {
+        // set text content
+        // el.childNodes[0].textContent = "";
+        var text = el.childNodes[0] ? el.childNodes[0].textContent : "";
+        text = text.replace(/\u00a0/g, " ");
+        targetEl.childNodes[0].textContent = text;
+      }
+      
+      speechArray.length = 0;
+      drawTree();
+    }
+
+    function handleKeys( event ){
+      if ( "Enter" == event.keyIdentifier || 13 == event.keyCode) {
+        event.target.blur();
+      }
+    }
+
+    function hilite( el ){
+      // var elCt = el.getAttribute("data-el");
+      // var targetEl = svgEls[elCt];
+      // console.log(targetEl)
+      // targetEl.style.opacity = "1"
+      // console.log(targetEl.style)
+    }
+     
+     function speak( msg ) {
+       msg = speechArray.join(". \n");
+       
+       var u = new SpeechSynthesisUtterance();
+       u.text = msg;
+       u.lang = 'en-US';
+       u.rate = 1.2;
+//       u.onend = function(event) { alert('Finished in ' + event.elapsedTime + ' seconds.'); }
+//        u.onend = function() {  alert(0); }
+       // u.onend = function(event) {  document.getElementById('time').textContent = ('Finished in ' + event.elapsedTime + ' seconds.'); }
+       speechSynthesis.speak( u );
+     }
+     
+    function writeSource() {
+      var displayArea = document.getElementById( "display-area" );
+//      console.log(displayArea.toString()  )
+      var codeView = document.getElementById( "code-view" ).firstElementChild;  
+//      console.log(displayArea.innerHTML)
+      var code = document.createTextNode(displayArea.innerHTML);
+//      alert(code)
+      codeView.replaceChild( code, codeView.firstChild );
+    }
+    
+    function createSaveLink( svg ) {
+      // uses HTML5 features: the ‘Blob’ object and the ‘download’ attribute of the <a> element 
+	    var blob = new Blob([svg], {type:'image/svg+xml'});
+      var downloadLink = document.getElementById('download');
+      downloadLink.download = "svgax-" + filename;
+      downloadLink.href = window.URL.createObjectURL(blob);
+      document.getElementById('new-filesize').innerHTML = '(revised: ' + byteSized( blob.size ) + ')';
+    }
+    
+    
+    function byteSized( bytes ) {
+      var units = ['bytes', 'KB', 'MB', 'GB', 'TB'];
+      var size = ";"
+      if ( 0 == bytes) {
+        size = "0 Bytes"
+      } else {
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        if (0 == i) {
+          size = bytes + ' ' + units[i];
+        } else {
+          size = (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];;
+        } 
+      }
+      return size;
+    }   
+
+    
+    // displayNew = (document.getElementById(nr).style.display == 'none') ? 'block' : 'none';
+    //      document.getElementById(nr).style.display = displayNew;
+    
+    // document.getElementById('list').addEventListener('mouseover', hilite, false);
+    document.getElementById('fileButton').addEventListener('change', uploadFile, false);
+    document.documentElement.addEventListener('blur', updateMetadata, false);
+    document.documentElement.addEventListener('keypress', handleKeys, false);
+    window.onload = init;
+  </script>
+
+
+
+</body></html>

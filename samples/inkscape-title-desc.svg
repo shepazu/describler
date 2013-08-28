@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="744.09448"
+   height="1052.3622"
+   id="svg2">
+  <title
+     id="title3068">Tilted Stars</title>
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Tilted Stars</dc:title>
+        <dc:description>Three 5-pointed stars in various colors, sizes, and positions</dc:description>
+        <cc:license
+           rdf:resource="" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1">
+    <path
+       d="M 362.85712,640.93361 239.55735,528.28863 76.862579,565.99989 145.89259,413.92562 59.751606,270.84712 225.71427,289.50503 335.17099,163.3664 368.71155,326.97188 522.5005,392.09242 377.26704,474.54827 z"
+       transform="translate(-20,-108.57143)"
+       id="star-1"
+       style="fill:#ffff00;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1">
+      <desc
+         id="desc2991">A yellow 5-pointed star</desc>
+      <title
+         id="title2989">Star</title>
+    </path>
+    <path
+       d="m 145.7143,683.79074 84.20849,-39.44356 15.24643,-91.7301 63.53492,67.8983 91.95192,-13.84594 -44.94176,81.40702 41.58298,83.17284 -91.31045,-17.586 -66.25222,65.24959 -11.4912,-92.27577 z"
+       id="path3072"
+       style="fill:#0000ff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       d="m 597.14285,569.50506 -51.02011,20.94829 -11.66738,53.90506 -35.68909,-42.04963 -54.87218,5.56124 28.96304,-46.93639 -22.24549,-50.46802 53.58924,13.04134 41.1237,-36.75219 4.15693,54.99638 z"
+       transform="translate(-34.285714,65.714286)"
+       id="path3074"
+       style="fill:#ff0000" />
+  </g>
+</svg>

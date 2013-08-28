@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+  width="745" height="1055">
+  <title>Tilted Stars</title>
+  <desc>Three 5-pointed stars in various colors, sizes, and positions</desc>
+  <g style="stroke:#000000;">
+    <path d="M 362.85712,640.93361 239.55735,528.28863 76.862579,565.99989 145.89259,413.92562 59.751606,270.84712 225.71427,289.50503 335.17099,163.3664 368.71155,326.97188 522.5005,392.09242 377.26704,474.54827 z" transform="translate(-20,-108.57143)" id="star-1" fill="#ffff00">
+      <title>Yellow Star</title>
+      <desc>A yellow 5-pointed star</desc>
+    </path>
+    <path d="m 145.7143,683.79074 84.20849,-39.44356 15.24643,-91.7301 63.53492,67.8983 91.95192,-13.84594 -44.94176,81.40702 41.58298,83.17284 -91.31045,-17.586 -66.25222,65.24959 -11.4912,-92.27577 z" id="star-2" fill="#0000ff">
+      <title>Blue Star</title>
+      <desc>A blue 5-pointed star</desc>
+    </path>
+    <path d="m 597.14285,569.50506 -51.02011,20.94829 -11.66738,53.90506 -35.68909,-42.04963 -54.87218,5.56124 28.96304,-46.93639 -22.24549,-50.46802 53.58924,13.04134 41.1237,-36.75219 4.15693,54.99638 z" transform="translate(-34.285714,65.714286)" id="star-3" fill="#ff0000">
+      <title>Red Star</title>
+      <desc>A red 5-pointed star</desc>
+    </path>
+  </g>
+</svg>
