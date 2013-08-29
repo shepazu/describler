@@ -621,6 +621,9 @@
     var svgEls = null;
     var speechArray = [];
     var filename = null;
+    var svgRoot = null;
+    
+    var hiliter = null;
     
     function init() {
       if ( "undefined" == typeof speechSynthesis ) {
@@ -651,6 +654,7 @@
         // console.log("ok 2 ")
             var displayArea = document.getElementById( "display-area" );
             displayArea.innerHTML = (e.target.result);
+            svgRoot = displayArea.firstElementChild;
             
             speechArray.length = 0;
             setVB( displayArea.firstElementChild );
@@ -710,10 +714,12 @@
         idText = " <span class='id' title='id attribute' contenteditable onblur='updateMetadata(this)'>" + id + "</span>";
       }
       
+      var evtStr = " onmouseover='hilite(event)' onmouseout='lolite(event)'";
+      
       var str = "";
       if ( -1 != name.indexOf(":") ) {
         //elements in another namespace
-        str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='namespaced'>" + name + idText + "</span>";
+        str += "<ul><li data-el='" + eli + "'><span class='namespaced'>" + name + idText + "</span>";
       } else if ( "title" == name || "desc" == name || "text" == name || "tspan" == name  || "textPath" == name  ) {
         // textual elements
         var text = "";
@@ -721,7 +727,11 @@
           text = ( 1 == el.childNodes[0].nodeType ) ? "" : el.childNodes[0].textContent;
         }
         
-        str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='metadata'>" + name + idText + "</span>";
+        if (  "title" == name || "desc" == name ) {
+          evtStr = "";
+        }
+        
+        str += "<ul><li data-el='" + eli + "'><span class='metadata'" + evtStr + ">" + name + idText + "</span>";
         str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
              
         // store current text for speech review
@@ -731,7 +741,7 @@
         }  
       } else {
         // graphical and all other elements
-        str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='graphics'>" + name + idText + "</span>";
+        str += "<ul><li data-el='" + eli + "'><span class='graphics'" + evtStr + ">" + name + idText + "</span>";
       }
       
       if ( "title" != name && "desc" != name ) {
@@ -824,12 +834,23 @@
       }
     }
 
-    function hilite( el ){
-      // var elCt = el.getAttribute("data-el");
-      // var targetEl = svgEls[elCt];
-      // console.log(targetEl)
-      // targetEl.style.opacity = "1"
-      // console.log(targetEl.style)
+    function hilite( event ){
+      event.stopPropagation()
+      var li = event.target.parentNode;
+      var elCt = li.getAttribute("data-el");
+      var targetEl = svgEls[elCt];
+      targetEl.style.opacity = "0.5";
+
+      // svgRoot.style.opacity = "0.3";
+      // targetEl.style.opacity = "1";
+    }
+
+    function lolite( event ){
+      event.stopPropagation()
+      var li = event.target.parentNode;
+      var elCt = li.getAttribute("data-el");
+      var targetEl = svgEls[elCt];
+      targetEl.style.opacity = "";
     }
      
      function speak( msg ) {
