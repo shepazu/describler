@@ -693,8 +693,10 @@
       
       var str = "";
       if ( -1 != name.indexOf(":") ) {
+        //elements in another namespace
         str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='namespaced'>" + name + idText + "</span>";
       } else if ( "title" == name || "desc" == name || "text" == name || "tspan" == name  || "textPath" == name  ) {
+        // textual elements
         var text = ( 1 == el.childNodes[0].nodeType ) ? "" : el.childNodes[0].textContent;
         str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='metadata'>" + name + idText + "</span>";
         str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
@@ -705,6 +707,7 @@
           speechArray.push( elText );
         }  
       } else {
+        // graphical and all other elements
         str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='graphics'>" + name + idText + "</span>";
       }
  
@@ -723,26 +726,25 @@
     }
 
     function updateMetadata( el ){
-      // alert(el.textContent)
-      var elCt = el.parentNode.getAttribute("data-el");
-      // console.log(elCt)
-      // console.log(el.textContent)
-      // console.log(svgEls);
-      var targetEl = svgEls[elCt];
-      // console.log(targetEl);
-      
       var cname = el.getAttribute("class");
-      if ( "id" == cname ) {
-        var text = el.id;
-        targetEl.id = text;
-      } else {
-        // set text content
-        // el.childNodes[0].textContent = "";
-        var text = el.childNodes[0] ? el.childNodes[0].textContent : "";
-        text = text.replace(/\u00a0/g, " ");
-        targetEl.childNodes[0].textContent = text;
+      var elCt = el.parentNode.getAttribute("data-el");
+      if ( !elCt ){
+        elCt = el.parentNode.parentNode.getAttribute("data-el");
       }
       
+      if ( elCt ) {
+        var targetEl = svgEls[elCt];
+        var text = el.childNodes[0] ? el.childNodes[0].textContent : "";
+
+        if ( "id" == cname ) {
+          targetEl.id = text;
+        } else {
+          // set text content
+          text = text.replace(/\u00a0/g, " ");
+          targetEl.childNodes[0].textContent = text;
+        }
+      }
+
       speechArray.length = 0;
       drawTree();
     }
@@ -768,21 +770,14 @@
        u.text = msg;
        u.lang = 'en-US';
        u.rate = 1.2;
-//       u.onend = function(event) { alert('Finished in ' + event.elapsedTime + ' seconds.'); }
-//        u.onend = function() {  alert(0); }
        // u.onend = function(event) {  document.getElementById('time').textContent = ('Finished in ' + event.elapsedTime + ' seconds.'); }
        speechSynthesis.speak( u );
      }
      
     function writeSource() {
       var displayArea = document.getElementById( "display-area" );
-//      console.log(displayArea.toString()  )
-      // var codeView = document.getElementById( "code-view" ).firstElementChild;  
       var codeView = document.querySelector("#code-view code");
-      console.log(codeView)
-      console.log(codeView.firstChild)
       var code = document.createTextNode(displayArea.innerHTML);
-//      alert(code)
       codeView.replaceChild( code, codeView.firstChild );
     }
     
