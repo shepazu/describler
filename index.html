@@ -837,20 +837,35 @@
     function hilite( event ){
       event.stopPropagation()
       var li = event.target.parentNode;
+      // console.log(li)
+      // console.log(li + ": " + li.getAttribute("data-el") )
       var elCt = li.getAttribute("data-el");
       var targetEl = svgEls[elCt];
-      targetEl.style.opacity = "0.5";
+      var bbox = targetEl.getBBox();
+      
+      hiliter = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      hiliter.setAttribute( "x", bbox.x - (bbox.width/30) );
+      hiliter.setAttribute( "y", bbox.y - (bbox.height/30) );
+      hiliter.setAttribute( "width", bbox.width + (bbox.width/15) );
+      hiliter.setAttribute( "height", bbox.height + (bbox.height/15) );
+      hiliter.setAttribute( "fill", "none" );
+      hiliter.setAttribute( "stroke", "red" );
+      hiliter.setAttribute( "stroke-width", "2" );
+      hiliter.setAttribute( "stroke-linecap", "round" );
+      hiliter.setAttribute( "stroke-dasharray", "1, 5" );
 
-      // svgRoot.style.opacity = "0.3";
-      // targetEl.style.opacity = "1";
+      svgRoot.appendChild( hiliter );
     }
 
     function lolite( event ){
       event.stopPropagation()
-      var li = event.target.parentNode;
-      var elCt = li.getAttribute("data-el");
-      var targetEl = svgEls[elCt];
-      targetEl.style.opacity = "";
+      // var li = event.target.parentNode;
+      // var elCt = li.getAttribute("data-el");
+      // var targetEl = svgEls[elCt];
+
+      if (hiliter) {
+        svgRoot.removeChild( hiliter );
+      }
     }
      
      function speak( msg ) {
