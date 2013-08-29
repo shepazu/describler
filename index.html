@@ -744,7 +744,7 @@
         str += "<ul><li data-el='" + eli + "'><span class='graphics'" + evtStr + ">" + name + idText + "</span>";
       }
       
-      if ( "title" != name && "desc" != name ) {
+      if ( "title" != name && "desc" != name && -1 == name.indexOf(":") ) {
         var t = el.querySelector("title");
         if ( !t || el != t.parentNode ) { 
           // console.log( el.tagName + " doesn't have a <title>" )
@@ -840,20 +840,24 @@
       // console.log(li)
       // console.log(li + ": " + li.getAttribute("data-el") )
       var elCt = li.getAttribute("data-el");
-      var targetEl = svgEls[elCt];
-      var bbox = targetEl.getBBox();
+      var targetEl = svgEls[elCt];  
       
-      hiliter = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      hiliter.setAttribute( "x", bbox.x - (bbox.width/30) );
-      hiliter.setAttribute( "y", bbox.y - (bbox.height/30) );
-      hiliter.setAttribute( "width", bbox.width + (bbox.width/15) );
-      hiliter.setAttribute( "height", bbox.height + (bbox.height/15) );
-      hiliter.setAttribute( "fill", "none" );
+      var name = targetEl.tagName;
+      
+      var sw = targetEl.getAttribute( "stroke-width");
+      sw = (sw) ? ( parseFloat(sw) *3 ) : 5;
+      
+      hiliter = targetEl.cloneNode(true);
+      hiliter.setAttribute( "fill", "yellow" );
       hiliter.setAttribute( "stroke", "red" );
-      hiliter.setAttribute( "stroke-width", "2" );
+      hiliter.setAttribute( "stroke-width", sw );
+      hiliter.setAttribute( "opacity", "0.75" );
       hiliter.setAttribute( "stroke-linecap", "round" );
-      hiliter.setAttribute( "stroke-dasharray", "1, 5" );
-
+      
+      if ( "text" != name && "tspan" != name  && "textPath" != name  ) {
+        hiliter.setAttribute( "stroke-dasharray", "2, 10" );
+      }
+      
       svgRoot.appendChild( hiliter );
     }
 
