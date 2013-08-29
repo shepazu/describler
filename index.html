@@ -100,19 +100,7 @@
       background: whitesmoke;
       border-radius: 3px;
     }
-    
-    div#display-area:target {
-      position: absolute;
-      transition: width 1.5s ease;
-      transition: height 1.5s ease;
-      margin: 0;
-      width: 90%;
-      height: 90%;
-      box-shadow: none;
-      background: whitesmoke;
-      border-radius: 3px;
-    }
-    
+
     section#info {
       display: block;
       border-radius: 3px;
@@ -143,7 +131,7 @@
     div#list {
       margin-left: 30%;
       height: 85%;
-      overflow-y: scroll;
+      overflow-y: auto;
       padding: 0em 2em 0em 1em;
     }
     
@@ -380,7 +368,7 @@
    
         
     /* Lightbox */    
-    .lightbox-image .close a { 
+    .lightbox .close a { 
       display: none;
       position: absolute;
       background: rgba(0, 0, 0, 0.75);
@@ -392,102 +380,84 @@
       padding: 0;
     }
     
-    .lightbox-image:target .close a { 
-      display: inline-block;
-/*      z-index: 1;*/
-    }
-    
-    .lightbox-image:target div#display-area { 
-      position: absolute;
-      z-index: 1;
-    }
-    
-    
-    
-    .lightbox { 
-      position: absolute; 
-      right: 100%; 
-      display: none;
-    }
-      .lightbox:target { 
-        position: absolute; 
-        bottom: 0; 
-        left: 0; 
-        right: 0; 
-        top: 0; 
+      .lightbox:target .close a { 
+        display: inline-block;
       }
     
-        .lightbox:target .close a { 
-          background: rgba(0, 0, 0, 0.75);
+      #code-view, 
+      #audio-help {
+        display: none;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: 0;
+        margin: auto;
+      }
+      
+        #code-view > code, 
+        #audio-help > div, 
+        .lightbox:target div#display-area {
+          position: absolute;
           bottom: 0;
           left: 0;
           right: 0;
           top: 0;
+          margin: auto;
+        }
+        
+        #audio-help > div {
+          width: 50%;
+          height: 60%;
+          background-color: whitesmoke;
+          border-radius: 0.5em;
+          padding: 0 1em;
+          overflow-y: auto;
+        }
+      
+        #code-view > code {
+          width: 70%;
+          height: 90%;
+          color: gainsboro;
+          background-color: black;
+          border: 2px solid hsla(0, 0%, 25%, 1.0);
+          overflow-y: auto;
+          white-space: pre-wrap;
+          padding: 1em 2em;
+        }
+      
+        #code-view:target, 
+        #audio-help:target {
+          display: inline-block;
           position: absolute;
-          z-index: 1;
         }
-        
-        .lightbox:target .close a:before { 
-          font-family: 'icomoon', 'Overlock', sans-serif;
-          content: "\e005";
-          color: #fff;
-          font-size: 2em;
-          text-indent: 0;
-          position: absolute;
-          right: 0.5em;
-          top: 0.5em;
-        }
-        
-        .lightbox:target .close {
-          text-indent: -999em;
-        }
-        
-    .lightbox:target div, .lightbox:target > code { 
-      z-index: 99; 
-      position: absolute;
-      top:0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      
-      margin: auto;
+   
+    
+      .lightbox:target div#display-area { 
+        position: absolute;
+        transition: width 0.5s ease;
+        transition: height 0.5s ease;
+        width: 90%;
+        height: 90%;
+        box-shadow: none;
+        background: whitesmoke;
+        border-radius: 3px;
+        z-index: 1;
+      }
+
+      .lightbox:target .close a:before { 
+        font-family: 'icomoon', 'Overlock', sans-serif;
+        content: "\e005";
+        color: whitesmoke;
+        font-size: 2em;
+        text-indent: 0;
+        position: absolute;
+        right: 0.5em;
+        top: 0.5em;
+      }
       
       
-      width: 50%;
-      height: 60%;
-      background-color: whitesmoke;
-      border-radius: 0.5em;
-      padding: 0 1em;
-    }
-    
-    #svg-view-area {
-      width: 90%;
-      height: 90%;
-      background-color: gray;
-    }
-    
-    #svg-view-area svg {
-      /*      border: 2px solid gray;*/
-      background-color: whitesmoke;
-    }
-    
-    #code-view > code {
-      white-space: pre-wrap;
-      padding: 1em 2em;
-      background-color: black;
-      color: gainsboro;
-      width: 70%;
-      height: 90%;
-      border: 2px solid hsla(0, 0%, 25%, 1.0);
-    }
-    
-    .scroll { 
-      overflow-y: scroll;
-    }
-
-
-
-
+    /* responsible responsive resizing */
     @media only screen and (max-width: 1024px){
       section#info, .button, button {
         font-size: 0.75em;
@@ -542,11 +512,9 @@
         </div>
 
         <a href="#code-view" title="View code" class="button icon icon-view-source image-action"></a>     
-        <!-- <a href="#image-view" title="Show large image" class="button icon icon-zoom-in image-action"></a>      -->
         <a href="#image-view-new" title="Show large image" class="button icon icon-zoom-in image-action"></a>     
-       <!-- <a href="#display-area" title="Show large image" class="button icon icon-zoom-in image-action"></a> -->
        
-       <section class="lightbox-image" id="image-view-new">
+       <section class="lightbox" id="image-view-new">
       	 <p class="close"><a href="#" title="Close dialog"> </a></p>
          <div id="display-area">
            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 70 130">
@@ -602,14 +570,14 @@
   </section>
 
   <section id="lightboxes">
-<!--  
-    <section class="lightbox" id="image-view">
-      <div id="svg-view-area">
-      </div>
-      <p class="close"><a href="#" title="Close dialog"> </a></p>
-    </section>
-   -->
+  	<section class="lightbox" id="code-view">
+  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
+  		<code>
+  		</code>
+  	</section>
+
   	<section class="lightbox" id="audio-help">
+  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
   		<div>
   			<h2>About Audio Preview</h2>
   			<p>The audio preview of your SVG represents how a <i>screenreader</i> –an accessibility application for the visually impaired that speaks the contents of a document aloud, using a text-to-speech engine– will interpret your SVG file.</p>
@@ -623,13 +591,6 @@
   			  </ol>
   			  <p>In the future, it's expected that the Web Speech API will be available in multiple browsers without opting into flags.</p>
   		</div>
-  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
-  	</section>
-  
-  	<section class="lightbox" id="code-view">
-  		<code class="scroll">
-  		</code>
-  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
   	</section>
   </section>
   
@@ -711,11 +672,9 @@
 
     function drawTree(){    
       var displayArea = document.getElementById( "display-area" );
-      var svgView = document.getElementById( "svg-view-area" );
       var str = displayTree( displayArea.firstElementChild );
       document.getElementById('list').innerHTML = str;
       
-      svgView.replaceChild( displayArea.firstElementChild.cloneNode(true), svgView.firstChild );
       writeSource();
       createSaveLink( displayArea.innerHTML );
       
@@ -818,8 +777,10 @@
     function writeSource() {
       var displayArea = document.getElementById( "display-area" );
 //      console.log(displayArea.toString()  )
-      var codeView = document.getElementById( "code-view" ).firstElementChild;  
-//      console.log(displayArea.innerHTML)
+      // var codeView = document.getElementById( "code-view" ).firstElementChild;  
+      var codeView = document.querySelector("#code-view code");
+      console.log(codeView)
+      console.log(codeView.firstChild)
       var code = document.createTextNode(displayArea.innerHTML);
 //      alert(code)
       codeView.replaceChild( code, codeView.firstChild );
@@ -851,9 +812,6 @@
       return size;
     }   
 
-    
-    // displayNew = (document.getElementById(nr).style.display == 'none') ? 'block' : 'none';
-    //      document.getElementById(nr).style.display = displayNew;
     
     // document.getElementById('list').addEventListener('mouseover', hilite, false);
     document.getElementById('fileButton').addEventListener('change', uploadFile, false);
