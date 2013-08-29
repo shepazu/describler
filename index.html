@@ -211,7 +211,7 @@
 
     .upload {
       position: relative;
-      overflow: hidden;
+/*      overflow: hidden;*/
     }
     
     .upload input {
@@ -221,6 +221,7 @@
       font-size: 1em;
       opacity: 0;
       cursor: pointer;
+      width: 14em;
     }
  
     .button, button {
@@ -495,6 +496,9 @@
         padding: 0;
       }
 
+      .upload input {
+        width: 2em;
+      }
     }
   
   </style>
@@ -604,7 +608,7 @@
     var filename = null;
     
     function init() {
-      if (!speechSynthesis) {
+      if ( "undefined" == typeof speechSynthesis ) {
         document.getElementById( "listen" ).setAttribute("disabled", "disabled");
       }
     }
@@ -710,7 +714,19 @@
         // graphical and all other elements
         str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='graphics'>" + name + idText + "</span>";
       }
- 
+      
+      if ( "title" != name && "desc" != name ) {
+        var t = el.querySelector("title");
+        if ( !t || el != t.parentNode ) { 
+          // console.log( el.tagName + " doesn't have a <title>" )
+        }     
+
+        var d = el.querySelector("desc");
+        if ( !d || el != d.parentNode ) { 
+          // console.log( el.tagName + " doesn't have a <desc>" )
+        }     
+      } 
+      
       eli++;
       
       // recursive function to find child or sibling elements
