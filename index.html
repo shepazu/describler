@@ -36,7 +36,7 @@
     }
     
     body { 
-      font-family: "Overlock", sans-serif;
+      font-family: 'icomoon', 'Overlock', sans-serif;
       height: 100%; 
       width: 100%; 
       margin: 0; 
@@ -157,7 +157,11 @@
       border-radius: 0.7em;
     }
     
-    span.graphics, span.metadata, span.namespaced  {
+    span.graphics, 
+    span.metadata, 
+    span.namespaced,
+    span.add-title,
+    span.add-desc {
       color: whitesmoke;
       padding: 0.08em 0.5em 0.2em 0.5em;
       /*     vertical-align: top;*/
@@ -173,7 +177,18 @@
         border-radius: 0.7em 0em 0em 0.7em;
         padding: 0.08em 0.5em 0.2em 0.5em;
       }
-    
+      
+      span.add-title,
+      span.add-desc {
+        font-size: 15px;
+        background-color: #da5867;
+        border-radius: 0.7em;
+        margin-left: 0.5em;
+        padding-left: 0.em;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
     span.id {
       background-color: gray;
       color: black;
@@ -674,7 +689,7 @@
       }
     }
 
-    function drawTree(){    
+    function drawTree() {    
       var displayArea = document.getElementById( "display-area" );
       var str = displayTree( displayArea.firstElementChild );
       document.getElementById('list').innerHTML = str;
@@ -701,7 +716,11 @@
         str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='namespaced'>" + name + idText + "</span>";
       } else if ( "title" == name || "desc" == name || "text" == name || "tspan" == name  || "textPath" == name  ) {
         // textual elements
-        var text = ( 1 == el.childNodes[0].nodeType ) ? "" : el.childNodes[0].textContent;
+        var text = "";
+        if ( el.childNodes[0] ) {
+          text = ( 1 == el.childNodes[0].nodeType ) ? "" : el.childNodes[0].textContent;
+        }
+        
         str += "<ul><li data-el='" + eli + "' onmouseover='hilite(this)'><span class='metadata'>" + name + idText + "</span>";
         str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
              
@@ -719,11 +738,13 @@
         var t = el.querySelector("title");
         if ( !t || el != t.parentNode ) { 
           // console.log( el.tagName + " doesn't have a <title>" )
+          str += "<span class='add-title' title='add title to this element' aria-role='button' onclick='addMetadata(this)'>+ &lt;title&gt;</span>";
         }     
 
         var d = el.querySelector("desc");
         if ( !d || el != d.parentNode ) { 
           // console.log( el.tagName + " doesn't have a <desc>" )
+          str += "<span class='add-desc' title='add description to this element' aria-role='button' onclick='addMetadata(this)'>+ &lt;desc&gt;</span>";
         }     
       } 
       
@@ -739,6 +760,33 @@
       }
       str += "</li></ul>";
       return str;
+    }
+
+    function addMetadata( el ){
+      var elCt = el.parentNode.getAttribute("data-el");
+      var targetEl = svgEls[elCt];
+      var cname = el.getAttribute("class").replace("add-","");
+
+      var m = document.createElementNS("http://www.w3.org/2000/svg", cname );
+      
+      var el1 = targetEl.firstElementChild;
+      if ( el1 ) {
+        var el2 = el1.nextElementSibling;
+        
+        if ( "title" != el1.tagName ) {
+          targetEl.insertBefore( m, el1 );
+        } else if ( el2 ) {
+          targetEl.insertBefore( m, el2 );
+        } else {
+          targetEl.appendChild( m );
+        }
+      } else {
+        targetEl.appendChild( m );
+      }
+      
+      // console.log(targetEl)
+      speechArray.length = 0;
+      drawTree();
     }
 
     function updateMetadata( el ){
@@ -757,7 +805,12 @@
         } else {
           // set text content
           text = text.replace(/\u00a0/g, " ");
-          targetEl.childNodes[0].textContent = text;
+          
+          if ( targetEl.childNodes[0] ) {
+            targetEl.childNodes[0].textContent = text;            
+          } else {
+            targetEl.appendChild( document.createTextNode( text ) );            
+          }
         }
       }
 
