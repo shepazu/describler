@@ -160,6 +160,7 @@
     span.graphics, 
     span.metadata, 
     span.namespaced,
+    span.misc,
     span.add-title,
     span.add-desc {
       color: whitesmoke;
@@ -169,6 +170,12 @@
     
       span.graphics {
         background-color: hsl(197, 100%, 32%);
+        border-radius: 0.7em;
+      }
+  
+      span.misc {
+/*        background-color: hsl(290, 70%, 50%);*/
+        background-color: hsl(31, 93%, 54%);
         border-radius: 0.7em;
       }
     
@@ -181,12 +188,13 @@
       span.add-title,
       span.add-desc {
         font-size: 15px;
-        background-color: #da5867;
+        background-color: hsl(282, 100%, 40%);
         border-radius: 0.7em;
         margin-left: 0.5em;
         padding-left: 0.em;
         font-weight: bold;
         cursor: pointer;
+        white-space: nowrap;
       }
 
     span.id {
@@ -207,7 +215,12 @@
         background-color: hsl(85, 76%, 55%);
         margin-right: -0.25em;
       }
-    
+  
+      span.misc span.id {
+        background-color: hsl(31, 93%, 74%);
+        margin-right: -0.25em;
+      }
+
     span.textvalue {
       background-color: gainsboro;
       background-color: white;
@@ -217,7 +230,9 @@
       display: inline-block;
       vertical-align: top;
       margin-top: -0.05em;
+      min-height: 1.2em;
     }
+    
     
     svg {
       /*     opacity: 0.1;*/
@@ -270,7 +285,7 @@
     .upload {
 	    color: #fef4e9;
 	    border: solid 1px #da7c0c;
-      background: #f78d1d; /* Old browsers */
+      background: hsl(31, 93%, 54%); /* Old browsers */
       background: linear-gradient(top, #faa51a 35%, #f47a20 100%)
     }
       
@@ -516,7 +531,22 @@
       }
     }
   
+  
+  /*
+    stop speech playback
+    play back current selected item
+
+    firefox, style contenteditable on new title/desc
+
+    removing nodes
+    links
+
+  long-term
+    navigating document
+  */
   </style>
+	
+	
 	
 </head>
 <body>
@@ -720,7 +750,11 @@
       if ( -1 != name.indexOf(":") ) {
         //elements in another namespace
         str += "<ul><li data-el='" + eli + "'><span class='namespaced'>" + name + idText + "</span>";
-      } else if ( "title" == name || "desc" == name || "text" == name || "tspan" == name  || "textPath" == name  ) {
+      } else if ( "title" == name 
+               || "desc" == name 
+               || "text" == name 
+               || "tspan" == name 
+               || "textPath" == name  ) {
         // textual elements
         var text = "";
         if ( el.childNodes[0] ) {
@@ -739,9 +773,17 @@
           var elText = el.textContent;
           speechArray.push( elText );
         }  
-      } else {
+      } else if ( "path" == name 
+               || "rect" == name 
+               || "polygon" == name 
+               || "polyline" == name  
+               || "circle" == name 
+               || "line" == name ) {
         // graphical and all other elements
         str += "<ul><li data-el='" + eli + "'><span class='graphics'" + evtStr + ">" + name + idText + "</span>";
+      } else {
+        // all other elements
+        str += "<ul><li data-el='" + eli + "'><span class='misc'>" + name + idText + "</span>";
       }
       
       if ( "title" != name && "desc" != name && -1 == name.indexOf(":") ) {
@@ -848,6 +890,7 @@
       sw = (sw) ? ( parseFloat(sw) *3 ) : 5;
       
       hiliter = targetEl.cloneNode(true);
+      hiliter.setAttribute( "id", "" );
       hiliter.setAttribute( "fill", "yellow" );
       hiliter.setAttribute( "stroke", "red" );
       hiliter.setAttribute( "stroke-width", sw );
@@ -857,6 +900,7 @@
       if ( "text" != name && "tspan" != name  && "textPath" != name  ) {
         hiliter.setAttribute( "stroke-dasharray", "2, 10" );
       }
+      console.log(hiliter)
       
       svgRoot.appendChild( hiliter );
     }
@@ -873,14 +917,23 @@
     }
      
      function speak( msg ) {
-       msg = speechArray.join(". \n");
+       // var listenButton = document.getElementById('listen');
        
-       var u = new SpeechSynthesisUtterance();
-       u.text = msg;
-       u.lang = 'en-US';
-       u.rate = 1.2;
-       // u.onend = function(event) {  document.getElementById('time').textContent = ('Finished in ' + event.elapsedTime + ' seconds.'); }
-       speechSynthesis.speak( u );
+       if ( speechSynthesis.speaking ) {
+         speechSynthesis.cancel();
+         // listenButton.firstElementChild.textContent = "Listen to SVG…";
+       } else {
+         msg = speechArray.join(". \n");
+
+         var u = new SpeechSynthesisUtterance();
+         u.text = msg;
+         u.lang = 'en-US';
+         u.rate = 1.2;
+         // u.onend = function(event) { alert( event.elapsedTime ); }
+         // u.onend = function(event) {  document.getElementById('time').textContent = ('Finished in ' + event.elapsedTime + ' seconds.'); }
+         speechSynthesis.speak( u );
+         // listenButton.firstElementChild.textContent = "Stop voice";
+       }      
      }
      
     function writeSource() {
