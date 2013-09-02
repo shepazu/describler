@@ -530,20 +530,32 @@
         width: 2em;
       }
     }
-  
-  
-  /*
-    stop speech playback
-    play back current selected item
-
-    firefox, style contenteditable on new title/desc
-
-    removing nodes
-    links
-
-  long-term
-    navigating document
-  */
+    
+    @keyframes highlight {
+     	0% {
+     		background: yellow;
+        border-radius: 0.7em;
+     	}
+     	100% {
+     		background: none;
+     	}
+    }
+    
+    @keyframes .highlight {
+     	0% {
+     		background: yellow;
+        border-radius: 0.7em;
+     	}
+     	100% {
+     		background: none;
+     	}
+    }
+    
+    .highlight  { 
+      background-color: hsl(51, 100%, 74%); 
+      border-radius: 0.7em;
+      transition: background-color 1.5s ease-in-out; 
+    }
   </style>
 	
 	
@@ -565,7 +577,7 @@
        
        <section class="lightbox" id="image-view-new">
       	 <p class="close"><a href="#" title="Close dialog"> </a></p>
-         <div id="display-area">
+         <div id="display-area" onclick="showListItem(event)">
            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 70 130">
              <title>Describler Logo</title>
              <desc>Three purple concentric arcs, reminiscent of a capital letter 'D' and of the icon for audio, radiating from a purple dot in the center</desc>              
@@ -600,7 +612,7 @@
         <p>Describler also makes your SVG auto-scaling by default, rather than a fixed size; this allows you to use your SVG at whatever size you need, or to change the size dynamically, and it allows users to zoom and pan easily.</p>
         <h2>What is SVG?</h2>
         <p>SVG stands for Scalable Vector Graphics, and it is a vector-based format, that can be created in popular drawing tools like Inkscape and Adobe Illustrator. Because each shape is made up of one or more markup elements, and the document has a DOM like HTML, it can be styled with CSS, and made interactive or animated with JavaScript.</p>
-        <p>Like HTML, the text in SVG is simply text, and so screenreaders can read it. In addition to the visible text elements, lik  <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, and <code>&lt;textPath&gt;</code> elements, SVG has special metadata elements, <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code>, which allow you to annotate your shapes for mouseover tooltips and special screenreader descriptions.</p>
+        <p>Like HTML, the text in SVG is simply text, and so screenreaders can read it. In addition to the visible text elements, like <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, and <code>&lt;textPath&gt;</code> elements, SVG has special metadata elements, <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code>, which allow you to annotate your shapes for mouseover tooltips and special screenreader descriptions.</p>
         <h2>How do I use Describler?</h2>
         <ol>
             <li>
@@ -739,17 +751,21 @@
       var name = el.tagName;
       var namespace = el.nameSpace;
       var id = el.getAttribute("id");
+
+
+      var str = "<ul>";
+
       var idText = "";
       if ( id ) {
         idText = " <span class='id' title='id attribute' contenteditable onblur='updateMetadata(this)'>" + id + "</span>";
       }
       
+      var contextStr = " onmousedown='contextMenu(event)' onmouseup='contextMenu(event)'";
       var evtStr = " onmouseover='hilite(event)' onmouseout='lolite(event)'";
       
-      var str = "";
       if ( -1 != name.indexOf(":") ) {
         //elements in another namespace
-        str += "<ul><li data-el='" + eli + "'><span class='namespaced'>" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='namespaced'" + contextStr + ">" + name + idText + "</span>";
       } else if ( "title" == name 
                || "desc" == name 
                || "text" == name 
@@ -765,7 +781,7 @@
           evtStr = "";
         }
         
-        str += "<ul><li data-el='" + eli + "'><span class='metadata'" + evtStr + ">" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='metadata'" + evtStr + contextStr + ">" + name + idText + "</span>";
         str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
              
         // store current text for speech review
@@ -780,10 +796,10 @@
                || "circle" == name 
                || "line" == name ) {
         // graphical and all other elements
-        str += "<ul><li data-el='" + eli + "'><span class='graphics'" + evtStr + ">" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='graphics'" + evtStr + contextStr + ">" + name + idText + "</span>";
       } else {
         // all other elements
-        str += "<ul><li data-el='" + eli + "'><span class='misc'>" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='misc'" + contextStr + ">" + name + idText + "</span>";
       }
       
       if ( "title" != name && "desc" != name && -1 == name.indexOf(":") ) {
@@ -877,7 +893,7 @@
     }
 
     function hilite( event ){
-      event.stopPropagation()
+      event.stopPropagation();
       var li = event.target.parentNode;
       // console.log(li)
       // console.log(li + ": " + li.getAttribute("data-el") )
@@ -897,16 +913,18 @@
       hiliter.setAttribute( "opacity", "0.75" );
       hiliter.setAttribute( "stroke-linecap", "round" );
       
-      if ( "text" != name && "tspan" != name  && "textPath" != name  ) {
+      if ( "text" != name && 
+           "tspan" != name && 
+           "textPath" != name ) {
         hiliter.setAttribute( "stroke-dasharray", "2, 10" );
       }
-      console.log(hiliter)
+      // console.log(hiliter)
       
       svgRoot.appendChild( hiliter );
     }
 
     function lolite( event ){
-      event.stopPropagation()
+      event.stopPropagation();
       // var li = event.target.parentNode;
       // var elCt = li.getAttribute("data-el");
       // var targetEl = svgEls[elCt];
@@ -914,6 +932,14 @@
       if (hiliter) {
         svgRoot.removeChild( hiliter );
       }
+    }
+
+    function contextMenu( event ){
+      // console.log(event)
+      // event.stopPropagation()
+      // var li = event.target;
+      // console.log(hiliter)
+      // console.log(hiliter.parentNode)
     }
      
      function speak( msg ) {
@@ -968,6 +994,31 @@
       }
       return size;
     }   
+
+
+
+
+
+
+
+    function showListItem( event ) {
+      event.stopPropagation();
+      var el = event.target;
+      var i = 0;
+      for ( i = 0; svgEls.length > i; i++) {
+        var eachEl = svgEls[i];        
+        if ( eachEl == el ) {
+          break;
+        }
+      };
+      
+      var li = document.querySelector('li[data-el="' + i + '"]');
+      li.scrollIntoView();
+      li.classList.add("highlight");
+      setTimeout(function(){
+          li.classList.remove("highlight");
+      }, 1600);
+    }
 
     
     // document.getElementById('list').addEventListener('mouseover', hilite, false);
