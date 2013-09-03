@@ -709,16 +709,20 @@
       var h = parseFloat( el.getAttribute("height") );
       h = isNaN( h ) ? 0 : h;
 
-      if (!vb) {
-        el.setAttribute("viewBox", (x + " " + y + " " + w + " " + h) );
-        el.setAttribute("width", "100%" );
-        el.setAttribute("height", "100%" );
-      } else {
-        var vbArray = vb.split(" ");
-        if ( w == vbArray[2] && h == vbArray[3] ) {
-          el.setAttribute("width", "100%" );
-          el.setAttribute("height", "100%" );
-        }
+      var newVB = x + " " + y + " " + w + " " + h;
+      if ( 0 == w || 0 == h ) {
+        // if width and height not set, use bounding box of SVG contents
+        var bbox = el.getBBox();
+        newVB = bbox.x + " " + bbox.y + " " + bbox.width + " " + bbox.height;
+      }
+
+      el.setAttribute("width", "100%" );
+      el.setAttribute("height", "100%" );
+      
+      var vbArray = vb.split(" ");
+
+      if ( !vb || ( w == vbArray[2] && h == vbArray[3] ) ) {
+        el.setAttribute("viewBox", newVB );
       }
     }
 
