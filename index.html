@@ -130,7 +130,7 @@
     
     div#list {
       margin-left: 30%;
-      height: 85%;
+      height: 88%;
       overflow-y: auto;
       padding: 0em 2em 0em 1em;
     }
@@ -593,19 +593,16 @@
         <h2>What is SVG?</h2>
         <p>SVG stands for Scalable Vector Graphics, and it is a vector-based format, that can be created in popular drawing tools like Inkscape and Adobe Illustrator. Because each shape is made up of one or more markup elements, and the document has a DOM like HTML, it can be styled with CSS, and made interactive or animated with JavaScript.</p>
         <p>Like HTML, the text in SVG is simply text, and so screenreaders can read it. In addition to the visible text elements, like <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, and <code>&lt;textPath&gt;</code> elements, SVG has special metadata elements, <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code>, which allow you to annotate your shapes for mouseover tooltips and special screenreader descriptions.</p>
-        <h2>How do I use Describler?</h2>
+        <h2>How do I use Describler to make my SVG accessible?</h2>
         <ol>
-            <li>
-                <p><b>Upload your SVG file.</b> Click on the orange button with the up-arrow icon, and select an SVG file.</p>
-                
-            
-            </li>
-            <li><b>.</b> </li>
+          <li><b>Upload your SVG file.</b> Click on the orange button with the up-arrow icon, and select an SVG file.</li>
+          <li><b>Add or edit the text, titles, and descriptions.</b> Click on any text in the list view, and edit it. Hit <code>Enter</code> or click off the text to commit your change to the SVG image. To add a title or description to any element, click one of the purple buttons next to that list item. Remember: titles should be short, and descriptions should be longer; don’t duplicate text… write your descriptions just the way you yourself would like to hear the image described.</li>
+          <li><b>Listen to the SVG image!</b> Click on the green button with the speaker icon to hear your SVG spoken aloud like a person using a screenreader will hear it. <i>This is an experimental feature in browsers, so you’ll have to <a href="#audio-help">enable it in your browser</a> to use this feature.</i></li>
+          <li><b>Save your SVG file.</b> Click on the purple button with the down-arrow icon to save your SVG file locally.</li>
         </ol>
-        <p></p>
+        <h2>Notes</h2>
         <p>Describler is meant to add accessibility to SVG images, not to interactive SVG applications or GUIs; use ARIA markup for that.</p>
-        <h2>How can I make my SVG accessible?</h2>
-        <p></p>
+        <p>For more background on accessible SVG, see my <a href="http://schepers.cc/authoring-accessible-svg ‎">blog post</a>. Suggestions or code improvements are welcome! See the <a href="https://github.com/shepazu/describler">source on github</a>.
       </div>
     </section>
   </section>
