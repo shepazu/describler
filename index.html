@@ -531,30 +531,10 @@
       }
     }
     
-    @keyframes highlight {
-     	0% {
-     		background: yellow;
-        border-radius: 0.7em;
-     	}
-     	100% {
-     		background: none;
-     	}
-    }
-    
-    @keyframes .highlight {
-     	0% {
-     		background: yellow;
-        border-radius: 0.7em;
-     	}
-     	100% {
-     		background: none;
-     	}
-    }
-    
     .highlight  { 
       background-color: hsl(51, 100%, 74%); 
       border-radius: 0.7em;
-      transition: background-color 1.5s ease-in-out; 
+      transition: background-color 1.5s ease-out; 
     }
   </style>
 	
@@ -693,20 +673,20 @@
         // Closure to capture the file information.
         reader.onload = (function(file) {
           return function(e) {
-        // console.log("ok 2 ")
             var displayArea = document.getElementById( "display-area" );
-            displayArea.innerHTML = (e.target.result);
+            var svgContent = e.target.result;
+            var svgStart = svgContent.indexOf("<svg");
+            
+            var prolog = svgContent.substring(0, (svgStart - 1));
+            svgContent = svgContent.substring( svgStart );
+            
+            displayArea.innerHTML = (svgContent);
             svgRoot = displayArea.firstElementChild;
             
             speechArray.length = 0;
-            setVB( displayArea.firstElementChild );
+            setScalability( displayArea.firstElementChild );
             
             drawTree();
-            
-            // console.log(displayArea.firstElementChild.textContent)
-            // console.log( speechArray.join(" \n") )
-            // speak( speechArray.join(". \n") );
-            
           };
         })(f);
 
@@ -714,24 +694,31 @@
       }
     }
 
-    function setVB( el ){
+    function setScalability( el ){
       var vb = el.getAttribute("viewBox");
+      
+      var x = parseFloat( el.getAttribute("x") );
+      x = isNaN( x ) ? 0 : x;
+
+      var y = parseFloat( el.getAttribute("y") );
+      y = isNaN( y ) ? 0 : y;
+      
+      var w = parseFloat( el.getAttribute("width") );
+      w = isNaN( w ) ? 0 : w;
+
+      var h = parseFloat( el.getAttribute("height") );
+      h = isNaN( h ) ? 0 : h;
+
       if (!vb) {
-        var x = parseFloat( el.getAttribute("x") );
-        x = isNaN( x ) ? 0 : x;
-
-        var y = parseFloat( el.getAttribute("y") );
-        y = isNaN( y ) ? 0 : y;
-        
-        var w = parseFloat( el.getAttribute("width") );
-        w = isNaN( w ) ? 0 : w;
-
-        var h = parseFloat( el.getAttribute("height") );
-        h = isNaN( h ) ? 0 : h;
-        
         el.setAttribute("viewBox", (x + " " + y + " " + w + " " + h) );
         el.setAttribute("width", "100%" );
         el.setAttribute("height", "100%" );
+      } else {
+        var vbArray = vb.split(" ");
+        if ( w == vbArray[2] && h == vbArray[3] ) {
+          el.setAttribute("width", "100%" );
+          el.setAttribute("height", "100%" );
+        }
       }
     }
 
@@ -829,6 +816,11 @@
       str += "</li></ul>";
       return str;
     }
+    
+    
+    /*
+    * text editing
+    */
 
     function addMetadata( el ){
       var elCt = el.parentNode.getAttribute("data-el");
@@ -892,6 +884,11 @@
       }
     }
 
+    
+    /* 
+    * highlighting 
+    */
+
     function hilite( event ){
       event.stopPropagation();
       var li = event.target.parentNode;
@@ -934,6 +931,26 @@
       }
     }
 
+    function showListItem( event ) {
+      event.stopPropagation();
+      var el = event.target;
+      var i = 0;
+      for ( i = 0; svgEls.length > i; i++) {
+        var eachEl = svgEls[i];        
+        if ( eachEl == el ) {
+          break;
+        }
+      };
+      
+      var li = document.querySelector('li[data-el="' + i + '"]');
+      li.scrollIntoView();
+      li.classList.add("highlight");
+      setTimeout(function(){
+          li.classList.remove("highlight");
+      }, 1600);
+    }
+
+
     function contextMenu( event ){
       // console.log(event)
       // event.stopPropagation()
@@ -941,6 +958,10 @@
       // console.log(hiliter)
       // console.log(hiliter.parentNode)
     }
+    
+    /*
+    * speech
+    */
      
      function speak( msg ) {
        // var listenButton = document.getElementById('listen');
@@ -994,31 +1015,6 @@
       }
       return size;
     }   
-
-
-
-
-
-
-
-    function showListItem( event ) {
-      event.stopPropagation();
-      var el = event.target;
-      var i = 0;
-      for ( i = 0; svgEls.length > i; i++) {
-        var eachEl = svgEls[i];        
-        if ( eachEl == el ) {
-          break;
-        }
-      };
-      
-      var li = document.querySelector('li[data-el="' + i + '"]');
-      li.scrollIntoView();
-      li.classList.add("highlight");
-      setTimeout(function(){
-          li.classList.remove("highlight");
-      }, 1600);
-    }
 
     
     // document.getElementById('list').addEventListener('mouseover', hilite, false);
