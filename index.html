@@ -197,7 +197,7 @@
         white-space: nowrap;
       }
 
-    span.id {
+    span.att {
       background-color: gray;
       color: black;
       margin-left: 0.5em;
@@ -207,16 +207,16 @@
       border-radius: 0.4em;
     }
     
-      span.graphics span.id {
+      span.graphics span.att {
         background-color: hsl(197, 100%, 55%);
       }
     
-      span.metadata span.id {
+      span.metadata span.att {
         background-color: hsl(85, 76%, 55%);
         margin-right: -0.25em;
       }
   
-      span.misc span.id {
+      span.misc span.att {
         background-color: hsl(31, 93%, 74%);
         margin-right: -0.25em;
       }
@@ -644,6 +644,8 @@
     var speechArray = [];
     var filename = null;
     var svgRoot = null;
+    var svgns = "http://www.w3.org/2000/svg";
+    var xlinkns = "http://www.w3.org/1999/xlink";
     
     var hiliter = null;
     
@@ -741,14 +743,24 @@
     function displayTree( el ){
       var name = el.tagName;
       var namespace = el.nameSpace;
-      var id = el.getAttribute("id");
 
 
       var str = "<ul>";
 
-      var idText = "";
+      var id = el.getAttribute("id");
+      var idStr = "";
       if ( id ) {
-        idText = " <span class='id' title='id attribute' contenteditable onblur='updateMetadata(this)'>" + id + "</span>";
+        idStr = " <span class='id att' title='id attribute' contenteditable onblur='updateMetadata(this)'>" + id + "</span>";
+      }
+
+      // check for 'title' or 'xlink:title' attribute, as on <a>
+      var titleAtt = el.getAttribute("title");
+      if (!titleAtt) {
+        titleAtt = el.getAttributeNS(xlinkns, "title");
+      }
+      var titleAttStr = "";
+      if ( titleAtt ) {
+        titleAttStr = " <span class='title att' title='title attribute' contenteditable onblur='updateMetadata(this)'>" + titleAtt + "</span>";
       }
       
       var contextStr = " onmousedown='contextMenu(event)' onmouseup='contextMenu(event)'";
@@ -756,7 +768,7 @@
       
       if ( -1 != name.indexOf(":") ) {
         //elements in another namespace
-        str += "<li data-el='" + eli + "'><span class='namespaced'" + contextStr + ">" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='namespaced'" + contextStr + ">" + name + idStr + titleAttStr + "</span>";
       } else if ( "title" == name 
                || "desc" == name 
                || "text" == name 
@@ -772,7 +784,7 @@
           evtStr = "";
         }
         
-        str += "<li data-el='" + eli + "'><span class='metadata'" + evtStr + contextStr + ">" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='metadata'" + evtStr + contextStr + ">" + name + idStr + titleAttStr + "</span>";
         str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
              
         // store current text for speech review
@@ -787,10 +799,10 @@
                || "circle" == name 
                || "line" == name ) {
         // graphical and all other elements
-        str += "<li data-el='" + eli + "'><span class='graphics'" + evtStr + contextStr + ">" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='graphics'" + evtStr + contextStr + ">" + name + idStr + titleAttStr + "</span>";
       } else {
         // all other elements
-        str += "<li data-el='" + eli + "'><span class='misc'" + contextStr + ">" + name + idText + "</span>";
+        str += "<li data-el='" + eli + "'><span class='misc'" + contextStr + ">" + name + idStr + titleAttStr + "</span>";
       }
       
       if ( "title" != name && "desc" != name && -1 == name.indexOf(":") ) {
@@ -823,7 +835,7 @@
     
     
     /*
-    * text editing
+    * tree editing
     */
 
     function addMetadata( el ){
@@ -831,7 +843,7 @@
       var targetEl = svgEls[elCt];
       var cname = el.getAttribute("class").replace("add-","");
 
-      var m = document.createElementNS("http://www.w3.org/2000/svg", cname );
+      var m = document.createElementNS( svgns, cname );
       
       var el1 = targetEl.firstElementChild;
       if ( el1 ) {
@@ -853,6 +865,11 @@
       drawTree();
     }
 
+
+    /*
+    * text editing
+    */
+
     function updateMetadata( el ){
       var cname = el.getAttribute("class");
       var elCt = el.parentNode.getAttribute("data-el");
@@ -864,8 +881,10 @@
         var targetEl = svgEls[elCt];
         var text = el.childNodes[0] ? el.childNodes[0].textContent : "";
 
-        if ( "id" == cname ) {
+        if ( -1 != cname.indexOf("id") ) {
           targetEl.id = text;
+        } else  if ( -1 != cname.indexOf("title") ) {
+          targetEl.setAttribute("title", text);
         } else {
           // set text content
           text = text.replace(/\u00a0/g, " ");
