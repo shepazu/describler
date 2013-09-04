@@ -44,7 +44,7 @@
       overflow: hidden; 
     }
 
-    h1, h2 {
+    h1, h2, #sig {
       font-family: 'Galberik', cursive;      
     }
     
@@ -602,7 +602,8 @@
         </ol>
         <h2>Notes</h2>
         <p>Describler is meant to add accessibility to SVG images, not to interactive SVG applications or GUIs; use ARIA markup for that.</p>
-        <p>For more background on accessible SVG, see my <a href="http://schepers.cc/authoring-accessible-svg ‎">blog post</a>. Suggestions or code improvements are welcome! See the <a href="https://github.com/shepazu/describler">source on github</a>.
+        <p>For more background on accessible SVG, see my <a href="http://schepers.cc/authoring-accessible-svg ‎">blog post</a>. Suggestions or code improvements are welcome! See the <a href="https://github.com/shepazu/describler">source on github</a>, where you can also check out some <a href="https://github.com/shepazu/describler/tree/gh-pages/samples">sample SVG files to play with.</a></p>
+        <p>Thanks! <br>–<a id="sig" href="http://twitter.com/shepazu" target="_blank">Shepazu</a></p>
       </div>
     </section>
   </section>
@@ -1034,7 +1035,15 @@
         } 
       }
       return size;
-    }   
+    }
+    
+    
+    function optimize( str, decimals ) {
+      // str = str.replace()
+      // \d+(\.\d)(\d)(\d+)
+      
+      // result = str.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+    }
 
     
     // document.getElementById('list').addEventListener('mouseover', hilite, false);
