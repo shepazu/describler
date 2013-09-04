@@ -1014,7 +1014,7 @@
       // uses HTML5 features: the ‘Blob’ object and the ‘download’ attribute of the <a> element 
 	    var blob = new Blob([svg], {type:'image/svg+xml'});
       var downloadLink = document.getElementById('download');
-      downloadLink.download = "svgax-" + filename;
+      downloadLink.download = filename.replace(".svg", "-svgax.svg");
       downloadLink.href = window.URL.createObjectURL(blob);
       document.getElementById('new-filesize').innerHTML = '(revised: ' + byteSized( blob.size ) + ')';
     }
