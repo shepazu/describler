@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 70 130">
-  <title>Describler Logo</title>
-  <desc>Three concentric arcs, reminiscent of a capital letter 'D' and of the icon for audio, radiating from a dot in the center</desc>    
-  <path stroke-width="8" stroke="hsla(282, 100%, 40%, 1)" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M10,15 A50,50 0 1,1 10,115 M10,100 A30,30 0 1,0 10,30 M10,45 A15,15 0 1,1 10,85"/>
-  <circle cx="10" cy="65" r="7" fill="hsla(282, 100%, 40%, 1)" />
-</svg>
