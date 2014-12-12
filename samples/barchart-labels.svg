@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  
+  width="100%" height="100%" viewBox="0 0 540 410">
+  <title>Accessible SVG Chart</title>  
+
+  <g id="ChartRoot" font-family="Arial">
+    <title>Time Spent on Creating a Presentation</title>  
+    <g>
+      <rect id="backdrop" x="0" y="0" width="540" height="410" fill="#fff"/>
+    </g>
+
+    <g id="xScale" display="inline">
+      <title>Weekdays</title>
+      <g>
+        <line x1="176.25" y1="370" x2="176.25" y2="375" stroke="black" stroke-width="2" stroke-linecap="round"/>
+        <text id="x-Saturday" x="120.62" y="388" font-size="14" text-anchor="middle">Saturday</text>
+      </g>
+      <g>
+        <line x1="287.5" y1="370" x2="287.5" y2="375" stroke="black" stroke-width="2" stroke-linecap="round"/>
+        <text id="x-Sunday" x="231.87" y="388" font-size="14" text-anchor="middle">Sunday</text>
+      </g>
+      <g>
+        <line x1="398.75" y1="370" x2="398.75" y2="375" stroke="black" stroke-width="2" stroke-linecap="round"/>
+        <text id="x-Monday" x="343.12" y="388" font-size="14" text-anchor="middle">Monday</text>
+      </g>
+      <g>
+        <line x1="510" y1="370" x2="510" y2="375" stroke="black" stroke-width="2" stroke-linecap="round"/>
+        <text id="x-Tuesday" x="454.37" y="388" font-size="14" text-anchor="middle">Tuesday</text>
+      </g>
+    </g>
+
+
+    <g id="yScale" display="inline">
+      
+      <g id="y-axis-labels">
+         <text x="15" y="222.5" font-size="20" pointer-events="none" text-anchor="middle" transform="rotate(-90,15,202.5)">Hours Working on this Presentation</text>
+         <text id="y-1" x="55" y="346.37" font-size="13" text-anchor="end">1</text>
+         <text id="y-2" x="55" y="318.45" font-size="13" text-anchor="end">2</text>
+         <text id="y-3" x="55" y="290.54" font-size="13" text-anchor="end">3</text>
+         <text id="y-4" x="55" y="262.62" font-size="13" text-anchor="end">4</text>
+         <text id="y-5" x="55" y="234.70" font-size="13" text-anchor="end">5</text>
+         <text id="y-6" x="55" y="206.79" font-size="13" text-anchor="end">6</text>
+         <text id="y-7" x="55" y="178.87" font-size="13" text-anchor="end">7</text>
+         <text id="y-8" x="55" y="150.95" font-size="13" text-anchor="end">8</text>
+         <text id="y-9" x="55" y="123.04" font-size="13" text-anchor="end">9</text>
+         <text id="y-10" x="55" y="95.12" font-size="13" text-anchor="end">10</text>
+         <text id="y-11" x="55" y="67.20" font-size="13" text-anchor="end">11</text>
+         <text id="y-12" x="55" y="39.29" font-size="13" text-anchor="end">12</text>
+      </g>
+
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g>
+        <linearGradient id="linearGradient_cccccc_0" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0" stop-color="rgb(255, 255, 255)"/>
+          <stop offset="1" stop-color="#cccccc"/>
+        </linearGradient>
+        <polyline points="65,370 75,360 75,25 65,35 65,370" fill="url(#linearGradient_cccccc_0)" stroke="#ccc" stroke-width="0.75" stroke-opacity="0.2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-27.91)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-55.83)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-83.75)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-111.66)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-139.58)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-167.5)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-195.41)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-223.33)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-251.24)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-279.16)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-307.08)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+      <g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="translate(0,-335)">
+        <polyline points="60,370 65,370 75,360 520,360" fill="none" stroke="#ccc" stroke-width="0.75"/>
+        <line x1="60" y1="370" x2="65" y2="370" stroke="black" stroke-width="2"/>
+      </g>
+    </g>
+
+    <g id="dataarea">
+      <g id="datapoint_0" fill="rgb(97, 115, 169)" stroke="rgb(0, 0, 49)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill-rule="nonzero">
+        <title>Saturday: 8 Hours</title>
+        <path d="M93.5,136.7 H167.7 V360 H93.5 V136.7 M83.5,146.7 L93.5,136.7 V360 L83.5,370 V146.7 M83.5,370 L93.5,360 H167.7 L157.7,370 H83.5"/>
+        <path d="M157.7,146.7 L167.7,136.7 V360 L157.7,370 V146.7 M83.5,146.7 L93.5,136.7 H167.7 L157.7,146.7 H83.5" fill="rgb(17, 35, 89)"/>
+        <path d="M83.5,146.7 H157.7 V370 H83.5 V146.7"/>
+      </g>
+      
+      <g id="datapoint_1" fill="rgb(141, 166, 66)" stroke="rgb(21, 46, 0)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill-rule="nonzero">
+        <title>Sunday: 6 Hours</title>
+        <path d="M204.8,192.5 H278.9 V360 H204.8 V192.5 M194.8,202.5 L204.8,192.5 V360 L194.8,370 V202.5 M194.8,370 L204.8,360 H278.9 L268.9,370 H194.8"/>
+        <path d="M268.9,202.5 L278.9,192.5 V360 L268.9,370 V202.5 M194.8,202.5 L204.8,192.5 H278.9 L268.9,202.5 H194.8" fill="rgb(61, 86, 0)"/>
+        <path d="M194.8,202.5 H268.9 V370 H194.8 V202.5"/>
+      </g>
+      
+      <g id="datapoint_2" fill="rgb(152, 52, 28)" stroke="rgb(32, 0, 0)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill-rule="nonzero">
+        <title>Monday: 4.5 Hours</title>
+        <path d="M316.1,234.5 H390.2 V360 H316.1 V234.5 M306.1,244.5 L316.1,234.5 V360 L306.1,370 V258.4 M306.1,370 L316.1,360 H390.2 L380.2,370 H306.1 z"/>
+        <path d="M380.2,244.5 L390.2,234.5 V360 L380.2,370 V244.5 M306.1,244.5 L316.1,234.5 H390.2 L380.2,244.5 H306.1" fill="rgb(72, 0, 0)"/>
+        <path d="M306.1,244.5 H380.2 V370 H306.1 V244.5"/>
+      </g>
+      
+      <g id="datapoint_3" fill="rgb(253, 200, 97)" stroke="rgb(133, 80, 0)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill-rule="nonzero">
+        <title>Tuesday: 12 Hours</title>
+        <path d="M427.3,25 H501.5 V360 H427.3 V25 M417.3,35 L427.3,25 V360 L417.3,370 V35 M417.3,370 L427.3,360 H501.5 L491.5,370 H417.3"/>
+        <path d="M491.5,35 L501.5,25 V360 L491.5,370 V35 M417.3,35 L427.3,25 H501.5 L491.5,35 H417.3" fill="rgb(173, 120, 17)"/>
+        <path d="M417.3,35 H491.5 V370 H417.3 V35"/>
+      </g>
+    </g>
+
+    <line id="xAxis" x1="60" y1="370" x2="510" y2="370" stroke="black" stroke-width="3" stroke-linecap="round" pointer-events="none" display="inline"/>
+    <line id="yAxis" x1="65" y1="35" x2="65" y2="375" stroke="black" stroke-width="3" stroke-linecap="round" pointer-events="none" display="inline"/>
+    
+  </g>
+</svg>
