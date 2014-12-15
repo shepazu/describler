@@ -1,4 +1,4 @@
-// "use strict";
+"use strict";
 
 window.onfocus = function ( event ) {
 	event.target.blur();
@@ -6,21 +6,23 @@ window.onfocus = function ( event ) {
 
 function describlerObj () {
 	this.root = null;
+	
+	// focus properties
 	this.focusList = [];
 	this.focusIndex = 0;
 	this.focusBox = null;
 	this.activeElement = null;
 	this.padding = 0;
 	this.strokewidth = 0;
+	this.navDirection = 0;
+	this.detailCount = 0;
+	
+	// chart properties
+	this.charts = [];
+
+	// voice and sonification properties
 	this.speeches = [];
 	this.voice = new SpeechSynthesisUtterance();
-	this.charts = [];
-	this.navDirection = 0;
-	this.x = 0;
-	this.y = 0;
-	this.width = 0;
-	this.height = 0;
-	this.detailCount = 0;
 	this.sonifier = null;
 
 	// constants
@@ -49,22 +51,8 @@ describlerObj.prototype.init = function ( root ) {
   this.root.addEventListener('click', bind(this, this.click), false );
   this.root.addEventListener('keydown', bind(this, this.trackKeys), false );
 
-  // var roles = root.querySelectorAll("[role]");
+	// create a list of all focusable elements, including the root
   this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
-  // this.focusList = this.root.querySelectorAll("[tabindex]");
-
-	// // if root is also focusable, add that to the list
-	// var tabindex = this.root.getAttribute("tabindex");
-	// if ( tabindex ) {
-	// 	var focusNodelist = this.focusList;
-	// 	this.focusList = [this.root];			
-	// 	for (var f = 0, f = focusNodelist.length; fLen > f; ++f) {
-	// 		var chartEl = focusNodelist[f];
-	// 		var chart = new chartObj();
-	// 		chart.init( this );
-	// 		this.charts.push( chart );
-	// 	}
-	// }		
 
   console.log( this.focusList );
 	this.createModel();
@@ -74,7 +62,6 @@ describlerObj.prototype.init = function ( root ) {
   this.metaGroup.setAttribute("id", "describler-metadata" );
   this.root.appendChild( this.metaGroup );
 }
-
 
 describlerObj.prototype.createModel = function () {
 
@@ -93,39 +80,12 @@ describlerObj.prototype.createModel = function () {
 	  // console.log( charts );
 	}
 
-
+	// parse all charts
 	for (var c = 0, cLen = charts.length; cLen > c; ++c) {
 		var chartEl = charts[c];
 		var chart = new chartObj();
-		chart.init( this );
+		chart.init( chartEl );
 		this.charts.push( chart );
-		chart.element = chartEl;
-		chart.type = chartEl.getAttribute("aria-charttype");
-		
-		// get chart title
-		var title = chartEl.querySelector("[role='chart'] > [role='heading']");
-	  // console.log( title );
-		if ( title ) {
-			chart.label = title.textContent;
-		}
-    
-		if ( "pie" != chart.type ) {
-			// get chart axes
-			chart.axes["x"] = new axisObj;
-			chart.axes["x"].init( chartEl, "x", "horizontal" )
-
-			chart.axes["y"] = new axisObj;
-			chart.axes["y"].init( chartEl, "y", "vertical" )
-		}
-	
-	  var datasetEls = chartEl.querySelectorAll("[role='dataset']");
-		for (var d = 0, dLen = datasetEls.length; dLen > d; ++d) {
-			var eachDataset = datasetEls[d];
-		  var datapoints = eachDataset.querySelectorAll("[role='datapoint']");
-		
-			var dataset = this.extractDataset( datapoints );
-			this.charts[c].datasets.push( dataset );
-	  }
 	}
   console.log( this.charts );
 	this.exportCSV();
@@ -176,112 +136,6 @@ describlerObj.prototype.exportCSV = function () {
 
 }
 
-
-/*
-var data = [["name1", "city1", "some other info"], ["name2", "city2", "more info"]];
-var csvContent = "data:text/csv;charset=utf-8,";
-data.forEach(function(infoArray, index){
-
-   dataString = infoArray.join(",");
-   csvContent += index < infoArray.length ? dataString+ "\n" : dataString;
-
-});
-*/
-
-
-describlerObj.prototype.extractDataset = function ( datapoints ) {
-	var dataset = [];
-	dataset["values"] = [];
-
-	for (var dp = 0, dpLen = datapoints.length; dpLen > dp; ++dp) {
-		var eachDatapoint = datapoints[dp];
-		var datapoint = {};
-
-		datapoint["element"] = eachDatapoint;
-
-	  var datavalueEL = eachDatapoint.querySelector("[role='datavalue']");
-		var dataText = datavalueEL.textContent;
-		datapoint["element"] = eachDatapoint;
-		datapoint["value"] = parseFloat( dataText );
-	
-		dataset["values"].push( datapoint["value"] );
-	
-		var labelEl = datavalueEL.getAttribute("aria-labelledby");
-		datapoint["labelElement"] = labelEl;
-		var labelContent = "";
-		if (labelEl) {
-      var label = document.getElementById(labelEl);
-			if (label) {
-	      labelContent = label.textContent;
-				datapoint["labelElementText"] = labelContent;
-			}
-			labelContent += ": ";
-		}
-		datapoint["label"] = labelContent + dataText;
-	
-		dataset.push( datapoint );
-  };
-
-	 // aria-valuemin="0" aria-valuemax="12"
-
-	// sort values
-	dataset["values"].sort( function(a, b) {
-	  return a - b;
-	}); 
-
-	// find low
-	dataset["low"] = dataset["values"][0];
-
-	// find high
-	dataset["high"] = dataset["values"][ dataset.length - 1 ];
-
-	// find range 
-	dataset["range"] = dataset["high"] - dataset["low"];
-
-	// find sum
-	dataset["sum"] = dataset["values"].reduce( function(a, b) {
-	  return a + b;
-	}); 
-
-	// find mean 
-	dataset["mean"] = dataset["sum"] / dataset.length;
-
-	// find median  
-  var mid = Math.floor(dataset.length/2);
-  // if ( 1 == dataset.length%2 ) {
-  if (dataset.length % 2) {
-  	dataset["median"] = dataset["values"][mid];
-	} else {
-    dataset["median"] = ( dataset["values"][mid - 1] + dataset["values"][mid]) / 2;
-	}
-
-	// find mode 
-	var modeMap = {},
-      maxCount = 1, 
-      modes = [dataset["values"][0]];
-
-  for(var i = 0; i < dataset["values"].length; ++i) {
-    var val = dataset["values"][i];
-
-    if (modeMap[val] == null) {
-      modeMap[val] = 1;
-    } else {
-      modeMap[val]++;
-    }
-
-    if (modeMap[val] > maxCount) {
-      modes = [val];
-      maxCount = modeMap[val];
-    } else if (modeMap[val] == maxCount) {
-      modes.push(val);
-      maxCount = modeMap[val];
-    }
-  }
-	dataset["mode"] = modes;	
-	
-	return dataset;	
-}   
-
 describlerObj.prototype.findTextContent = function () {
   var textContents = document.querySelectorAll("text,title");
 	for (var t = 0, tLen = textContents.length; tLen > t; ++t) {
@@ -294,7 +148,7 @@ describlerObj.prototype.findTextContent = function () {
 	  el.setAttribute("tabindex", 0 );
 	}
   this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
-	console.log(this.focusList)
+	// console.log(this.focusList)
 }   
 
 describlerObj.prototype.navNext = function () {
@@ -329,13 +183,6 @@ describlerObj.prototype.showFocus = function () {
   // console.log( el );
   var bbox = this.activeElement.getBBox();
 	var transform = this.root.getTransformToElement(this.activeElement).inverse();
-	// if (this.root.getTransformToElement(this.activeElement) ) {
-	// 	transform = this.activeElement.getTransformToElement();
-	// } else {
-	//   var graphic = this.activeElement.querySelectorAll(":not(title)");
-	// 	console.log(graphic)
-	// 	transform = graphic.getTransformToElement();
-	// }
 	
 	// console.log(transform)
 
@@ -348,11 +195,9 @@ describlerObj.prototype.showFocus = function () {
   this.focusBox.setAttribute("y", y );
   this.focusBox.setAttribute("width", w );
   this.focusBox.setAttribute("height", h );
+
+	// TODO: figure out how to apply matrix transform to this element
   this.focusBox.setAttribute("transform", "translate(" + transform.e + ","  + transform.f + ")" );
-  // this.focusBox.setAttribute("transform", "translate(" + (-transform.e) + ","  + (-transform.f) + ")" );
-  // this.focusBox.setAttribute("transform", "matrix(" + transform.inverse() + ")" );
-  // this.focusBox.matrixTransform( transform.inverse() );			
-	// this.focusBox.matrixTransform(transform);
 
 	this.getInfo();
 }   
@@ -374,7 +219,7 @@ describlerObj.prototype.trackKeys = function (event) {
     }
 	} else if ("u+0044" == key) {
 		// d
-	  console.log( "10: " + this.detailCount );
+	  // console.log( "10: " + this.detailCount );
 		this.getInfo( true );
 	} else if ("u+0053" == key) {
 		// s
@@ -434,7 +279,7 @@ describlerObj.prototype.getFraction = function ( decimal ) {
 		var denominator = 1;
 
 		while (fraction.toFixed(3) != decimal.toFixed(3)) {
-		  console.log( fraction + "," + decimal );
+		  // console.log( fraction + "," + decimal );
 			if (fraction.toFixed(3) < decimal.toFixed(3) ) {
 				numerator += 1;
 			}
@@ -531,10 +376,10 @@ describlerObj.prototype.getInfo = function ( details ) {
 							
 							// increment detail counter, to allow additional level of detail
 							this.detailCount++;
-						  console.log( "1: " + this.detailCount );
+						  // console.log( "1: " + this.detailCount );
 
 							if ( 1 == this.detailCount ) {
-							  console.log( "2: " + this.detailCount );
+							  // console.log( "2: " + this.detailCount );
 								// describe change of value
 								if ( (0 != dp && 1 == this.navDirection ) 
 										|| (dpLen - 1 != dp && -1 == this.navDirection )) {
@@ -554,7 +399,7 @@ describlerObj.prototype.getInfo = function ( details ) {
 									}
 									delta += " from the previous value of " + previousValue;
 									this.speeches.push( delta );
-								  console.log( "3: " + this.detailCount );
+								  // console.log( "3: " + this.detailCount );
 								}
 
 								// describe change of value
@@ -574,7 +419,7 @@ describlerObj.prototype.getInfo = function ( details ) {
 									this.speeches.push( "This is the average value." );
 								}
 							} else { // more details
-							  console.log( "4: " + this.detailCount );
+							  // console.log( "4: " + this.detailCount );
 								// reset detail counter, no deeper level of detail
 								this.detailCount = 0;
 								var firstItem = true;
@@ -602,12 +447,17 @@ describlerObj.prototype.getInfo = function ( details ) {
 										}
 										
 										this.speeches.push( delta );
-									  console.log( "5: " + this.detailCount );
+									  // console.log( "5: " + this.detailCount );
 									}
 								}
 
 							}
 						}
+						
+						// no need to iterate further
+						continue;
+						d = dLen;
+						c = cLen;
 					}
 				}
 			}
@@ -641,6 +491,10 @@ describlerObj.prototype.getInfo = function ( details ) {
 																	+ axis.labels[axis.labels.length - 1] );
 						}
 					}
+					
+					// no need to iterate further
+					continue;
+					c = cLen;
 				}
 			}
 		}
@@ -650,27 +504,30 @@ describlerObj.prototype.getInfo = function ( details ) {
 
 		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
 			var chart = this.charts[c];
-			for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
-				var dataset = chart.datasets[d];
-				
-				if ( chart.label ) {
-					this.speeches.push( "Chart: " + chart.label );
+			if ( this.activeElement == chart.element ) {
+				for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
+					var dataset = chart.datasets[d];
+
+					if ( chart.label ) {
+						this.speeches.push( "Chart: " + chart.label );
+					}
+
+					if ( details ) {
+					  // console.log( "6: " + this.detailCount );
+						// this.speeches.push( "This is a " + chart.type + " chart, with " 
+						// 										+ dataset.length + " data points" );
+						this.speeches.push( "" + chart.type + " chart, with " 
+																+ dataset.length + " data points" );
+						this.speeches.push( "The highest value is " + +dataset.high.toFixed(2)
+																+ ", and the lowest value is " + +dataset.low.toFixed(2)
+																+ ", with a range of " + +dataset.range.toFixed(2) );
+						this.speeches.push( "The average is " + +dataset.mean.toFixed(2)
+																+ ", the median is " + +dataset.median.toFixed(2)
+																+ ", and the total is " + +dataset.sum.toFixed(2) );
+																// + ", and the total of all data points is " + dataset.sum );				
+					}
 				}
-				
-				if ( details ) {
-				  console.log( "6: " + this.detailCount );
-					// this.speeches.push( "This is a " + chart.type + " chart, with " 
-					// 										+ dataset.length + " data points" );
-					this.speeches.push( "" + chart.type + " chart, with " 
-															+ dataset.length + " data points" );
-					this.speeches.push( "The highest value is " + +dataset.high.toFixed(2)
-															+ ", and the lowest value is " + +dataset.low.toFixed(2)
-															+ ", with a range of " + +dataset.range.toFixed(2) );
-					this.speeches.push( "The average is " + +dataset.mean.toFixed(2)
-															+ ", the median is " + +dataset.median.toFixed(2)
-															+ ", and the total is " + +dataset.sum.toFixed(2) );
-															// + ", and the total of all data points is " + dataset.sum );				
-				}
+				continue;
 			}
 		}
 	} else if ( "legend" == role ) {
@@ -685,6 +542,50 @@ describlerObj.prototype.getInfo = function ( details ) {
 			this.speeches.push( title.textContent );			
 		}
 		
+	} else if ( "legenditem" == role ) {
+		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+			var chart = this.charts[c];
+			for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
+				var eachLegend = chart.legends[ l ]; 
+				for (var li = 0, liLen = eachLegend.items.length; liLen > li; ++li) {
+					var eachLegendItem = eachLegend.items[ li ]; 
+					if ( this.activeElement == eachLegendItem.element ) {
+						if ( !details ) {
+							this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
+						}
+						
+						this.speeches.push( eachLegendItem.label );	
+
+						if ( details ) {
+							var total = 0;
+							var refsLength = eachLegendItem.refs.length;
+							
+							var msg = refsLength + " datapoint";
+							if ( 1 < refsLength ) {
+								msg += "s"; // make it plural
+							}
+							
+							this.speeches.push( "This legend item applies to " + msg);	
+
+							for (var r = 0; refsLength > r; ++r) {
+								var eachRef = eachLegendItem.refs[ r ];
+								this.speeches.push( eachRef.label );	
+								// TODO: make sure the value is numeric
+								total += eachRef.value
+							}
+							
+							this.speeches.push( "The total of all items is " + total );	
+						}
+
+						
+						// no need to iterate further
+						continue;
+						l = lLen;
+						c = cLen;
+					}
+				}
+			}
+		}
 	} else {
 		// reset detail counter, different detail levels only available on datapoints
 		this.detailCount = 0;
@@ -785,7 +686,9 @@ describlerObj.prototype.sonify = function () {
 }   
 
 
-
+/*
+*  Chart Object
+*/
 
 function chartObj() {
 	this.element = null;
@@ -800,138 +703,152 @@ function chartObj() {
 	this.height = null;
 }
 
-chartObj.prototype.init = function ( parentObj ) {
+chartObj.prototype.init = function ( el ) {
+	this.element = el;
+	this.type = this.element.getAttribute("aria-charttype");
+	
+	// get chart title
+	var title = this.element.querySelector("[role='chart'] > [role='heading']");
+	if ( title ) {
+		this.label = title.textContent;
+	}
+    
 	// find the dimensions of the chart area
-	var chartarea = parentObj.root.querySelector("[role='chartarea']");
+	var chartarea = this.element.querySelector("[role='chartarea']");
 	if ( chartarea ) {
 		this.x = +chartarea.getAttribute("x");
 		this.y = +chartarea.getAttribute("y");
 		this.width = +chartarea.getAttribute("width");
 		this.height = +chartarea.getAttribute("height");
 	}
-	// 
-	// var charts = parentObj.root.querySelectorAll("[role='chart']");
-	// for (var c = 0, cLen = charts.length; cLen > c; ++c) {
-	// 	var chartEl = charts[c];
-	// 	var this.element = new chartObj();
-	// 	parentObj.charts.push( chart );
-	// 	chart.element = chartEl;
-	// 	chart.type = chartEl.getAttribute("aria-charttype");
-	// 	
-	// 	// get chart title
-	// 	var title = chartEl.querySelector("[role='chart'] > [role='heading']");
-	//   // console.log( title );
-	// 	if ( title ) {
-	// 		chart.label = title.textContent;
-	// 	}
-	//     
-	// 	// get chart axes
-	// 	chart.axes["x"] = new axisObj;
-	// 	chart.axes["x"].init( chartEl, "x", "horizontal" )
-	// 	
-	// 	chart.axes["y"] = new axisObj;
-	// 	chart.axes["y"].init( chartEl, "y", "vertical" )
-	// 	
-	// 
-	//   var datasetEls = chartEl.querySelectorAll("[role='dataset']");
-	// 	for (var d = 0, dLen = datasetEls.length; dLen > d; ++d) {
-	// 		var eachDataset = datasetEls[d];
-	// 	  var datapoints = eachDataset.querySelectorAll("[role='datapoint']");
-	// 
-	// 		var dataset = [];
-	// 		dataset["values"] = [];
-	// 		
-	// 	
-	// 		for (var dp = 0, dpLen = datapoints.length; dpLen > dp; ++dp) {
-	// 			var eachDatapoint = datapoints[dp];
-	// 			var datapoint = {};
-	// 
-	// 			datapoint["element"] = eachDatapoint;
-	// 
-	// 		  var datavalueEL = eachDatapoint.querySelector("[role='datavalue']");
-	// 			var dataText = datavalueEL.textContent;
-	// 			datapoint["element"] = eachDatapoint;
-	// 			datapoint["value"] = parseFloat( dataText );
-	// 		
-	// 			dataset["values"].push( datapoint["value"] );
-	// 		
-	// 			var labelEl = datavalueEL.getAttribute("aria-labelledby");
-	// 			datapoint["labelElement"] = labelEl;
-	// 			var labelContent = "";
-	// 			if (labelEl) {
-	// 	      var label = document.getElementById(labelEl);
-	// 				if (label) {
-	// 		      labelContent = label.textContent;
-	// 				}
-	// 			}
-	// 			datapoint["label"] = labelContent + ": " + dataText;
-	// 		
-	// 			dataset.push( datapoint );
-	// 	  };
-	// 	
-	// 		 // aria-valuemin="0" aria-valuemax="12"
-	// 
-	// 		// sort values
-	// 		dataset["values"].sort( function(a, b) {
-	// 		  return a - b;
-	// 		}); 
-	// 	
-	// 		// find low
-	// 		dataset["low"] = dataset["values"][0];
-	// 	
-	// 		// find high
-	// 		dataset["high"] = dataset["values"][ dataset.length - 1 ];
-	// 	
-	// 		// find range 
-	// 		dataset["range"] = dataset["high"] - dataset["low"];
-	// 	
-	// 		// find sum
-	// 		dataset["sum"] = dataset["values"].reduce( function(a, b) {
-	// 		  return a + b;
-	// 		}); 
-	// 	
-	// 		// find mean 
-	// 		dataset["mean"] = dataset["sum"] / dataset.length;
-	// 	
-	// 		// find median  
-	//     var mid = Math.floor(dataset.length/2);
-	//     // if ( 1 == dataset.length%2 ) {
-	//     if (dataset.length % 2) {
-	//     	dataset["median"] = dataset["values"][mid];
-	// 		} else {
-	//       dataset["median"] = ( dataset["values"][mid - 1] + dataset["values"][mid]) / 2;
-	// 		}
-	// 
-	// 		// find mode 
-	// 		var modeMap = {},
-	// 	      maxCount = 1, 
-	// 	      modes = [dataset["values"][0]];
-	// 
-	// 	  for(var i = 0; i < dataset["values"].length; ++i) {
-	// 	    var val = dataset["values"][i];
-	// 
-	// 	    if (modeMap[val] == null) {
-	// 	      modeMap[val] = 1;
-	// 	    } else {
-	// 	      modeMap[val]++;
-	// 	    }
-	// 
-	// 	    if (modeMap[val] > maxCount) {
-	// 	      modes = [val];
-	// 	      maxCount = modeMap[val];
-	// 	    } else if (modeMap[val] == maxCount) {
-	// 	      modes.push(val);
-	// 	      maxCount = modeMap[val];
-	// 	    }
-	// 	  }
-	// 		dataset["mode"] = modes;		
-	//   }
-	// 	this.charts[c].datasets.push( dataset );
-	// }
-	//   console.log( this.charts );
-	// 
-	// this.mapToRange();
+	
+	if ( "pie" != this.type ) {
+		// get chart axes
+		this.axes["x"] = new axisObj;
+		this.axes["x"].init( this.element, "x", "horizontal" )
+
+		this.axes["y"] = new axisObj;
+		this.axes["y"].init( this.element, "y", "vertical" )
+	}
+
+  var datasetEls = this.element.querySelectorAll("[role='dataset']");
+	for (var d = 0, dLen = datasetEls.length; dLen > d; ++d) {
+		var eachDataset = datasetEls[d];
+	  var datapoints = eachDataset.querySelectorAll("[role='datapoint']");
+	
+		var dataset = this.extractDataset( datapoints );
+		this.datasets.push( dataset );
+  }
+
+  var legendEls = this.element.querySelectorAll("[role='legend']");
+	for (var l = 0, lLen = legendEls.length; lLen > l; ++l) {
+		var eachLegend = legendEls[ l ]; 
+		var legend = new legendObj();
+		legend.init( eachLegend );
+		this.legends.push( legend );
+	}
 }   
+
+chartObj.prototype.extractDataset = function ( datapoints ) {
+	var dataset = [];
+	dataset["values"] = [];
+
+	for (var dp = 0, dpLen = datapoints.length; dpLen > dp; ++dp) {
+		var eachDatapoint = datapoints[dp];
+		var datapoint = new datapointObj();
+		datapoint.init( eachDatapoint ); 
+		dataset["values"].push( datapoint.value );
+		dataset.push( datapoint );
+  };
+
+	// sort values
+	dataset["values"].sort( function(a, b) {
+	  return a - b;
+	}); 
+
+	// find low
+	dataset["low"] = dataset["values"][0];
+
+	// find high
+	dataset["high"] = dataset["values"][ dataset.length - 1 ];
+
+	// find range 
+	dataset["range"] = dataset["high"] - dataset["low"];
+
+	// find sum
+	dataset["sum"] = dataset["values"].reduce( function(a, b) {
+	  return a + b;
+	}); 
+
+	// find mean 
+	dataset["mean"] = dataset["sum"] / dataset.length;
+
+	// find median  
+  var mid = Math.floor(dataset.length/2);
+  // if ( 1 == dataset.length%2 ) {
+  if (dataset.length % 2) {
+  	dataset["median"] = dataset["values"][mid];
+	} else {
+    dataset["median"] = ( dataset["values"][mid - 1] + dataset["values"][mid]) / 2;
+	}
+
+	// find mode 
+	var modeMap = {},
+      maxCount = 1, 
+      modes = [dataset["values"][0]];
+
+  for(var i = 0; i < dataset["values"].length; ++i) {
+    var val = dataset["values"][i];
+
+    if (modeMap[val] == null) {
+      modeMap[val] = 1;
+    } else {
+      modeMap[val]++;
+    }
+
+    if (modeMap[val] > maxCount) {
+      modes = [val];
+      maxCount = modeMap[val];
+    } else if (modeMap[val] == maxCount) {
+      modes.push(val);
+      maxCount = modeMap[val];
+    }
+  }
+	dataset["mode"] = modes;	
+	
+	return dataset;	
+}   
+
+
+function datapointObj() {
+	this.element = null;
+	this.value = null;
+	this.values = [];
+	this.label = null;
+	this.labelElement = null;
+	this.labelElementText = null;
+}
+
+datapointObj.prototype.init = function ( el ) {
+	this.element = el;
+	
+	var datavalueEL = this.element.querySelector("[role='datavalue']");
+	var dataText = datavalueEL.textContent;
+	this.value = parseFloat( dataText );
+	
+	var labelEl = datavalueEL.getAttribute("aria-labelledby");
+	this.labelElement = labelEl;
+	var labelContent = "";
+	if (labelEl) {
+	  var label = document.getElementById(labelEl);
+		if (label) {
+	    labelContent = label.textContent.trim();
+			this.labelElementText = labelContent;
+		}
+		labelContent += ": ";
+	}
+	this.label = labelContent + dataText;
+}
 
 function axisObj() {
 	this.element = null;
@@ -978,28 +895,23 @@ function legendObj() {
 	this.items = []; // each item has: element, label, list of referencing datapoints
 }
 
-legendObj.prototype.init = function ( chartEl, type, dir ) {
-	// this.element = chartEl.querySelector("[role='" + type + "axis']");
-	// this.type = type;
-	// 
-	// // get axis title
-	// var title = chartEl.querySelector("[role='" + type + "axis'] > [role='heading']");
-	// if ( title ) {
-	// 	this.label = title.textContent;
-	// }
-	// 
-	// // first extract all the axis labels
-	// var axislabels = this.element.querySelectorAll("[role='axislabel']");
-	// if ( axislabels.length ) {
-	// 	// var axisTexts = [];
-	// 	// var axisValues = [];
-	// 	for (var a = 0, aLen = axislabels.length; aLen > a; ++a) {
-	// 		var eachLabel = axislabels[ a ]; 
-	// 		this.labels.push( eachLabel.textContent );
-	// 		// axisValues.push( parseFloat(eachLabel.textContent) );
-	// 	}
-	//   // console.log( min + ", " + max );
-	// }
+legendObj.prototype.init = function ( el ) {
+	this.element = el;
+	
+	// get legend title
+	var title = this.element.querySelector("[role='legend'] > [role='heading']");
+	if ( title ) {
+		this.label = title.textContent;
+	}
+	
+	// first extract all the legend items
+	var legendItems = this.element.querySelectorAll("[role='legenditem']");
+	for (var l = 0, lLen = legendItems.length; lLen > l; ++l) {
+		var eachItem = legendItems[ l ]; 
+		var legendItem = new legendItemObj();
+		legendItem.init( eachItem )
+		this.items.push( legendItem );
+	}
 }
 
 function legendItemObj() {
@@ -1008,7 +920,44 @@ function legendItemObj() {
 	this.refs = []; // list of referencing datapoints
 }
 
-legendItemObj.prototype.init = function ( chartEl, type, dir ) {
+legendItemObj.prototype.init = function ( el ) {
+	this.element = el;
+	var title = this.element.querySelector("[role='legenditem'] > text,[role='legenditem'] > title");
+	if ( title ) {
+		this.label = title.textContent;
+	}
+
+	/// BE HERE NOW!!!
+	
+	/// find all the datapoints which reference this legend item
+	var allRefs = document.querySelectorAll("[aria-labelledby~='" + this.element.id + "']");
+	for (var r = 0, rLen = allRefs.length; rLen > r; ++r) {
+		var eachRef = allRefs[ r ]; 
+		
+		var ref = eachRef;
+		var role = eachRef.getAttribute("role");
+		while ( "datapoint" != role ) {
+			ref = ref.parentNode;
+			role = ref.getAttribute("role");
+		}		
+
+		// if ( "datavalue" == role ) {
+		// 	while ( "datapoint" == role ) {
+		// 		ref = ref.parentNode;
+		// 	}		
+		// 	
+		// }		
+		
+		var datapoint = new datapointObj();
+		datapoint.init( ref ); 
+		// dataset["values"].push( datapoint.value );
+		// dataset.push( datapoint );
+		
+		
+		this.refs.push(datapoint); // list of referencing datapoints
+  	// console.log( min + ", " + max );
+	}
+
 }
 
 /****
@@ -1132,7 +1081,6 @@ Sonifier.prototype.init = function ( svgroot, metaGroup, dataLine,
 	// this.speak( axisMsg, false );
 }
 
-
 Sonifier.prototype.trackKeys = function (event) {
 	var key = event.keyIdentifier.toLowerCase();
   
@@ -1228,7 +1176,6 @@ Sonifier.prototype.stepCursor = function ( direction ) {
 	// this.coords.y = 0;
 	this.updateCursor();	
 }   
-
 
 Sonifier.prototype.setDirection = function () { 
   if ( 1 == this.cursorDirection ) {
@@ -1361,7 +1308,6 @@ Sonifier.prototype.positionCursor = function ( x, y, setLine ) {
 	}
 }
 
-
 Sonifier.prototype.setDetune = function ( detune ) { 
   if (!this.oscillator) {
     this.audioContext = new AudioContext();
@@ -1394,13 +1340,11 @@ Sonifier.prototype.setDetune = function ( detune ) {
 	// oscillator.detune.value = Math.pow(2, 1/12) * 10; // Offset sound by 10 semitones
 }
 
-
 Sonifier.prototype.setVolume = function ( gain ) { 
 	if (this.volume) {
 	  this.volume.gain.value = gain;		
 	}
 }
-
 
 Sonifier.prototype.toggleVolume = function ( forceMute ) { 
 	if ( !this.isMute || forceMute ) {
@@ -1417,9 +1361,6 @@ Sonifier.prototype.pan = function () {
 	var panAngle = this.panValue * Math.PI / 2;
 	this.panner.setPosition(Math.sin(panAngle), Math.cos(panAngle), 1, 0, 0.5)
 }
-
-
-
 
 Sonifier.prototype.playTickmark = function () { 
 	
@@ -1473,6 +1414,22 @@ Sonifier.prototype.speak = function ( msg ) {
   }
 }
 
+function Axis(min, max, pos, chartMin, chartMax) {
+	if ( arguments.length > 0 ) {
+		this.min = min;
+		this.max = max;
+		this.pos = pos; // position of the axis line along the axis
+		this.chartMin = chartMin;
+		this.chartMax = chartMax;
+	}
+}
+
+Axis.prototype.scale = function( val ) {
+	var newVal = (val / ((this.chartMax - this.chartMin) / (this.max - this.min))) + this.min;
+	newVal = Math.round( newVal * 10 ) / 10;
+	return newVal;
+};
+
 
 /****
 * Helper methods
@@ -1492,23 +1449,6 @@ function bind (scope, fn) {
 	}
 }
 
-function Axis(min, max, pos, chartMin, chartMax) {
-	if ( arguments.length > 0 ) {
-		this.min = min;
-		this.max = max;
-		this.pos = pos; // position of the axis line along the axis
-		this.chartMin = chartMin;
-		this.chartMax = chartMax;
-	}
-}
-
-Axis.prototype.scale = function( val ) {
-	var newVal = (val / ((this.chartMax - this.chartMin) / (this.max - this.min))) + this.min;
-	newVal = Math.round( newVal * 10 ) / 10;
-	return newVal;
-};
-
-
 
 /******
 * 
@@ -1519,77 +1459,75 @@ Axis.prototype.scale = function( val ) {
 ******/
 
 function Point2D(x, y) {
-    if ( arguments.length > 0 ) {
-        this.x = x;
-        this.y = y;
-    }
+	if ( arguments.length > 0 ) {
+		this.x = x;
+		this.y = y;
+	}
 }
 
 function Intersection(status) {
-    if ( arguments.length > 0 ) {
-        this.init(status);
-    }
+	if ( arguments.length > 0 ) {
+		this.init(status);
+	}
 }
 
-
 Intersection.prototype.init = function(status) {
-    this.status = status;
-    this.points = new Array();
+	this.status = status;
+	this.points = new Array();
 };
-
 
 Intersection.prototype.appendPoints = function(points) {
-    this.points = this.points.concat(points);
+	this.points = this.points.concat(points);
 };
-
 
 Intersection.intersectLineLine = function(a1, a2, b1, b2) {
-    var result;
-    
-    var ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
-    var ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
-    var u_b  = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
+	var result;
 
-    if ( u_b != 0 ) {
-        var ua = ua_t / u_b;
-        var ub = ub_t / u_b;
+	var ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
+	var ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
+	var u_b  = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
 
-        if ( 0 <= ua && ua <= 1 && 0 <= ub && ub <= 1 ) {
-            result = new Intersection("Intersection");
-            result.points.push(
-                new Point2D(
-                    a1.x + ua * (a2.x - a1.x),
-                    a1.y + ua * (a2.y - a1.y)
-                )
-            );
-        } else {
-            result = new Intersection("No Intersection");
-        }
-    } else {
-        if ( ua_t == 0 || ub_t == 0 ) {
-            result = new Intersection("Coincident");
-        } else {
-            result = new Intersection("Parallel");
-        }
-    }
+	if ( u_b != 0 ) {
+		var ua = ua_t / u_b;
+		var ub = ub_t / u_b;
 
-    return result;
+		if ( 0 <= ua && ua <= 1 && 0 <= ub && ub <= 1 ) {
+			result = new Intersection("Intersection");
+			result.points.push(
+				new Point2D(
+					a1.x + ua * (a2.x - a1.x),
+					a1.y + ua * (a2.y - a1.y)
+				)
+			);
+		} else {
+			result = new Intersection("No Intersection");
+		}
+	} else {
+		if ( ua_t == 0 || ub_t == 0 ) {
+			result = new Intersection("Coincident");
+		} else {
+			result = new Intersection("Parallel");
+		}
+	}
+
+	return result;
 };
 
-
 Intersection.intersectLinePolygon = function(a1, a2, points) {
-    var result = new Intersection("No Intersection");
-    var length = points.length;
+	var result = new Intersection("No Intersection");
+	var length = points.length;
 
-    for ( var i = 0; i < length; ++i ) {
-        var b1 = points[i];
-        var b2 = points[(i+1) % length];
-        var inter = Intersection.intersectLineLine(a1, a2, b1, b2);
+	for ( var i = 0; i < length; ++i ) {
+		var b1 = points[i];
+		var b2 = points[(i+1) % length];
+		var inter = Intersection.intersectLineLine(a1, a2, b1, b2);
 
-        result.appendPoints(inter.points);
-    }
+		result.appendPoints(inter.points);
+	}
 
-    if ( result.points.length > 0 ) result.status = "Intersection";
-
-    return result;
+	if ( result.points.length > 0 ) {
+		result.status = "Intersection";
+	}
+	
+	return result;
 };

@@ -65,17 +65,17 @@
   
   <g id="legend" role="legend" tabindex="0" transform="translate(365, 95)">
     <title role="heading">Happiness Key</title>
-    <g id="l-Happy" role="listitem" tabindex="0" >
+    <g id="l-Happy" role="legenditem" tabindex="0" >
        <rect x="0" y="0" width="30" height="30" rx="2" ry="2" class="happy" />
        <text x="35" y="22">Happy</text>
     </g>
 
-    <g id="l-Unhappy" role="listitem" tabindex="0" transform="translate(0, 60)">
+    <g id="l-Unhappy" role="legenditem" tabindex="0" transform="translate(0, 60)">
        <rect x="0" y="0" width="30" height="30" rx="2" ry="2" class="unhappy" />
        <text x="35" y="22">Unhappy</text>
     </g>
 
-    <g id="l-Unsure" role="listitem" tabindex="0" transform="translate(0, 120)">
+    <g id="l-Unsure" role="legenditem" tabindex="0" transform="translate(0, 120)">
        <rect x="0" y="0" width="30" height="30" rx="2" ry="2" class="unsure" />
        <text x="35" y="22">Not Sure</text>
     </g>     
