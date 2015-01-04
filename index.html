@@ -1,4 +1,6 @@
-<html lang="en"><head>
+<doctype html>
+<html lang="en">
+<head>
   <meta charset="utf-8">
   <title>Describler</title>
   <link rel="shortcut icon" href="favicon.ico">
@@ -255,6 +257,23 @@
       cursor: pointer;
       width: 14em;
     }
+
+    select {
+      margin: 0.5em 0 0.5em 0;
+      font-size: 1em;
+      width: 10em;
+      height: 2em;      
+      border-radius: 1em;
+      color: white;
+      background-color: hsl(31, 93%, 54%);
+      font-size: 1em;
+      cursor: pointer;
+      width: 14em;
+      color: #fef4e9;
+      border: solid 1px #da7c0c;
+      background: hsl(31, 93%, 54%);
+      padding: 0.25em;
+    }
  
     .button, button {
       font-family: 'icomoon', 'Overlock', sans-serif;
@@ -268,6 +287,7 @@
       padding: .5em 2em .3em;
       text-shadow: 0 1px 1px rgba(0,0,0,.3);
       box-shadow: 0 1px 2px rgba(0,0,0,.2);
+      border: solid 1px #da7c0c;
       border-radius: 8px;
     }
 
@@ -538,7 +558,7 @@
         padding: 0;
       }
 
-      .upload input {
+      .upload input, {
         width: 2em;
       }
     }
@@ -563,6 +583,10 @@
             <span>Upload an SVG file…</span>
             <input type="file" id="fileButton" accept="image/svg+xml">
         </div>
+        <select id="selectFile">
+          <option>Select a file:</option>
+        </select>
+
 
         <!-- <a href="#code-view" title="View code" class="button icon icon-view-source image-action"></a>      -->
         <!-- <a href="#image-view-new" title="Show large image" class="button icon icon-zoom-in image-action"></a>     
@@ -585,14 +609,14 @@
            </svg>
          </div>
       </section>
-           -->
 
         <a id="download" class="button icon-download download" href="#"><span>Download…</span></a>     
+           -->
 
         <section id="info">
           <span id="file-name"> </span>
           <output id="filesize"> </output>
-          <output id="new-filesize"> </output>
+          <!-- <output id="new-filesize"> </output> -->
         </section>
         
 
@@ -666,75 +690,102 @@
   <script>
     var eli = 0;
     var svgEls = null;
-    var speechArray = [];
     var filename = null;
     var svgRoot = null;
     var svgns = "http://www.w3.org/2000/svg";
     var xlinkns = "http://www.w3.org/1999/xlink";
     var lang = "en-US";
+
+    var sampleList = [
+      "aria-bar-chart.svg",
+      "aria-pie-chart.svg",
+      "barchart-labels.svg",
+      "barchart-pt.svg",
+      "barchart.svg",
+      "desc-test-1.svg",
+      "graph-desc.svg",
+      "index.html",
+      "linechart-icon.svg",
+      "simple-car.svg",
+      "star-title-desc.svg"      
+    ];
     
     var hiliter = null;
-    
-    function init() {
-      if ( "undefined" == typeof speechSynthesis ) {
-        document.getElementById( "listen" ).setAttribute("disabled", "disabled");
+
+    window.onload = function () {
+      var select = document.getElementById("selectFile");
+      for(var i = 0; i < sampleList.length; i++) {
+        var option = sampleList[i];
+        var el = document.createElement("option");
+        el.textContent = option;
+        el.value = option;
+        select.appendChild(el);
       }
+      select.addEventListener("change", loadFileFromServer, false);
     }
 
-    function uploadFile(evt) {
-      var f = evt.target.files[0]; // FileList object
-      
+    function loadFileFromServer( e ){
+      // console.log(event.target.value)
+      xhr("samples/" + e.target.value, insertFile)
+    }
+
+    function xhr( url, callback ){
+      var xhr = new XMLHttpRequest;
+      xhr.open('GET', url);
+      xhr.onload = callback;
+      xhr.send()
+    }
+
+    function uploadFile(e) {
+      var file = e.target.files[0]; // FileList object
+
       // Only process image files.
-      if ("image/svg+xml" == f.type) {
-       document.getElementById('file-name').innerHTML = '<strong title="last modified: ' 
-         + (f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a')
-         + '">' + escape(f.name) + '</strong>';
-       
-       document.getElementById('filesize').innerHTML = f.size + ' bytes';
-
-
-       filename = f.name;
-        // console.log("ok")
+      if ("image/svg+xml" == file.type) {
+        // filename = file.name;
         var reader = new FileReader();
-        // console.log("reader")
+        reader.onload = insertFile;
+        reader.readAsText(file);
 
-        // Closure to capture the file information.
-        reader.onload = (function(file) {
-          return function(e) {
-            var displayArea = document.getElementById( "display-area" );
-            var svgContent = e.target.result;
-            var svgStart = svgContent.indexOf("<svg");
-            
-            var prolog = svgContent.substring(0, (svgStart - 1));
-            svgContent = svgContent.substring( svgStart );
-            
-            displayArea.innerHTML = (svgContent);
-            svgRoot = displayArea.firstElementChild;
-            
-            speechArray.length = 0;
-            setScalability( displayArea.firstElementChild );
-            
-            var langAttr = svgRoot.getAttribute("lang");
-            if (langAttr) {
-              lang = langAttr;
-            } else {
-              lang = "en-UK";
-            }
-            
-            // drawTree();
-            
-            var elText = svgRoot.textContent;
-            speechArray.push( elText );
-            
-            var describler = new describlerObj(); 
-          	describler.init( svgRoot );
-            
-          };
-        })(f);
+        document.getElementById('file-name').innerHTML = '<strong title="last modified: ' 
+          + (file.lastModifiedDate ? file.lastModifiedDate.toLocaleDateString() : 'n/a')
+          + '">' + escape(file.name) + '</strong>';
 
-        reader.readAsBinaryString(f);
+        document.getElementById('filesize').innerHTML = file.size + ' bytes';
       }
-    }
+    }   
+
+    function insertFile( e ){
+      // try to use FileReader file
+      var svgContent = e.target.result;
+      if ( !svgContent ) { 
+        // otherwise use XHR file
+        svgContent = this.response;
+      }
+
+      var displayArea = document.getElementById( "display-area" );
+
+      // strip off XML prolog 
+      var svgStart = svgContent.indexOf("<svg");
+      var prolog = svgContent.substring(0, (svgStart - 1));
+      svgContent = svgContent.substring( svgStart );
+      
+      // insert SVG file into HTML page
+      displayArea.innerHTML = (svgContent);
+      svgRoot = displayArea.firstElementChild;
+      
+      setScalability( displayArea.firstElementChild );
+      
+      var langAttr = svgRoot.getAttribute("lang");
+      if (langAttr) {
+        lang = langAttr;
+      } else {
+        lang = "en-US";
+      }
+      
+      // invoke screenreader
+      var describler = new describlerObj(); 
+      describler.init( svgRoot );           
+    } 
 
     function setScalability( el ){
       var vb = el.getAttribute("viewBox");
@@ -768,301 +819,7 @@
       }
     }
 
-    function drawTree() {    
-      var displayArea = document.getElementById( "display-area" );
-      var str = displayTree( displayArea.firstElementChild );
-      document.getElementById('list').innerHTML = str;
-      
-      writeSource();
-      createSaveLink( displayArea.innerHTML );
-      
-      eli = 0;
-      svgEls = displayArea.querySelectorAll( "*" );            
-    }
-
-    function displayTree( el ){
-      var name = el.tagName;
-      var namespace = el.nameSpace;
-
-
-      var str = "<ul>";
-
-      var id = el.getAttribute("id");
-      var idStr = "";
-      if ( id ) {
-        idStr = " <span class='id att' title='id attribute' contenteditable onblur='updateMetadata(this)'>" + id + "</span>";
-      }
-
-      // check for 'title' or 'xlink:title' attribute, as on <a>
-      var titleAtt = el.getAttribute("title");
-      if (!titleAtt) {
-        titleAtt = el.getAttributeNS(xlinkns, "title");
-      }
-      var titleAttStr = "";
-      if ( titleAtt ) {
-        titleAttStr = " <span class='title att' title='title attribute' contenteditable onblur='updateMetadata(this)'>" + titleAtt + "</span>";
-      }
-      
-      var contextStr = " onmousedown='contextMenu(event)' onmouseup='contextMenu(event)'";
-      var evtStr = " onmouseover='hilite(event)' onmouseout='lolite(event)'";
-      
-      if ( -1 != name.indexOf(":") ) {
-        //elements in another namespace
-        str += "<li data-el='" + eli + "'><span class='namespaced'" + contextStr + ">" + name + idStr + titleAttStr + "</span>";
-      } else if ( "title" == name 
-               || "desc" == name 
-               || "text" == name 
-               || "tspan" == name 
-               || "textPath" == name  ) {
-        // textual elements
-        var text = "";
-        if ( el.childNodes[0] ) {
-          text = ( 1 == el.childNodes[0].nodeType ) ? "" : el.childNodes[0].textContent;
-        }
-        
-        if (  "title" == name || "desc" == name ) {
-          evtStr = "";
-        }
-        
-        str += "<li data-el='" + eli + "'><span class='metadata'" + evtStr + contextStr + ">" + name + idStr + titleAttStr + "</span>";
-        str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
-             
-        // store current text for speech review
-        if ( "title" == name || "desc" == name || "text" == name ) {
-          var elText = el.textContent;
-          speechArray.push( elText );
-        }  
-      } else if ( "path" == name 
-               || "rect" == name 
-               || "polygon" == name 
-               || "polyline" == name  
-               || "circle" == name 
-               || "line" == name ) {
-        // graphical and all other elements
-        str += "<li data-el='" + eli + "'><span class='graphics'" + evtStr + contextStr + ">" + name + idStr + titleAttStr + "</span>";
-      } else {
-        // all other elements
-        str += "<li data-el='" + eli + "'><span class='misc'" + contextStr + ">" + name + idStr + titleAttStr + "</span>";
-      }
-      
-      if ( "title" != name && "desc" != name && -1 == name.indexOf(":") ) {
-        var t = el.querySelector("title");
-        if ( !t || el != t.parentNode ) { 
-          // console.log( el.tagName + " doesn't have a <title>" )
-          str += "<span class='add-title' title='add title to this element' aria-role='button' onclick='addMetadata(this)'>+ &lt;title&gt;</span>";
-        }     
-
-        var d = el.querySelector("desc");
-        if ( !d || el != d.parentNode ) { 
-          // console.log( el.tagName + " doesn't have a <desc>" )
-          str += "<span class='add-desc' title='add description to this element' aria-role='button' onclick='addMetadata(this)'>+ &lt;desc&gt;</span>";
-        }     
-      } 
-      
-      eli++;
-      
-      // recursive function to find child or sibling elements
-      var child = el.firstElementChild;
-      if ( child ) {
-        while ( child ) {
-          str += displayTree( child )
-          child = child.nextElementSibling;
-        }
-      }
-      str += "</li></ul>";
-      return str;
-    }
-    
-    
-    /*
-    * tree editing
-    */
-
-    function addMetadata( el ){
-      var elCt = el.parentNode.getAttribute("data-el");
-      var targetEl = svgEls[elCt];
-      var cname = el.getAttribute("class").replace("add-","");
-
-      var m = document.createElementNS( svgns, cname );
-      
-      var el1 = targetEl.firstElementChild;
-      if ( el1 ) {
-        var el2 = el1.nextElementSibling;
-        
-        if ( "title" != el1.tagName ) {
-          targetEl.insertBefore( m, el1 );
-        } else if ( el2 ) {
-          targetEl.insertBefore( m, el2 );
-        } else {
-          targetEl.appendChild( m );
-        }
-      } else {
-        targetEl.appendChild( m );
-      }
-      
-      // console.log(targetEl)
-      speechArray.length = 0;
-      // drawTree();
-    }
-
-
-    /*
-    * text editing
-    */
-
-    function updateMetadata( el ){
-      var cname = el.getAttribute("class");
-      var elCt = el.parentNode.getAttribute("data-el");
-      if ( !elCt ){
-        elCt = el.parentNode.parentNode.getAttribute("data-el");
-      }
-      
-      if ( elCt ) {
-        var targetEl = svgEls[elCt];
-        var text = el.childNodes[0] ? el.childNodes[0].textContent : "";
-
-        if ( -1 != cname.indexOf("id") ) {
-          targetEl.id = text;
-        } else  if ( -1 != cname.indexOf("title") ) {
-          targetEl.setAttribute("title", text);
-        } else {
-          // set text content
-          text = text.replace(/\u00a0/g, " ");
-          
-          if ( targetEl.childNodes[0] ) {
-            targetEl.childNodes[0].textContent = text;            
-          } else {
-            targetEl.appendChild( document.createTextNode( text ) );            
-          }
-        }
-      }
-
-      speechArray.length = 0;
-      // drawTree();
-    }
-
-    function handleKeys( event ){
-      if ( "Enter" == event.keyIdentifier || 13 == event.keyCode) {
-        event.target.blur();
-      }
-    }
-
-    
-    /* 
-    * highlighting 
-    */
-
-    function hilite( event ){
-      event.stopPropagation();
-      var li = event.target.parentNode;
-      // console.log(li)
-      // console.log(li + ": " + li.getAttribute("data-el") )
-      var elCt = li.getAttribute("data-el");
-      var targetEl = svgEls[elCt];  
-      
-      var name = targetEl.tagName;
-      
-      var sw = targetEl.getAttribute( "stroke-width");
-      sw = (sw) ? ( parseFloat(sw) *3 ) : 5;
-      
-      hiliter = targetEl.cloneNode(true);
-      hiliter.setAttribute( "id", "" );
-      hiliter.setAttribute( "fill", "yellow" );
-      hiliter.setAttribute( "stroke", "red" );
-      hiliter.setAttribute( "stroke-width", sw );
-      hiliter.setAttribute( "opacity", "0.75" );
-      hiliter.setAttribute( "stroke-linecap", "round" );
-      
-      if ( "text" != name && 
-           "tspan" != name && 
-           "textPath" != name ) {
-        hiliter.setAttribute( "stroke-dasharray", "2, 10" );
-      }
-      // console.log(hiliter)
-      
-      svgRoot.appendChild( hiliter );
-    }
-
-    function lolite( event ){
-      event.stopPropagation();
-      // var li = event.target.parentNode;
-      // var elCt = li.getAttribute("data-el");
-      // var targetEl = svgEls[elCt];
-
-      if (hiliter) {
-        svgRoot.removeChild( hiliter );
-      }
-    }
-
-    function showListItem( event ) {
-      event.stopPropagation();
-      var el = event.target;
-      var i = 0;
-      for ( i = 0; svgEls.length > i; i++) {
-        var eachEl = svgEls[i];        
-        if ( eachEl == el ) {
-          break;
-        }
-      };
-      
-      var li = document.querySelector('li[data-el="' + i + '"]');
-      li.scrollIntoView();
-      li.classList.add("highlight");
-      setTimeout(function(){
-          li.classList.remove("highlight");
-      }, 1600);
-    }
-
-
-    function contextMenu( event ){
-      // console.log(event)
-      // event.stopPropagation()
-      // var li = event.target;
-      // console.log(hiliter)
-      // console.log(hiliter.parentNode)
-    }
-    
-    /*
-    * speech
-    */
-     
-     function speak( msg ) {
-       // var listenButton = document.getElementById('listen');
-       
-       if ( speechSynthesis.speaking ) {
-         speechSynthesis.cancel();
-         // listenButton.firstElementChild.textContent = "Listen to SVG…";
-       } else {
-         msg = speechArray.join(". \n");
-
-         var u = new SpeechSynthesisUtterance();
-         u.text = msg;
-         u.lang = lang;
-         u.rate = 1.2;
-         // u.onend = function(event) { alert( event.elapsedTime ); }
-         // u.onend = function(event) {  document.getElementById('time').textContent = ('Finished in ' + event.elapsedTime + ' seconds.'); }
-         speechSynthesis.speak( u );
-         // listenButton.firstElementChild.textContent = "Stop voice";
-       }      
-     }
-     
-    function writeSource() {
-      var displayArea = document.getElementById( "display-area" );
-      var codeView = document.querySelector("#code-view code");
-      var code = document.createTextNode(displayArea.innerHTML);
-      codeView.replaceChild( code, codeView.firstChild );
-    }
-    
-    function createSaveLink( svg ) {
-      // uses HTML5 features: the ‘Blob’ object and the ‘download’ attribute of the <a> element 
-	    var blob = new Blob([svg], {type:'image/svg+xml'});
-      var downloadLink = document.getElementById('download');
-      downloadLink.download = filename.replace(".svg", "-svgax.svg");
-      downloadLink.href = window.URL.createObjectURL(blob);
-      document.getElementById('new-filesize').innerHTML = '(revised: ' + byteSized( blob.size ) + ')';
-    }
-    
-    
+ 
     function byteSized( bytes ) {
       var units = ['bytes', 'KB', 'MB', 'GB', 'TB'];
       var size = ";"
@@ -1090,11 +847,10 @@
     
     // document.getElementById('list').addEventListener('mouseover', hilite, false);
     document.getElementById('fileButton').addEventListener('change', uploadFile, false);
-    document.documentElement.addEventListener('blur', updateMetadata, false);
-    document.documentElement.addEventListener('keypress', handleKeys, false);
-    window.onload = init;
+    // window.onload = init;
   </script>
 
 
 
-</body></html>
+</body>
+</html>

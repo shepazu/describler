@@ -1,36 +1,40 @@
 "use strict";
 
-window.onfocus = function ( event ) {
+window.onfocus = function (event) {
 	event.target.blur();
+};
+
+function showEvent(event) {
+  console.log(event.type)
 }
 
-function describlerObj () {
-	this.root = null;
-	
-	// focus properties
-	this.focusList = [];
-	this.focusIndex = 0;
-	this.focusBox = null;
-	this.activeElement = null;
-	this.padding = 0;
-	this.strokewidth = 0;
-	this.navDirection = 0;
-	this.detailCount = 0;
-	
-	// chart properties
-	this.charts = [];
+function describlerObj() {
+    this.root = null;
 
-	// voice and sonification properties
-	this.speeches = [];
-	this.voice = new SpeechSynthesisUtterance();
-	this.sonifier = null;
+    // focus properties
+    this.focusList = [];
+    this.focusIndex = 0;
+    this.focusBox = null;
+    this.activeElement = null;
+    this.padding = 0;
+    this.strokewidth = 0;
+    this.navDirection = 0;
+    this.options = [];
 
-	// constants
+    // chart properties
+    this.charts = [];
+
+    // voice and sonification properties
+    this.speeches = [];
+    // this.voice = new SpeechSynthesisUtterance();
+    this.sonifier = null;
+
+    // constants
   this.svgns = "http://www.w3.org/2000/svg";
 }
 
-describlerObj.prototype.init = function ( root ) {
-	this.root = root;
+describlerObj.prototype.init = function (root){
+  this.root = root;
 
   // find appropriate sizes
   var vb = root.getAttribute("viewBox").split(" ");
@@ -69,7 +73,7 @@ describlerObj.prototype.createModel = function () {
 	if (!charts.length) {
 		var role = this.root.getAttribute("role");
 		
-		if ( "chart" == role ) {
+		if ( "chart" == role){
 			charts = [this.root];			
 		}		
 	}
@@ -106,7 +110,7 @@ describlerObj.prototype.exportCSV = function () {
 			  // console.log(key, chart[axis]);
 				var eachAxis = chart.axes[a];
 				if (eachAxis["labels"]) {
-					if ( dataset.length == eachAxis["labels"].length ) {
+					if ( dataset.length == eachAxis["labels"].length){
 						allies.push({
 							"label": eachAxis.label,
 							"fields": eachAxis["labels"]
@@ -115,8 +119,8 @@ describlerObj.prototype.exportCSV = function () {
 				}
 			}
 			
-			if ( "bar" == chart.type ) {
-				if ( 1 == allies.length ) {
+			if ( "bar" == chart.type){
+				if ( 1 == allies.length){
 					var axis = allies[0]
 					csv = axis["label"] + ",values\n";
 
@@ -124,7 +128,7 @@ describlerObj.prototype.exportCSV = function () {
 						csv += axis["fields"][i] + "," + dataset[i].value + "\n";
 					}	
 				}
-			} else if ( "pie" == chart.type ) {
+			} else if ( "pie" == chart.type){
 				for (var i = 0, iLen = dataset.length; iLen > i; ++i) {
 					csv += dataset[i].label + "\n";
 				}	
@@ -141,7 +145,7 @@ describlerObj.prototype.findTextContent = function () {
 	for (var t = 0, tLen = textContents.length; tLen > t; ++t) {
 		var eachTextContent= textContents[t];
 		var el = eachTextContent;
-		if ( "title" == el.localName ) {
+		if ( "title" == el.localName){
 		  el = el.parentNode;
 		}
 		
@@ -203,8 +207,10 @@ describlerObj.prototype.showFocus = function () {
 }   
 
 describlerObj.prototype.trackKeys = function (event) {
-	var key = event.keyIdentifier.toLowerCase();
+  var key = event.keyIdentifier.toLowerCase();
+  // var key = parseInt(event.keyIdentifier.substr(2), 16);
   // console.log( key );
+  // console.log( "key: " + event.key);
 
   if ("u+0009" == key) {
     // tab
@@ -219,23 +225,36 @@ describlerObj.prototype.trackKeys = function (event) {
     }
 	} else if ("u+0044" == key) {
 		// d
-	  // console.log( "10: " + this.detailCount );
 		this.getInfo( true );
 	} else if ("u+0053" == key) {
 		// s
 		this.sonify();
+	} else if ( "u+0030" == key
+          ||  "u+0031" == key
+          ||  "u+0032" == key 
+          ||  "u+0033" == key 
+          ||  "u+0034" == key 
+          ||  "u+0035" == key 
+          ||  "u+0036" == key 
+          ||  "u+0037" == key 
+          ||  "u+0038" == key 
+          ||  "u+0039" == key ) {
+		// 1 to 9
+    var number = parseInt(key.substr(2)) - 30;
+    // console.log( "key: " + number);
+		this.getInfo( number );
 	}
 }
 
-describlerObj.prototype.click = function ( event ) {
+describlerObj.prototype.click = function (event){
  	event.preventDefault();
   event.stopPropagation();
 	// document.activeElement.blur();	
 	
 	var focusEl = event.target;
-	while ( !focusEl.hasAttribute("tabindex") ) {
+	while ( !focusEl.hasAttribute("tabindex")){
 	  // console.log( focusEl );
-		if ( document == focusEl.parentNode ) {
+		if ( document == focusEl.parentNode){
 			return false;
 		}
 		focusEl = focusEl.parentNode;
@@ -246,7 +265,7 @@ describlerObj.prototype.click = function ( event ) {
 
   // console.log( this.focusIndex );
 	for (var l = 0, lLen = this.focusList.length; lLen > l; ++l) {
-		if ( focusEl == this.focusList[l] ) {
+		if ( focusEl == this.focusList[l]){
 			this.focusIndex = l + 1;
 		  if (this.focusList.length - 1 < this.focusIndex) {
 		    this.focusIndex = 0;
@@ -261,7 +280,7 @@ describlerObj.prototype.click = function ( event ) {
 	this.showFocus();
 }
 
-describlerObj.prototype.mapToRange = function (val, range1, range2 ) {
+describlerObj.prototype.mapToRange = function (val, range1, range2){
 	// affine transformation transforms number x in range [a,b] to number y in range [c,d]
 	// y = (x-a)(d-c/b-a) + c
 	
@@ -271,16 +290,16 @@ describlerObj.prototype.mapToRange = function (val, range1, range2 ) {
 
 
 
-describlerObj.prototype.getFraction = function ( decimal ) {
+describlerObj.prototype.getFraction = function (decimal){
 	var msg = "The same as ";
-	if ( 1 != decimal ) {
+	if ( 1 != decimal){
 		var fraction = 1;
 		var numerator = 1;
 		var denominator = 1;
 
 		while (fraction.toFixed(3) != decimal.toFixed(3)) {
 		  // console.log( fraction + "," + decimal );
-			if (fraction.toFixed(3) < decimal.toFixed(3) ) {
+			if (fraction.toFixed(3) < decimal.toFixed(3)){
 				numerator += 1;
 			}
 			else {
@@ -291,21 +310,21 @@ describlerObj.prototype.getFraction = function ( decimal ) {
 		}
 
 		msg = numerator + '/' + denominator;
-		if ( numerator > denominator ) {
+		if ( numerator > denominator){
 			var number = parseInt( numerator / denominator );
 			var mod = numerator % denominator;
 			
 			/*
 			for (var d = 0; 10 > d; ++d) {
 				var mod2 = denominator % mod;
-				if ( 0 != mod2 ) {
+				if ( 0 != mod2){
 					
 				}
 			}
 			*/
 			
 			msg = number.toString() + " " + mod + '/' + denominator;
-			if ( 0 == mod ) {
+			if ( 0 == mod){
 				msg = number.toString() + " times ";
 			}
 		}
@@ -313,8 +332,7 @@ describlerObj.prototype.getFraction = function ( decimal ) {
 	return msg;
 }
 
-
-describlerObj.prototype.convertNumberToWords = function ( number ) {
+describlerObj.prototype.convertNumberToWords = function (number){
 
 	var names = [{"0":"zero", "1":"one", "2":"two", "3":"three", "4":"four", "5":"five", "6":"six", 
 								"7":"seven", "8":"eight", "9":"nine" },{"0":"ten", "1":"eleven", "2":"twelve", 
@@ -325,7 +343,7 @@ describlerObj.prototype.convertNumberToWords = function ( number ) {
 								"octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", 
 								"quattuordecillion", "quindecillion", "sexdecillion", "septdecillion", "octdecillion", 
 								"novemdecillion", "vigintillion"]];
-	var to_words = function(s, n){
+	var to_words = function (s, n){
 	    var ns = s.slice(0,3);
 	    return (ns.length < 1)?"":to_words(s.slice(3,s.length),n+1)
 						 +((ns.length>1)?((ns.length==3&&ns[2]!="0")?names[0][ns[2]]+" hundred "
@@ -340,57 +358,234 @@ describlerObj.prototype.convertNumberToWords = function ( number ) {
 						||(ns.length==2&&(ns[0]!="0"||ns[1]!="0"))||(ns.length==1&&ns[0]!="0"))
 						?"<span class='magnitude'>"+names[3][n]+"</span> ":""));
 	}, input;
-	document.getElementById('input').addEventListener('keyup', function(){
+	document.getElementById('input').addEventListener('keyup', function (){
 	document.getElementById('output').innerHTML = to_words(this.value.replace(/[^0-9]/g, '')
 					.split('').reverse(), 0);
 	}, false);
 }
 
-
-describlerObj.prototype.getInfo = function ( details ) {
-	
+describlerObj.prototype.getInfo = function (option){
 	this.speeches.length = 0;
+  this.options.length = 0;
 	
 	if (!this.activeElement) {
 		return false;
 	}
 	
 	var role = this.activeElement.getAttribute("role");
-	if ( "datapoint" == role) {
+	   
+  if ( "chart" == role){
+    this.options = [
+      "Press 1 for chart statistics",
+      "Press 2 for datapoints from lowest to highest",
+      "Press 3 for datapoints from highest to lowest"
+    ];
+
+		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+			var chart = this.charts[c];
+			if ( this.activeElement == chart.element){
+				for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
+					var dataset = chart.datasets[d];
+
+					if ( chart.label){
+						this.speeches.push( "Chart: " + chart.label );
+					}
+
+					
+					if ( null != option ){
+            console.log( "option: " + option.toString(16) );
+  					if ( 1 == option ){
+  						// this.speeches.push( "This is a " + chart.type + " chart, with " 
+  						// 										+ dataset.length + " data points" );
+  						this.speeches.push( "" + chart.type + " chart, with " 
+  																+ dataset.length + " data points" );
+  						this.speeches.push( "The highest value is " + +dataset.high.toFixed(2)
+  																+ ", and the lowest value is " + +dataset.low.toFixed(2)
+  																+ ", with a range of " + +dataset.range.toFixed(2) );
+  						this.speeches.push( "The average is " + +dataset.mean.toFixed(2)
+  																+ ", the median is " + +dataset.median.toFixed(2)
+  																+ ", and the total is " + +dataset.sum.toFixed(2) );
+  																// + ", and the total of all data points is " + dataset.sum );				
+  					} else if ( 2 == option || 3 == option ){
+  						// list datapoints lowest to highest, or highest to lowests
+  						// create a copy of the dataset, so we don't mess with the original ordering
+  						var datasort = dataset.slice();
+						
+  						if ( 2 == option){
+  							datasort.sort( function (a, b) {
+  							  return a.value - b.value;
+  							}); 
+  							this.speeches.push( "Lowest to highest: " );
+  						} else if ( 3 == option){
+  							datasort.sort( function (a, b) {
+  							  return b.value - a.value;
+  							}); 
+  							this.speeches.push( "Highest to lowest: " );
+  						}
+							
+  						for (var dp = 0, dpLen = datasort.length; dpLen > dp; ++dp) {
+  							var datapoint = datasort[dp];
+  							this.speeches.push( datapoint.label );
+  						}
+  					}
+					}
+				}
+				continue;
+			}
+		}
+    // this.speeches.push( choices.join(" ") );
+	} else if ( "xaxis" == role || "yaxis" == role){
+    this.options = [
+      "Press 1 for axis labels"
+    ];
+		
+		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+			var chart = this.charts[c];
+			for (var a in chart.axes) {
+			  // console.log(key, chart[axis]);
+				var axis = chart.axes[a];
+				if ( this.activeElement == axis.element){
+					if ( axis.label){
+						this.speeches.push( axis.type + " axis: " + axis.label );
+					}
+		
+					if ( !isNaN(axis.min) && !isNaN(axis.max)){
+						this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
+																+ axis.min + " to " + axis.max );
+					} else {
+            this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
+                               + axis.labels[0] + " to " 
+                               + axis.labels[axis.labels.length - 1] );
+						// if ( 1 == option ){
+						// 	this.speeches.push( ", with the following labels: " );
+						// 	for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
+						// 		this.speeches.push( axis.labels[l] );
+						// 	}
+						// } else {
+						// 	this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
+						// 											+ axis.labels[0] + " to " 
+						// 											+ axis.labels[axis.labels.length - 1] );
+						// }
+					}
+					
+          if ( 1 == option ){
+            this.speeches.push( ", with the following labels: " );
+            for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
+              this.speeches.push( axis.labels[l] );
+            }
+          }
+
+					// no need to iterate further
+					continue;
+					c = cLen;
+				}
+			}
+		}
+	} else if ( "legend" == role){
+		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+			var chart = this.charts[c];
+			for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
+				var eachLegend = chart.legends[ l ]; 
+				if ( this.activeElement == eachLegend.element){
+					var legendItemsCount = eachLegend.items.length + " legend item";
+					if ( 1 != eachLegend.items.length){
+						legendItemsCount += "s"; // make it plural
+					}
+					
+					this.speeches.push( "Legend: " + eachLegend.label + " with " + legendItemsCount );	
+					// if ( !1 == option ){
+					// 	this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
+					// }
+					
+					// no need to iterate further
+					continue;
+					l = lLen;
+					c = cLen;
+				}
+			}
+		}
+	} else if ( "legenditem" == role){
+		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+			var chart = this.charts[c];
+			for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
+				var eachLegend = chart.legends[ l ]; 
+				for (var li = 0, liLen = eachLegend.items.length; liLen > li; ++li) {
+					var eachLegendItem = eachLegend.items[ li ]; 
+					if ( this.activeElement == eachLegendItem.element){
+						if ( null == option ){
+							this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
+						}
+						
+						this.speeches.push( eachLegendItem.label );	
+
+
+            this.options = [
+              "Press 1 for list of all applicable data points"
+            ];
+
+						if ( 1 == option ){
+							var total = 0;
+							var refsLength = eachLegendItem.refs.length;
+							
+							var refsCount = refsLength + " datapoint";
+							if ( 1 != refsLength){
+								refsCount += "s"; // make it plural
+							}
+							
+							this.speeches.push( "This legend item applies to " + refsCount);	
+
+							for (var r = 0; refsLength > r; ++r) {
+								var eachRef = eachLegendItem.refs[ r ];
+								this.speeches.push( eachRef.label );	
+								// TODO: make sure the value is numeric
+								total += eachRef.value
+							}
+							
+							this.speeches.push( "The total of all items is " + total );	
+						}
+					
+						// no need to iterate further
+						continue;
+						l = lLen;
+						c = cLen;
+					}
+				}
+			}
+		}
+	} else if ( "datapoint" == role) {
 		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
 			var chart = this.charts[c];
 			for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
 				var dataset = chart.datasets[d];
 				for (var dp = 0, dpLen = dataset.length; dpLen > dp; ++dp) {
 					var datapoint = dataset[dp];
-					if ( this.activeElement == datapoint.element ) {
+					if ( this.activeElement == datapoint.element){
 					  // console.log( datapoint );
-						if ( !details ) {
+						if ( null == option ){
 							this.speeches.push( "Data point " + (dp + 1) + " of " + dataset.length );
 						}
 
 						this.speeches.push( datapoint.label );
 
-						if ( details ) {
-							var value = datapoint.value;
-							
-							// increment detail counter, to allow additional level of detail
-							this.detailCount++;
-						  // console.log( "1: " + this.detailCount );
+            this.options = [
+              "Press 1 for more details",
+              "Press 2 for comparison to other data points"
+            ];
 
-							if ( 1 == this.detailCount ) {
-							  // console.log( "2: " + this.detailCount );
+						if ( null != option ){
+							var value = datapoint.value;
+							if ( 1 == option ){
 								// describe change of value
 								if ( (0 != dp && 1 == this.navDirection ) 
 										|| (dpLen - 1 != dp && -1 == this.navDirection )) {
 											
 									var previousValue = dataset[dp - 1].value;
-									if ( -1 == this.navDirection ) {
+									if ( -1 == this.navDirection){
 										previousValue = dataset[dp + 1].value;
 									}
 
 									var delta = "";
-									if ( value > previousValue ) {
+									if ( value > previousValue){
 										delta += "This is an increase of " + (value - previousValue);
 									}	else if ( value < previousValue) {
 										delta += "This is a decrease of " + (previousValue - value);
@@ -399,40 +594,36 @@ describlerObj.prototype.getInfo = function ( details ) {
 									}
 									delta += " from the previous value of " + previousValue;
 									this.speeches.push( delta );
-								  // console.log( "3: " + this.detailCount );
 								}
 
 								// describe change of value
-								if ( dataset["low"] == value ) {
+								if ( dataset["low"] == value){
 									this.speeches.push( "This is the lowest value." );
 								} 
 
-								if ( dataset["high"] == value ) {
+								if ( dataset["high"] == value){
 									this.speeches.push( "This is the highest value." );
 								}
 
-								if ( dataset["median"] == value ) {
+								if ( dataset["median"] == value){
 									this.speeches.push( "This is the median value." );
 								}
 
-								if ( dataset["mean"] == value ) {
+								if ( dataset["mean"] == value){
 									this.speeches.push( "This is the average value." );
 								}
-							} else { // more details
-							  // console.log( "4: " + this.detailCount );
-								// reset detail counter, no deeper level of detail
-								this.detailCount = 0;
+							} else if ( 2 == option ){ // more details
 								var firstItem = true;
 								for (var odp = 0, odpLen = dataset.length; odpLen > odp; ++odp) {
 									var otherDatapoint = dataset[odp];
-									if ( datapoint.element != otherDatapoint.element ) {
+									if ( datapoint.element != otherDatapoint.element){
 										var otherValue = otherDatapoint.value;
 										var delta = "";
 										if (firstItem) {
 											firstItem = false;
 											delta = "This is ";
 										} else if ( odpLen - 1 == odp 
-															|| ( odpLen - 1 == dp && odpLen - 2 == odp ) ) {
+															|| ( odpLen - 1 == dp && odpLen - 2 == odp )){
 											delta = " and ";
 										}
 
@@ -440,14 +631,13 @@ describlerObj.prototype.getInfo = function ( details ) {
 										delta += this.getFraction(value/otherValue);
 										delta += " the value of ";
 										
-										if ( otherDatapoint.labelElementText ) {
+										if ( otherDatapoint.labelElementText){
 											delta +=  otherDatapoint.labelElementText;
 										} else {
 											delta +=  otherDatapoint.label;
 										}
 										
 										this.speeches.push( delta );
-									  // console.log( "5: " + this.detailCount );
 									}
 								}
 
@@ -462,180 +652,80 @@ describlerObj.prototype.getInfo = function ( details ) {
 				}
 			}
 		}
-	} else if ( "xaxis" == role || "yaxis" == role ) {
-		// reset detail counter, different detail levels only available on datapoints
-		this.detailCount = 0;
-		
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			for (var a in chart.axes) {
-			  // console.log(key, chart[axis]);
-				var axis = chart.axes[a];
-				if ( this.activeElement == axis.element ) {
-					if ( axis.label ) {
-						this.speeches.push( axis.type + " axis: " + axis.label );
-					}
-		
-					if ( !isNaN(axis.min) && !isNaN(axis.max) ) {
-						this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
-																+ axis.min + " to " + axis.max );
-					} else {
-						if ( details ) {
-							this.speeches.push( ", with the following labels: " );
-							for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
-								this.speeches.push( axis.labels[l] );
-							}
-						} else {
-							this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
-																	+ axis.labels[0] + " to " 
-																	+ axis.labels[axis.labels.length - 1] );
-						}
-					}
-					
-					// no need to iterate further
-					continue;
-					c = cLen;
-				}
-			}
-		}
-	} else if ( "chart" == role ) {
-		// reset detail counter, different detail levels only available on datapoints
-		this.detailCount = 0;
-
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			if ( this.activeElement == chart.element ) {
-				for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
-					var dataset = chart.datasets[d];
-
-					if ( chart.label ) {
-						this.speeches.push( "Chart: " + chart.label );
-					}
-
-					if ( details ) {
-					  // console.log( "6: " + this.detailCount );
-						// this.speeches.push( "This is a " + chart.type + " chart, with " 
-						// 										+ dataset.length + " data points" );
-						this.speeches.push( "" + chart.type + " chart, with " 
-																+ dataset.length + " data points" );
-						this.speeches.push( "The highest value is " + +dataset.high.toFixed(2)
-																+ ", and the lowest value is " + +dataset.low.toFixed(2)
-																+ ", with a range of " + +dataset.range.toFixed(2) );
-						this.speeches.push( "The average is " + +dataset.mean.toFixed(2)
-																+ ", the median is " + +dataset.median.toFixed(2)
-																+ ", and the total is " + +dataset.sum.toFixed(2) );
-																// + ", and the total of all data points is " + dataset.sum );				
-					}
-				}
-				continue;
-			}
-		}
-	} else if ( "legend" == role ) {
-		this.speeches.push( "Legend: " );	
-		
-		var title = this.activeElement.querySelector("[role='legend'] > [role='heading']");
-		if ( !title ) {
-			title = this.activeElement.querySelector("[role='legend'] > title");
-		}
-
-		if ( title ) {
-			this.speeches.push( title.textContent );			
-		}
-		
-	} else if ( "legenditem" == role ) {
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
-				var eachLegend = chart.legends[ l ]; 
-				for (var li = 0, liLen = eachLegend.items.length; liLen > li; ++li) {
-					var eachLegendItem = eachLegend.items[ li ]; 
-					if ( this.activeElement == eachLegendItem.element ) {
-						if ( !details ) {
-							this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
-						}
-						
-						this.speeches.push( eachLegendItem.label );	
-
-						if ( details ) {
-							var total = 0;
-							var refsLength = eachLegendItem.refs.length;
-							
-							var msg = refsLength + " datapoint";
-							if ( 1 < refsLength ) {
-								msg += "s"; // make it plural
-							}
-							
-							this.speeches.push( "This legend item applies to " + msg);	
-
-							for (var r = 0; refsLength > r; ++r) {
-								var eachRef = eachLegendItem.refs[ r ];
-								this.speeches.push( eachRef.label );	
-								// TODO: make sure the value is numeric
-								total += eachRef.value
-							}
-							
-							this.speeches.push( "The total of all items is " + total );	
-						}
-
-						
-						// no need to iterate further
-						continue;
-						l = lLen;
-						c = cLen;
-					}
-				}
-			}
-		}
 	} else {
-		// reset detail counter, different detail levels only available on datapoints
-		this.detailCount = 0;
-		
 		var el = this.activeElement;
-		if ( "text" != this.activeElement.localName ) {
+		if ( "text" != this.activeElement.localName){
 		  el = this.activeElement.querySelector("title");
 		
-			if ( !el ) {
+			if ( !el){
 			  el = this.activeElement.querySelector("text");
 			}
 		}
 		// var dataText = el.textContent;
 		
-		if ( el ) {
+		if ( el){
 			this.speeches.push( el.textContent );			
 		}
 		
-		if ( details ) {
+		if ( 1 == option ){
 			var desc = this.activeElement.querySelector("[tabindex] > desc");
-			if ( desc ) {
+			if ( desc){
 				this.speeches.push( desc.textContent );			
 			}
 		}
 	}
 	
-	if ( this.speeches.length ) {
+	if ( this.speeches.length){
 		this.speak();		
 	}
 }
 
 describlerObj.prototype.speak = function () {
-  if ( speechSynthesis.speaking ) {
-    speechSynthesis.cancel();
-  } else {
-    var msg = this.speeches.join(". \n");
-	  console.log( msg );
+  var msg = this.speeches.join(". \n");
+   // check Speech Synthesis support
+  if ('speechSynthesis' in window) {
+    // cancel previous calls to speech API, 
+    //  so UI is faster, more responsive, and less verbose
+    if ( speechSynthesis.speaking ){
+      speechSynthesis.cancel();
+    }
+    console.log( msg );
 
-    this.voice.text = msg;
-    this.voice.lang = "en";
-    this.voice.rate = 1.2;
-    speechSynthesis.speak( this.voice );
+  	var voice = new SpeechSynthesisUtterance();
+    voice.text = msg;
+    voice.lang = "en-US";
+    voice.rate = 1.1;
+    speechSynthesis.speak( voice );
+  
+    if (this.options.length) {
+      voice.onend = (function (optionList) {
+        var optionsMsg = "Options: " + optionList.join(". \n");
+        console.log( optionsMsg );
 
-		// for (var s = 0, sLen = this.speeches.length; sLen > s; ++s) {
-		// 	msg = this.speeches[s];
-		//   // console.log( msg );
-		// 	    this.voice.text = msg;
-		// 	    speechSynthesis.speak( this.voice );
-		// }
-  }      
+      	var voice = new SpeechSynthesisUtterance();
+        voice.text = optionsMsg;
+        voice.lang = "en-US";
+        voice.rate = 1.1;
+        speechSynthesis.speak( voice );
+      })(this.options);
+    }
+  }
+
+  // if ( speechSynthesis.speaking){
+  //   speechSynthesis.cancel();
+  // } else {
+  //   // this.voice.text = msg;
+  //   // this.voice.lang = "en";
+  //   // this.voice.rate = 1.2;
+  //   // speechSynthesis.speak( this.voice );
+  // 
+  // 		// for (var s = 0, sLen = this.speeches.length; sLen > s; ++s) {
+  // 		// 	msg = this.speeches[s];
+  // 		//   // console.log( msg );
+  // 		// 	    this.voice.text = msg;
+  // 		// 	    speechSynthesis.speak( this.voice );
+  // 		// }
+  // }      
 }
 
 
@@ -703,26 +793,26 @@ function chartObj() {
 	this.height = null;
 }
 
-chartObj.prototype.init = function ( el ) {
+chartObj.prototype.init = function (el){
 	this.element = el;
 	this.type = this.element.getAttribute("aria-charttype");
 	
 	// get chart title
 	var title = this.element.querySelector("[role='chart'] > [role='heading']");
-	if ( title ) {
+	if ( title){
 		this.label = title.textContent;
 	}
     
 	// find the dimensions of the chart area
 	var chartarea = this.element.querySelector("[role='chartarea']");
-	if ( chartarea ) {
+	if ( chartarea){
 		this.x = +chartarea.getAttribute("x");
 		this.y = +chartarea.getAttribute("y");
 		this.width = +chartarea.getAttribute("width");
 		this.height = +chartarea.getAttribute("height");
 	}
 	
-	if ( "pie" != this.type ) {
+	if ( "pie" != this.type){
 		// get chart axes
 		this.axes["x"] = new axisObj;
 		this.axes["x"].init( this.element, "x", "horizontal" )
@@ -749,7 +839,7 @@ chartObj.prototype.init = function ( el ) {
 	}
 }   
 
-chartObj.prototype.extractDataset = function ( datapoints ) {
+chartObj.prototype.extractDataset = function (datapoints){
 	var dataset = [];
 	dataset["values"] = [];
 
@@ -762,7 +852,7 @@ chartObj.prototype.extractDataset = function ( datapoints ) {
   };
 
 	// sort values
-	dataset["values"].sort( function(a, b) {
+	dataset["values"].sort( function (a, b) {
 	  return a - b;
 	}); 
 
@@ -776,7 +866,7 @@ chartObj.prototype.extractDataset = function ( datapoints ) {
 	dataset["range"] = dataset["high"] - dataset["low"];
 
 	// find sum
-	dataset["sum"] = dataset["values"].reduce( function(a, b) {
+	dataset["sum"] = dataset["values"].reduce( function (a, b) {
 	  return a + b;
 	}); 
 
@@ -785,7 +875,7 @@ chartObj.prototype.extractDataset = function ( datapoints ) {
 
 	// find median  
   var mid = Math.floor(dataset.length/2);
-  // if ( 1 == dataset.length%2 ) {
+  // if ( 1 == dataset.length%2){
   if (dataset.length % 2) {
   	dataset["median"] = dataset["values"][mid];
 	} else {
@@ -829,7 +919,7 @@ function datapointObj() {
 	this.labelElementText = null;
 }
 
-datapointObj.prototype.init = function ( el ) {
+datapointObj.prototype.init = function (el){
 	this.element = el;
 	
 	var datavalueEL = this.element.querySelector("[role='datavalue']");
@@ -860,7 +950,7 @@ function axisObj() {
 	this.labels = [];
 }
 
-axisObj.prototype.init = function ( chartEl, type, dir ) {
+axisObj.prototype.init = function (chartEl, type, dir){
 	this.element = chartEl.querySelector("[role='" + type + "axis']");
 	this.type = type;
 	this.direction = dir;
@@ -870,13 +960,13 @@ axisObj.prototype.init = function ( chartEl, type, dir ) {
 	
 	// get axis title
 	var title = chartEl.querySelector("[role='" + type + "axis'] > [role='heading']");
-	if ( title ) {
+	if ( title){
 		this.label = title.textContent;
 	}
 
 	// first extract all the axis labels
 	var axislabels = this.element.querySelectorAll("[role='axislabel']");
-	if ( axislabels.length ) {
+	if ( axislabels.length){
 		// var axisTexts = [];
 		// var axisValues = [];
 		for (var a = 0, aLen = axislabels.length; aLen > a; ++a) {
@@ -895,12 +985,12 @@ function legendObj() {
 	this.items = []; // each item has: element, label, list of referencing datapoints
 }
 
-legendObj.prototype.init = function ( el ) {
+legendObj.prototype.init = function (el){
 	this.element = el;
 	
 	// get legend title
 	var title = this.element.querySelector("[role='legend'] > [role='heading']");
-	if ( title ) {
+	if ( title){
 		this.label = title.textContent;
 	}
 	
@@ -920,10 +1010,10 @@ function legendItemObj() {
 	this.refs = []; // list of referencing datapoints
 }
 
-legendItemObj.prototype.init = function ( el ) {
+legendItemObj.prototype.init = function (el){
 	this.element = el;
 	var title = this.element.querySelector("[role='legenditem'] > text,[role='legenditem'] > title");
-	if ( title ) {
+	if ( title){
 		this.label = title.textContent;
 	}
 
@@ -936,13 +1026,13 @@ legendItemObj.prototype.init = function ( el ) {
 		
 		var ref = eachRef;
 		var role = eachRef.getAttribute("role");
-		while ( "datapoint" != role ) {
+		while ( "datapoint" != role){
 			ref = ref.parentNode;
 			role = ref.getAttribute("role");
 		}		
 
-		// if ( "datavalue" == role ) {
-		// 	while ( "datapoint" == role ) {
+		// if ( "datavalue" == role){
+		// 	while ( "datapoint" == role){
 		// 		ref = ref.parentNode;
 		// 	}		
 		// 	
@@ -1002,8 +1092,8 @@ function Sonifier() {
   this.svgns = "http://www.w3.org/2000/svg";
 }
 
-Sonifier.prototype.init = function ( svgroot, metaGroup, dataLine, 
-																		 x, y, width, height, xAxis, yAxis, xAxisPos, yAxisPos, color ) {	
+Sonifier.prototype.init = function (svgroot, metaGroup, dataLine, 
+																		 x, y, width, height, xAxis, yAxis, xAxisPos, yAxisPos, color){	
   this.svgroot = svgroot;
 	this.metaGroup = metaGroup;
 	this.dataLine = dataLine;
@@ -1068,7 +1158,7 @@ Sonifier.prototype.init = function ( svgroot, metaGroup, dataLine,
   this.metaGroup.addEventListener('mousemove', bind(this, this.trackPointer), false );
   // document.documentElement.addEventListener('click', this.toggleAudio, false );
 
-	if ( !this.isReady ) {
+	if ( !this.isReady){
 		// only register key listener on first initialization
 	  document.documentElement.addEventListener('keydown', bind(this, this.trackKeys), false );
 	}
@@ -1084,7 +1174,7 @@ Sonifier.prototype.init = function ( svgroot, metaGroup, dataLine,
 Sonifier.prototype.trackKeys = function (event) {
 	var key = event.keyIdentifier.toLowerCase();
   
-  switch ( key ) {
+  switch ( key){
     case "down":
     case "right":
       this.stepCursor( 1 );
@@ -1133,15 +1223,15 @@ Sonifier.prototype.trackKeys = function (event) {
 }   
 
 
-Sonifier.prototype.togglePlay = function ( forcePause ) {
+Sonifier.prototype.togglePlay = function (forcePause){
 	console.log("togglePlay")
-	if ( this.timer || forcePause ) {
+	if ( this.timer || forcePause){
 		this.stopPlay();
 	} else {
 	  this.isPlaying = true;
 		var t = this; 
 
-		this.timer = setInterval( function() { 
+		this.timer = setInterval( function () { 
 			t.coords.x += t.cursorDirection;
 		  t.updateCursor();
 		}, t.cursorSpeed);
@@ -1162,15 +1252,15 @@ Sonifier.prototype.resetPlay = function () {
 	this.setVolume( 0 );
 }   
 
-Sonifier.prototype.setPlayRate = function ( rateDelta ) { 
+Sonifier.prototype.setPlayRate = function (rateDelta){ 
 	this.cursorSpeed += rateDelta;
-	if ( this.timer ) {
+	if ( this.timer){
 		this.stopPlay();
 		this.togglePlay();
 	}
 }   
 
-Sonifier.prototype.stepCursor = function ( direction ) { 
+Sonifier.prototype.stepCursor = function (direction){ 
 	var x = parseFloat( this.cursorpoint.getAttribute( "cx" ) );
 	this.coords.x = x + direction;
 	// this.coords.y = 0;
@@ -1178,24 +1268,24 @@ Sonifier.prototype.stepCursor = function ( direction ) {
 }   
 
 Sonifier.prototype.setDirection = function () { 
-  if ( 1 == this.cursorDirection ) {
+  if ( 1 == this.cursorDirection){
 		this.cursorDirection = -1;
 	} else {
 		this.cursorDirection = 1;
 	}
 	
-	if ( !this.timer ) {
+	if ( !this.timer){
 		this.togglePlay();
 	}
 }   
 
 
-Sonifier.prototype.setRange = function ( xAxis, yAxis ) { 
+Sonifier.prototype.setRange = function (xAxis, yAxis){ 
   //this.oscillator.stop();
 }   
 
 Sonifier.prototype.trackPointer = function (event) { 
-	if ( this.cursor ) {
+	if ( this.cursor){
     this.coords.x = event.clientX;
     this.coords.y = event.clientY;
     this.coords = this.coords.matrixTransform( this.cursor.getScreenCTM().inverse() );			
@@ -1209,7 +1299,7 @@ Sonifier.prototype.updateCursor = function () {
   var x = Math.max( Math.min( this.maxx, this.coords.x ), this.minx );
 
 	if ( ( this.maxx == x && 1 == this.cursorDirection ) 
-		|| ( 0 == x && -1 == this.cursorDirection ) ) {
+		|| ( 0 == x && -1 == this.cursorDirection )){
 		this.stopPlay();
 	} else {
 	  var cursor_p1 = new Point2D(x, this.miny);
@@ -1226,7 +1316,7 @@ Sonifier.prototype.updateCursor = function () {
 			}
 			console.log(dataLineArray)
 			
-	    for (var vp in dataLineArray ) {
+	    for (var vp in dataLineArray){
 				if (typeof dataLineArray[vp] != 'function') { 
 		      var values = dataLineArray[vp].replace(/[A-Za-z]+/g, '').split(/[ ,]+/);
 		      this.dataLinePoints.push( 
@@ -1280,35 +1370,35 @@ Sonifier.prototype.updateCursor = function () {
 	
 	if ( this.axisX.pos == x 
 		|| this.axisX.chartMin == x
-		|| this.axisX.chartMax == x ) {
+		|| this.axisX.chartMax == x){
 			console.log("tick")
 			
 			//this.playTickmark(); /// buggy right now, doesn't turn off
 			
 			
 		// 	var msg = "";
-		// 	if (  this.axisX.pos == x ) {
+		// 	if (  this.axisX.pos == x){
 		// 		msg = "axis marker: " + x;
-		// 	} else if (  this.axisX.chartMin == x ) {
+		// 	} else if (  this.axisX.chartMin == x){
 		// 		msg = "min: " + x;
-		// 	}	else if (  this.axisX.chartMax == x ) {
+		// 	}	else if (  this.axisX.chartMax == x){
 		// 		msg = "max: " + x;
 		// 	}
 		// console.log(msg)
 	}
 }   
 
-Sonifier.prototype.positionCursor = function ( x, y, setLine ) { 
+Sonifier.prototype.positionCursor = function (x, y, setLine){ 
   this.cursorpoint.setAttribute( "cx", x );
   this.cursorpoint.setAttribute( "cy", y );
 
-	if ( setLine ) {
+	if ( setLine){
 	  // update cursor line
 	  this.cursor.setAttribute('d', "M" + x + "," + this.miny + " " + x + "," + this.maxy);
 	}
 }
 
-Sonifier.prototype.setDetune = function ( detune ) { 
+Sonifier.prototype.setDetune = function (detune){ 
   if (!this.oscillator) {
     this.audioContext = new AudioContext();
 
@@ -1340,14 +1430,14 @@ Sonifier.prototype.setDetune = function ( detune ) {
 	// oscillator.detune.value = Math.pow(2, 1/12) * 10; // Offset sound by 10 semitones
 }
 
-Sonifier.prototype.setVolume = function ( gain ) { 
+Sonifier.prototype.setVolume = function (gain){ 
 	if (this.volume) {
 	  this.volume.gain.value = gain;		
 	}
 }
 
-Sonifier.prototype.toggleVolume = function ( forceMute ) { 
-	if ( !this.isMute || forceMute ) {
+Sonifier.prototype.toggleVolume = function (forceMute){ 
+	if ( !this.isMute || forceMute){
 		this.isMute = true;
     this.volume.disconnect(this.audioContext.destination);
 	} else {
@@ -1377,26 +1467,26 @@ Sonifier.prototype.playTickmark = function () {
 	
 	/// buggy right now, doesn't turn off
 	var t = this; 
-	setTimeout( function() { 
+	setTimeout( function () { 
     t.tickTone.disconnect(t.tickContext.destination);
 	}, 100);
 }
 
 
-Sonifier.prototype.speak = function ( msg ) { 
-  if ( "undefined" != typeof speechSynthesis ) {
-	  if ( speechSynthesis.speaking ) {
+Sonifier.prototype.speak = function (msg){ 
+  if ( "undefined" != typeof speechSynthesis){
+	  if ( speechSynthesis.speaking){
 	    speechSynthesis.cancel();
 	  }
 	
-		if ( !msg ) {
+		if ( !msg){
 			msg = "x = " + this.axisX.scale( this.valuePoint.x );
 			msg += ", y = " + this.axisY.scale( this.valuePoint.y );
 		}
 		
 		var t = this;
 		t.toggleVolume( true );
-		if ( t.isPlaying ) {
+		if ( t.isPlaying){
 			t.togglePlay( true );
 		}
 
@@ -1404,9 +1494,9 @@ Sonifier.prototype.speak = function ( msg ) {
     voice.text = msg;
     voice.lang = 'en-US';
     voice.rate = 1.2;
-		voice.onend = function() { 
+		voice.onend = function () { 
 			t.toggleVolume(); 
-			if ( t.isPlaying ) {
+			if ( t.isPlaying){
 				t.togglePlay();
 			}
 		}
@@ -1415,7 +1505,7 @@ Sonifier.prototype.speak = function ( msg ) {
 }
 
 function Axis(min, max, pos, chartMin, chartMax) {
-	if ( arguments.length > 0 ) {
+	if ( arguments.length > 0){
 		this.min = min;
 		this.max = max;
 		this.pos = pos; // position of the axis line along the axis
@@ -1424,7 +1514,7 @@ function Axis(min, max, pos, chartMin, chartMax) {
 	}
 }
 
-Axis.prototype.scale = function( val ) {
+Axis.prototype.scale = function ( val){
 	var newVal = (val / ((this.chartMax - this.chartMin) / (this.max - this.min))) + this.min;
 	newVal = Math.round( newVal * 10 ) / 10;
 	return newVal;
@@ -1435,16 +1525,16 @@ Axis.prototype.scale = function( val ) {
 * Helper methods
 ****/
 
-Array.prototype.max = function() {
+Array.prototype.max = function () {
   return Math.max.apply(null, this)
 }
 
-Array.prototype.min = function() {
+Array.prototype.min = function () {
   return Math.min.apply(null, this)
 }
 
 function bind (scope, fn) {
-	return function() {
+	return function () {
 		return fn.apply( scope, arguments );
 	}
 }
@@ -1459,39 +1549,39 @@ function bind (scope, fn) {
 ******/
 
 function Point2D(x, y) {
-	if ( arguments.length > 0 ) {
+	if ( arguments.length > 0){
 		this.x = x;
 		this.y = y;
 	}
 }
 
 function Intersection(status) {
-	if ( arguments.length > 0 ) {
+	if ( arguments.length > 0){
 		this.init(status);
 	}
 }
 
-Intersection.prototype.init = function(status) {
+Intersection.prototype.init = function (status) {
 	this.status = status;
 	this.points = new Array();
 };
 
-Intersection.prototype.appendPoints = function(points) {
+Intersection.prototype.appendPoints = function (points) {
 	this.points = this.points.concat(points);
 };
 
-Intersection.intersectLineLine = function(a1, a2, b1, b2) {
+Intersection.intersectLineLine = function (a1, a2, b1, b2) {
 	var result;
 
 	var ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
 	var ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
 	var u_b  = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
 
-	if ( u_b != 0 ) {
+	if ( u_b != 0){
 		var ua = ua_t / u_b;
 		var ub = ub_t / u_b;
 
-		if ( 0 <= ua && ua <= 1 && 0 <= ub && ub <= 1 ) {
+		if ( 0 <= ua && ua <= 1 && 0 <= ub && ub <= 1){
 			result = new Intersection("Intersection");
 			result.points.push(
 				new Point2D(
@@ -1503,7 +1593,7 @@ Intersection.intersectLineLine = function(a1, a2, b1, b2) {
 			result = new Intersection("No Intersection");
 		}
 	} else {
-		if ( ua_t == 0 || ub_t == 0 ) {
+		if ( ua_t == 0 || ub_t == 0){
 			result = new Intersection("Coincident");
 		} else {
 			result = new Intersection("Parallel");
@@ -1513,11 +1603,11 @@ Intersection.intersectLineLine = function(a1, a2, b1, b2) {
 	return result;
 };
 
-Intersection.intersectLinePolygon = function(a1, a2, points) {
+Intersection.intersectLinePolygon = function (a1, a2, points) {
 	var result = new Intersection("No Intersection");
 	var length = points.length;
 
-	for ( var i = 0; i < length; ++i ) {
+	for ( var i = 0; i < length; ++i){
 		var b1 = points[i];
 		var b2 = points[(i+1) % length];
 		var inter = Intersection.intersectLineLine(a1, a2, b1, b2);
@@ -1525,7 +1615,7 @@ Intersection.intersectLinePolygon = function(a1, a2, points) {
 		result.appendPoints(inter.points);
 	}
 
-	if ( result.points.length > 0 ) {
+	if ( result.points.length > 0){
 		result.status = "Intersection";
 	}
 	
