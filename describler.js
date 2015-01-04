@@ -45,11 +45,8 @@ describlerObj.prototype.init = function (root){
   this.focusBox = document.createElementNS(this.svgns, 'rect');
   this.focusBox.setAttribute("rx", this.padding/2 );
   this.focusBox.setAttribute("ry", this.padding/2 );
-  this.focusBox.setAttribute("fill", "none");
-  this.focusBox.setAttribute("stroke", "cornflowerblue");
-  this.focusBox.setAttribute("stroke-opacity", "0.6");
-  this.focusBox.setAttribute("stroke-width", this.strokewidth );
-  this.focusBox.setAttribute("stroke-linejoin", "round");
+  this.focusBox.setAttribute("style", "fill:none; stroke:cornflowerblue; stroke-linejoin:round; stroke-opacity:0.6; stroke-width:" 
+                                      + this.strokewidth + "px;");
   this.root.appendChild( this.focusBox );
 
   this.root.addEventListener('click', bind(this, this.click), false );
