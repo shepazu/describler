@@ -253,7 +253,7 @@
       var svgContent = event.target.result;
       if ( !svgContent ) { 
         // otherwise use XHR file
-        svgContent = this.response;
+        svgContent = event.target.response;
       }
 
       if ( svgContent ) { 
