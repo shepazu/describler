@@ -8,33 +8,22 @@ function showEvent(event) {
   console.log(event.type)
 }
 
-function describlerObj() {
-    this.root = null;
-
-    // focus properties
-    this.focusList = [];
-    this.focusIndex = 0;
-    this.focusBox = null;
-    this.activeElement = null;
-    this.padding = 0;
-    this.strokewidth = 0;
-    this.navDirection = 0;
-    this.options = [];
-
-    // chart properties
-    this.charts = [];
-
-    // voice and sonification properties
-    this.speeches = [];
-    // this.voice = new SpeechSynthesisUtterance();
-    this.sonifier = null;
-
-    // constants
-  this.svgns = "http://www.w3.org/2000/svg";
-}
-
-describlerObj.prototype.init = function (root){
+function describlerObj(root) {
   this.root = root;
+
+  // chart properties
+  this.charts = [];
+
+  // voice and sonification properties
+  this.speeches = [];
+  this.options = [];
+
+  // this.voice = new SpeechSynthesisUtterance();
+  this.sonifier = null;
+
+  // constants
+  this.svgns = "http://www.w3.org/2000/svg";
+
 
   // find appropriate sizes
   var vb = root.getAttribute("viewBox").split(" ");
@@ -42,24 +31,34 @@ describlerObj.prototype.init = function (root){
   this.padding = basesize;
   this.strokewidth = basesize / 2;
   
-  this.focusBox = document.createElementNS(this.svgns, 'rect');
+  // focus properties
+  this.focusIndex = 0;
+  this.activeElement = null;
+  this.padding = 0;
+  this.strokewidth = 0;
+  this.navDirection = 0;
+
+  // create a list of all focusable elements, including the root
+  this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
+
+  // create focus box
+  this.focusBox = document.createElementNS(this.svgns, "rect");
   this.focusBox.setAttribute("rx", this.padding/2 );
   this.focusBox.setAttribute("ry", this.padding/2 );
-  this.focusBox.setAttribute("style", "fill:none; stroke:cornflowerblue; stroke-linejoin:round; stroke-opacity:0.6; stroke-width:" 
-                                      + this.strokewidth + "px;");
+  var style = "fill:none; stroke:cornflowerblue; stroke-linejoin:round; stroke-opacity:0.6; stroke-width:" 
+            + this.strokewidth + "px; ";
+  this.focusBox.setAttribute("style", style);
   this.root.appendChild( this.focusBox );
 
-  this.root.addEventListener('click', bind(this, this.click), false );
-  this.root.addEventListener('keydown', bind(this, this.trackKeys), false );
+  this.root.addEventListener("click", bind(this, this.click), false );
+  this.root.addEventListener("keydown", bind(this, this.trackKeys), false );
 
-	// create a list of all focusable elements, including the root
-  this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
 
   console.log( this.focusList );
 	this.createModel();
 	
 	this.sonifier = new Sonifier();
-	this.metaGroup = document.createElementNS(this.svgns, 'g');
+	this.metaGroup = document.createElementNS(this.svgns, "g");
   this.metaGroup.setAttribute("id", "describler-metadata" );
   this.root.appendChild( this.metaGroup );
 }
@@ -306,7 +305,7 @@ describlerObj.prototype.getFraction = function (decimal){
 			fraction = numerator / denominator;
 		}
 
-		msg = numerator + '/' + denominator;
+		msg = numerator + "/" + denominator;
 		if ( numerator > denominator){
 			var number = parseInt( numerator / denominator );
 			var mod = numerator % denominator;
@@ -320,7 +319,7 @@ describlerObj.prototype.getFraction = function (decimal){
 			}
 			*/
 			
-			msg = number.toString() + " " + mod + '/' + denominator;
+			msg = number.toString() + " " + mod + "/" + denominator;
 			if ( 0 == mod){
 				msg = number.toString() + " times ";
 			}
@@ -355,9 +354,9 @@ describlerObj.prototype.convertNumberToWords = function (number){
 						||(ns.length==2&&(ns[0]!="0"||ns[1]!="0"))||(ns.length==1&&ns[0]!="0"))
 						?"<span class='magnitude'>"+names[3][n]+"</span> ":""));
 	}, input;
-	document.getElementById('input').addEventListener('keyup', function (){
-	document.getElementById('output').innerHTML = to_words(this.value.replace(/[^0-9]/g, '')
-					.split('').reverse(), 0);
+	document.getElementById("input").addEventListener("keyup", function (){
+	document.getElementById("output").innerHTML = to_words(this.value.replace(/[^0-9]/g, "")
+					.split("").reverse(), 0);
 	}, false);
 }
 
@@ -375,7 +374,8 @@ describlerObj.prototype.getInfo = function (option){
     this.options = [
       "Press 1 for chart statistics",
       "Press 2 for datapoints from lowest to highest",
-      "Press 3 for datapoints from highest to lowest"
+      "Press 3 for datapoints from highest to lowest",
+      "Press 4 for trend sonification"
     ];
 
 		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
@@ -424,6 +424,12 @@ describlerObj.prototype.getInfo = function (option){
   							var datapoint = datasort[dp];
   							this.speeches.push( datapoint.label );
   						}
+            } else if ( 4 == option ){
+              // cancel speech  
+              this.speeches.length = 0;
+
+              this.sonify();
+              this.sonifier.togglePlay();
   					}
 					}
 				}
@@ -680,7 +686,7 @@ describlerObj.prototype.getInfo = function (option){
 describlerObj.prototype.speak = function () {
   var msg = this.speeches.join(". \n");
    // check Speech Synthesis support
-  if ('speechSynthesis' in window) {
+  if ("speechSynthesis" in window) {
     // cancel previous calls to speech API, 
     //  so UI is faster, more responsive, and less verbose
     if ( speechSynthesis.speaking ){
@@ -743,7 +749,7 @@ describlerObj.prototype.sonify = function () {
 		  console.log(datalinePoints);
 
 		  // draw line plot
-		  var dataline = document.createElementNS(this.svgns, 'polyline');
+		  var dataline = document.createElementNS(this.svgns, "polyline");
 		  //line.setAttribute("id", dataset);
 		  dataline.setAttribute("id", "dataLine");
 		  dataline.setAttribute("role", "trend-line");
@@ -1074,7 +1080,7 @@ function Sonifier() {
   this.isPlaying = false;
   this.isReady = false;
   this.timer = null;
-  this.cursorSpeed = 25;
+  this.cursorSpeed = 15; // 25
   this.cursorDirection = 1;
   this.cursorColor = "white";
   this.cursorIntersect = false;
@@ -1116,7 +1122,7 @@ Sonifier.prototype.init = function (svgroot, metaGroup, dataLine,
 	this.dataLinePoints = null;
 
 	// // create frame, debugging
-	//   var frame = document.createElementNS(this.svgns, 'path');
+	//   var frame = document.createElementNS(this.svgns, "path");
 	//   frame.setAttribute("d", "M" + this.minx + "," + this.miny 
 	// 															 + " " + this.maxx + "," + this.miny
 	// 															 + " " + this.maxx + "," + this.maxy
@@ -1129,7 +1135,7 @@ Sonifier.prototype.init = function (svgroot, metaGroup, dataLine,
 
 
 	// create cursor line and point
-  this.cursor = document.createElementNS(this.svgns, 'path');
+  this.cursor = document.createElementNS(this.svgns, "path");
   this.cursor.setAttribute("id", "cursor");
   this.cursor.setAttribute("d", "M" + this.minx + "," + this.miny + " " + this.minx + "," + this.maxy);
   // this.cursor.setAttribute("d", "M0,0 0," + this.maxy);
@@ -1152,12 +1158,12 @@ Sonifier.prototype.init = function (svgroot, metaGroup, dataLine,
   this.metaGroup.appendChild( this.cursorpoint );
 
 
-  this.metaGroup.addEventListener('mousemove', bind(this, this.trackPointer), false );
-  // document.documentElement.addEventListener('click', this.toggleAudio, false );
+  this.metaGroup.addEventListener("mousemove", bind(this, this.trackPointer), false );
+  // document.documentElement.addEventListener("click", this.toggleAudio, false );
 
 	if ( !this.isReady){
 		// only register key listener on first initialization
-	  document.documentElement.addEventListener('keydown', bind(this, this.trackKeys), false );
+	  document.documentElement.addEventListener("keydown", bind(this, this.trackKeys), false );
 	}
 	
 	// indicate first initialization
@@ -1306,7 +1312,7 @@ Sonifier.prototype.updateCursor = function () {
 	    this.dataLinePoints = [];
 	    var dataLineArray = null;
 			if ("path" == this.dataLine.localName) {
-				dataLineArray = this.dataLine.getAttribute("d").split('L');
+				dataLineArray = this.dataLine.getAttribute("d").split("L");
 			} else if ("polyline" == this.dataLine.localName || "polygon" == this.dataLine.localName) {
 				dataLineArray = this.dataLine.getAttribute("points").split(" ");
 				// dataLineArray = 
@@ -1314,8 +1320,8 @@ Sonifier.prototype.updateCursor = function () {
 			console.log(dataLineArray)
 			
 	    for (var vp in dataLineArray){
-				if (typeof dataLineArray[vp] != 'function') { 
-		      var values = dataLineArray[vp].replace(/[A-Za-z]+/g, '').split(/[ ,]+/);
+				if ("function" != typeof dataLineArray[vp]) { 
+		      var values = dataLineArray[vp].replace(/[A-Za-z]+/g, "").split(/[ ,]+/);
 		      this.dataLinePoints.push( 
 						new Point2D( 
 							parseFloat(values[0]), 
@@ -1327,7 +1333,7 @@ Sonifier.prototype.updateCursor = function () {
 	  }
 
 	  // update cursor line
-	  this.cursor.setAttribute('d', "M" + x + "," + this.miny + " " + x + "," + this.maxy);
+	  this.cursor.setAttribute("d", "M" + x + "," + this.miny + " " + x + "," + this.maxy);
 
 	  // find intersection
 	  var intersections = Intersection.intersectLinePolygon(
@@ -1391,7 +1397,7 @@ Sonifier.prototype.positionCursor = function (x, y, setLine){
 
 	if ( setLine){
 	  // update cursor line
-	  this.cursor.setAttribute('d', "M" + x + "," + this.miny + " " + x + "," + this.maxy);
+	  this.cursor.setAttribute("d", "M" + x + "," + this.miny + " " + x + "," + this.maxy);
 	}
 }
 
@@ -1412,8 +1418,8 @@ Sonifier.prototype.setDetune = function (detune){
 
 		this.panner = this.audioContext.createPanner();
     this.volume.connect(this.panner);
-		this.panner.panningModel = 'equalpower';
-		this.panner.distanceModel = 'exponential';
+		this.panner.panningModel = "equalpower";
+		this.panner.distanceModel = "exponential";
 		// this.panner.refDistance = 1000;
 		this.panner.coneOuterGain = 1;
 		this.panner.coneOuterAngle = 180;
@@ -1489,7 +1495,7 @@ Sonifier.prototype.speak = function (msg){
 
     var voice = new SpeechSynthesisUtterance();
     voice.text = msg;
-    voice.lang = 'en-US';
+    voice.lang = "en-US";
     voice.rate = 1.2;
 		voice.onend = function () { 
 			t.toggleVolume(); 

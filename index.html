@@ -4,15 +4,14 @@
   <meta charset="utf-8">
   <title>Describler</title>
   <link rel="shortcut icon" href="favicon.ico">
-  <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
   <style> 
     @font-face {
-      font-family: 'Galberik';
-      src: url('assets/Galberik.eot');
-      src: local('☺'), 
-        url('assets/Galberik.woff') format('woff'), 
-        url('assets/Galberik.ttf') format('truetype'), 
-        url('assets/Galberik.svg') format('svg');
+      font-family: "Galberik";
+      src: url("assets/Galberik.eot");
+      src: local("☺"), 
+        url("assets/Galberik.woff") format("woff"), 
+        url("assets/Galberik.ttf") format("truetype"), 
+        url("assets/Galberik.svg") format("svg");
       font-weight: normal;
       font-style: normal;
     }
@@ -25,7 +24,7 @@
     }
 
     h1 {
-      font-family: 'Galberik', cursive;      
+      font-family: "Galberik", cursive;      
       font-style: italic;
       font-weight: bold;
       text-transform: lowercase;
@@ -49,13 +48,17 @@
       background-image: url(assets/pixel_weave.png);
       border-radius: 3px;
       box-shadow: inset 0 0 10px #333;
-      padding: 1em
+      padding: 0.5em;
+      margin: 0;
+      /*padding: 0;*/
     }
 
     section#controls {
       float: left;
       width: 20%;
-      margin: 1em;
+/*      margin: 0 1em 0 0;
+      padding: 0;
+      margin: 0 !important;*/
     }
 
     article#display-area {
@@ -71,41 +74,28 @@
 
     .upload {
       position: relative;
+      cursor: pointer;
     }
 
-    .upload input {
-      position: absolute;
-      top: 0;
-      right: 0;
-      font-size: 1em;
-      opacity: 0;
-      cursor: pointer;
-      width: 14em;
-    }
+      .upload input {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 1em;
+        opacity: 0;
+        cursor: pointer;
+        width: 14em;
+      }
 
-    select {
-      width: 14em;
-      padding: 0.25em;
-      height: 2em;      
-      border-radius: 10em;
-/*      margin: 0.5em 0 0.5em 0;
-      font-size: 1em;
-      width: 10em;
-      height: 2em;      
-      border-radius: 1em;
-      color: white;
-      background-color: hsl(31, 93%, 54%);
-      font-size: 1em;
-      cursor: pointer;
-      width: 14em;
-      color: #fef4e9;
-      border: solid 1px #da7c0c;
-      background: hsl(31, 93%, 54%);
-*/      
-    }
+      select {
+        width: 14em;
+        padding: 0.25em;
+        height: 2em;      
+        border-radius: 10em;     
+      }
 
     .button, button {
-      font-family: 'icomoon', 'Overlock', sans-serif;
+      font-family: "icomoon", "Overlock", sans-serif;
       font-size: 1em;
       display: inline-block;
       margin: 0.15em;
@@ -149,13 +139,239 @@
         color: #fcd3a5;
         background: linear-gradient(top, #f47a20 35%, #faa51a 100%)
       }
+
+    .download {
+      color: hsl(284, 65%, 91%);
+      border: solid 1px hsl(283, 100%, 32%);
+      background: hsl(282, 100%, 40%); /* Old browsers */
+      background: linear-gradient(top, hsl(282, 100%, 47%) 35%, hsl(282, 100%, 32%) 100%)
+    }      
+     
+      .download:hover {
+        background: hsl(282, 100%, 34%);
+        background: linear-gradient(top, hsl(282, 100%, 40%) 35%, hsl(282, 100%, 28%) 100%)
+      }
       
+      .download:active {
+        color: hsl(282, 100%, 47%);
+        background: linear-gradient(top, hsl(282, 100%, 32%) 35%, hsl(282, 100%, 47%) 100%)
+      }      
 
 
+    section#info {
+      margin: 0.5em;
+      padding: 0.5em;
+      background-color: whitesmoke;
+      width: 10em;
+      box-shadow: 3px 3px 5px 6px #ccc;
+    }  
+      
+      output {
+        display: block;
+        font-style: italic;
+      }
   </style>
 	
 	<script src="describler.js"> </script>
-	
+  <script defer>
+    window.onload = function () {
+      var app = new appObj();
+    }
+
+    // window.onload = new appObj();
+    // var app = new appObj();
+
+    function appObj() {
+      this.svgroot = null;
+      this.describler = null;
+
+      this.file = null;
+
+      this.displayArea = document.getElementById( "display-area" );
+      this.downloadLink = document.getElementById( "download-button" );
+      this.selectFileButton = document.getElementById( "select_file-button" );
+      this.uploadFileButton = document.getElementById( "upload_file-button" );
+      this.codeView = document.querySelector("#code-view code");
+
+      this.lang = "en-US";
+
+      this.sampleList = [
+        "aria-bar-chart.svg",
+        "aria-pie-chart.svg",
+        "barchart-labels.svg",
+        "barchart-text-only.svg",
+        "simple-car.svg"
+      ];
+   
+
+      // constants
+      this.svgns = "http://www.w3.org/2000/svg";
+      this.xlinkns = "http://www.w3.org/1999/xlink";
+
+      /*
+      // initialize controls
+      */
+
+      // populate sample file list dropdown
+      for(var i = 0; i < this.sampleList.length; i++) {
+        var option = this.sampleList[i];
+        var optionEl = document.createElement("option");
+        optionEl.textContent = (i + 1) + ". " + option;
+        optionEl.value = option;
+        this.selectFileButton.appendChild(optionEl);
+      }
+
+      this.selectFileButton.addEventListener("change", bind(this, this.loadFileFromServer), false);
+      this.uploadFileButton.addEventListener("change", bind(this, this.uploadFile), false);
+    }
+
+    appObj.prototype.loadFileFromServer = function (){
+      this.file = {
+        "name": event.target.value
+      }
+
+      var xhr = new XMLHttpRequest;
+      xhr.open("GET", "samples/" + this.file.name);
+      xhr.onload = bind(this, this.insertFile);;
+      // xhr.onload = this.insertFile;
+      xhr.send()
+    }
+
+    appObj.prototype.uploadFile = function (event){
+      this.file = event.target.files[0]; // FileList object
+
+      // only allow SVG files
+      if ("image/svg+xml" == this.file.type) {
+        var reader = new FileReader();
+        reader.readAsText(this.file);
+        reader.onload = bind(this, this.insertFile);
+      }
+    }
+
+    appObj.prototype.insertFile = function (event){
+      // try to use FileReader file
+      var svgContent = event.target.result;
+      if ( !svgContent ) { 
+        // otherwise use XHR file
+        svgContent = this.response;
+      }
+
+      if ( svgContent ) { 
+        var fileSize = (this.file.size ? this.file.size : "n/a");
+        var lastMod = (this.file.lastModifiedDate ? this.file.lastModifiedDate.toLocaleDateString() : "n/a");
+        this.setFileInfo( this.file.name, fileSize, lastMod );
+
+        // strip off XML prolog 
+        var svgStart = svgContent.indexOf("<svg");
+        var prolog = svgContent.substring(0, (svgStart - 1));
+        svgContent = svgContent.substring( svgStart );
+        
+        // insert SVG file into HTML page
+        this.displayArea.innerHTML = svgContent;
+        this.svgroot = this.displayArea.firstElementChild;
+
+        // initialize download link
+        this.createSaveLink( svgContent );
+        // this.createSaveLink( this.displayArea.innerHTML );
+
+        // optimizations
+        this.setScalability( this.svgroot );
+        
+        this.lang = "en-US";
+        var langAttr = this.svgroot.getAttribute("lang");
+        if (langAttr) {
+          this.lang = langAttr;
+        }
+
+        // write source code to lightbox
+        this.writeSource();
+
+        // invoke screenreader
+        this.describler = new describlerObj(this.svgroot); 
+      }
+    }
+
+    appObj.prototype.setFileInfo = function ( name, filesize, lastMod ){
+        document.getElementById("file-name").innerHTML = "<strong title='last modified: " 
+          + lastMod
+          + "''>" + escape(name) + "</strong>";
+        document.getElementById("filesize").textContent = filesize;
+    } 
+
+    appObj.prototype.createSaveLink = function ( svgContent ) {
+      if ( svgContent && this.file ) {
+        // uses HTML5 features: the ‘Blob’ object and the ‘download’ attribute of the <a> element 
+        var blob = new Blob([ svgContent], {type:"image/svg+xml"});
+        this.downloadLink.download = this.file.name.replace(".svg", "-svgax.svg");
+        this.downloadLink.href = window.URL.createObjectURL(blob);
+
+        document.getElementById("new-filesize").textContent = "(revised: " + this.byteSized( blob.size ) + ")";        
+      }
+    } 
+
+    appObj.prototype.setScalability = function ( svgEl ) {
+      var vb = svgEl.getAttribute("viewBox");
+      
+      var x = parseFloat( svgEl.getAttribute("x") );
+      x = isNaN( x ) ? 0 : x;
+
+      var y = parseFloat( svgEl.getAttribute("y") );
+      y = isNaN( y ) ? 0 : y;
+      
+      var w = parseFloat( svgEl.getAttribute("width") );
+      w = isNaN( w ) ? 0 : w;
+
+      var h = parseFloat( svgEl.getAttribute("height") );
+      h = isNaN( h ) ? 0 : h;
+
+      var newVB = x + " " + y + " " + w + " " + h;
+      if ( 0 == w || 0 == h ) {
+        // if width and height not set, use bounding box of SVG contents
+        var bbox = svgEl.getBBox();
+        newVB = bbox.x + " " + bbox.y + " " + bbox.width + " " + bbox.height;
+      }
+
+      svgEl.setAttribute("width", "100%" );
+      svgEl.setAttribute("height", "100%" );
+      
+      var vbArray = vb.split(" ");
+
+      if ( !vb || ( w == vbArray[2] && h == vbArray[3] ) ) {
+        svgEl.setAttribute("viewBox", newVB );
+      }
+    } 
+
+    appObj.prototype.byteSized = function ( bytes ) {
+      var units = ["bytes", "KB", "MB", "GB", "TB"];
+      var size = ";"
+      if ( 0 == bytes) {
+        size = "0 Bytes"
+      } else {
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        if (0 == i) {
+          size = bytes + " " + units[i];
+        } else {
+          size = (bytes / Math.pow(1024, i)).toFixed(1) + " " + units[i];;
+        } 
+      }
+      return size;
+    }
+    
+    appObj.prototype.optimize = function ( str, decimals ) {
+      // str = str.replace()
+      // \d+(\.\d)(\d)(\d+)
+      
+      // result = str.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+    }
+
+
+    function bind (scope, fn) {
+      return function () {
+        return fn.apply( scope, arguments );
+      }
+    }
+
+  </script>	
 </head>
 <body>
 
@@ -165,41 +381,20 @@
       <section id="controls"> 
         <div class="upload button icon-upload">
             <span>Upload an SVG file…</span>
-            <input type="file" id="fileButton" accept="image/svg+xml">
+            <input type="file" id="upload_file-button" accept="image/svg+xml">
         </div>
-        <select id="selectFile" class="upload button">
+        <select id="select_file-button" class="upload button">
           <option>Select a file:</option>
         </select>
 
-
-        <!-- <a href="#code-view" title="View code" class="button icon icon-view-source image-action"></a>      -->
-        <!-- <a href="#image-view-new" title="Show large image" class="button icon icon-zoom-in image-action"></a>     
-       
-       <section class="lightbox" id="image-view-new">
-         <p class="close"><a href="#" title="Close dialog"> </a></p>
-         <div id="display-area" onclick="showListItem(event)">
-           <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 70 130">
-             <title>Describler Logo</title>
-             <desc>Three purple concentric arcs, reminiscent of a capital letter 'D' and of the icon for audio, radiating from a purple dot in the center</desc>              
-             <defs>
-               <radialGradient id="radgrad"
-               cx="10" cy="65" r="7" spreadMethod="reflect" gradientUnits="userSpaceOnUse">
-                 <stop offset="0" stop-color="hsl(282, 100%, 40%)" stop-opacity="0.3"/>
-                 <stop offset="22.5" stop-color="hsl(282, 100%, 40%)" stop-opacity="1"/>
-               </radialGradient>
-             </defs>          
-             <path stroke-width="8" stroke="url(#radgrad)" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M10,16 A48,48 0 1,1 10,114 M10,100 A30,30 0 1,0 10,30 M10,44 A16,16 0 1,1 10,86"/>
-             <circle cx="10" cy="65" r="7" fill="url(#radgrad)" />  
-           </svg>
-         </div>
-      </section>
-
-           -->
-
-        <section id="info">
-          <span id="file-name"> </span>
+       <section id="info">
+          <output id="file-name"> </output>
           <output id="filesize"> </output>
+          <output id="new-filesize"> </output>
         </section>
+
+        <a id="download-button" class="button icon-download download" href="#"><span>Download…</span></a>     
+
        </section>
     
       <article id="display-area">
@@ -231,193 +426,6 @@
       </article>
     </section>
   </section>
-
-  <section id="lightboxes">
-  	<section class="lightbox" id="code-view">
-  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
-  		<code>
-  		</code>
-  	</section>
-
-  	<section class="lightbox" id="audio-help">
-  	  <p class="close"><a href="#" title="Close dialog"> </a></p>
-  		<article>
-  			<h2>About Audio Preview</h2>
-  			<p>The audio preview of your SVG represents how a <i>screenreader</i> –an accessibility application for the visually impaired that speaks the contents of a document aloud, using a text-to-speech engine– will interpret your SVG file.</p>
-  			<p>The audible portions of your SVG document are the text contents, including that of the <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, <code>&lt;textPath&gt;</code> elements, as well as the <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code> metadata elements that you set as children of your graphics and grouping elements to help describe them.</p>
-  			<p>Describler uses the <a href="" target="_blank">Web Speech API</a> to voice your SVG. This is an  API still under development, though it has experimental implementations in Google Chrome (the Blink web engine) and some WebKit browsers. If you want to use this feature of Describler in Google Chrome, you must first enable it:</p>
-  			  <ol>
-  			    <li>Open a new browser tab</li>
-  			    <li>Navigate to Chrome's option flag for the “Enable experimental WebKit features”, at this URL: <br><code>chrome://flags/#enable-experimental-webkit-features</code></li>
-  			    <li>Select “Enable”</li>
-  			    <li>Restart your browser</li>
-  			  </ol>
-  			  <p>In the future, it's expected that the Web Speech API will be available in multiple browsers without opting into flags.</p>
-  		</article>
-  	</section>
-  </section>
-  
-  
-  
-
-  <script>
-    var eli = 0;
-    var svgEls = null;
-    var filename = null;
-    var svgRoot = null;
-    var svgns = "http://www.w3.org/2000/svg";
-    var xlinkns = "http://www.w3.org/1999/xlink";
-    var lang = "en-US";
-
-    var sampleList = [
-      "aria-bar-chart.svg",
-      "aria-pie-chart.svg",
-      "barchart-labels.svg",
-      "barchart-text-only.svg",
-      "simple-car.svg"
-    ];
-    
-    var hiliter = null;
-
-    window.onload = function () {
-      var select = document.getElementById("selectFile");
-      for(var i = 0; i < sampleList.length; i++) {
-        var option = sampleList[i];
-        var el = document.createElement("option");
-        el.textContent = (i + 1) + ". " + option;
-        el.value = option;
-        select.appendChild(el);
-      }
-      select.addEventListener("change", loadFileFromServer, false);
-    }
-
-    function loadFileFromServer( e ){
-      // console.log(event.target.value)
-      xhr("samples/" + e.target.value, insertFile)
-    }
-
-    function xhr( url, callback ){
-      var xhr = new XMLHttpRequest;
-      xhr.open('GET', url);
-      xhr.onload = callback;
-      xhr.send()
-    }
-
-    function uploadFile(e) {
-      var file = e.target.files[0]; // FileList object
-
-      // Only process image files.
-      if ("image/svg+xml" == file.type) {
-        // filename = file.name;
-        var reader = new FileReader();
-        reader.onload = insertFile;
-        reader.readAsText(file);
-
-        document.getElementById('file-name').innerHTML = '<strong title="last modified: ' 
-          + (file.lastModifiedDate ? file.lastModifiedDate.toLocaleDateString() : 'n/a')
-          + '">' + escape(file.name) + '</strong>';
-
-        document.getElementById('filesize').innerHTML = file.size + ' bytes';
-      }
-    }   
-
-    function insertFile( e ){
-      // try to use FileReader file
-      var svgContent = e.target.result;
-      if ( !svgContent ) { 
-        // otherwise use XHR file
-        svgContent = this.response;
-      }
-
-      var displayArea = document.getElementById( "display-area" );
-
-      // strip off XML prolog 
-      var svgStart = svgContent.indexOf("<svg");
-      var prolog = svgContent.substring(0, (svgStart - 1));
-      svgContent = svgContent.substring( svgStart );
-      
-      // insert SVG file into HTML page
-      displayArea.innerHTML = (svgContent);
-      svgRoot = displayArea.firstElementChild;
-      
-      setScalability( displayArea.firstElementChild );
-      
-      var langAttr = svgRoot.getAttribute("lang");
-      if (langAttr) {
-        lang = langAttr;
-      } else {
-        lang = "en-US";
-      }
-      
-      // invoke screenreader
-      var describler = new describlerObj(); 
-      describler.init( svgRoot );           
-    } 
-
-    function setScalability( el ){
-      var vb = el.getAttribute("viewBox");
-      
-      var x = parseFloat( el.getAttribute("x") );
-      x = isNaN( x ) ? 0 : x;
-
-      var y = parseFloat( el.getAttribute("y") );
-      y = isNaN( y ) ? 0 : y;
-      
-      var w = parseFloat( el.getAttribute("width") );
-      w = isNaN( w ) ? 0 : w;
-
-      var h = parseFloat( el.getAttribute("height") );
-      h = isNaN( h ) ? 0 : h;
-
-      var newVB = x + " " + y + " " + w + " " + h;
-      if ( 0 == w || 0 == h ) {
-        // if width and height not set, use bounding box of SVG contents
-        var bbox = el.getBBox();
-        newVB = bbox.x + " " + bbox.y + " " + bbox.width + " " + bbox.height;
-      }
-
-      el.setAttribute("width", "100%" );
-      el.setAttribute("height", "100%" );
-      
-      var vbArray = vb.split(" ");
-
-      if ( !vb || ( w == vbArray[2] && h == vbArray[3] ) ) {
-        el.setAttribute("viewBox", newVB );
-      }
-    }
-
- 
-    function byteSized( bytes ) {
-      var units = ['bytes', 'KB', 'MB', 'GB', 'TB'];
-      var size = ";"
-      if ( 0 == bytes) {
-        size = "0 Bytes"
-      } else {
-        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        if (0 == i) {
-          size = bytes + ' ' + units[i];
-        } else {
-          size = (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];;
-        } 
-      }
-      return size;
-    }
-    
-    
-    function optimize( str, decimals ) {
-      // str = str.replace()
-      // \d+(\.\d)(\d)(\d+)
-      
-      // result = str.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
-    }
-
-    
-    // document.getElementById('list').addEventListener('mouseover', hilite, false);
-    document.getElementById('fileButton').addEventListener('change', uploadFile, false);
-    // window.onload = init;
-  </script>
-
-
 
 </body>
 </html>

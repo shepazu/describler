@@ -3,8 +3,8 @@
      width="100%" height="100%" viewBox="0 0 500 380" 
      role="chart" aria-charttype="pie" tabindex="0" id="root">
 
-  <!-- <title role="heading">Pie Chart of Relative Happiness</title> -->
-  <text role="heading" tabindex="0" x="250" y="365" text-anchor="middle">Are You Happy?</text>
+  <title>Pie Chart of Relative Happiness</title>
+  <text role="heading" tabindex="0" x="175" y="365" text-anchor="middle">Are You Happy?</text>
   <style type="text/css"><![CDATA[
     .happy {
       fill: rgb(152, 52, 28);
@@ -20,6 +20,7 @@
     
     *[role="legend"] {
       stroke: gray;
+      stroke-width: 2px;
     }
     
     *[role="datapoint"] {
@@ -41,9 +42,7 @@
     
 
   ]]></style>
-  
-  <!-- <rect id="frame" x="0" y="0" width="500" height="380" fill="none" stroke="blue" /> -->
-  
+    
   <g id="pie-chart" role="dataset"
      transform="translate(-45,-20)">
     <path id="slice_1" role="datapoint" tabindex="0" 
