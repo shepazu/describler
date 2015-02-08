@@ -15,6 +15,17 @@
       font-weight: normal;
       font-style: normal;
     }
+    
+    @font-face {
+      font-family: "Overlock";
+      src: url("assets/Overlock.eot");
+      src: local("☺"), 
+        url("assets/Overlock.woff") format("woff"), 
+        url("assets/Overlock.ttf") format("truetype"), 
+        url("assets/Overlock.svg") format("svg");
+      font-weight: normal;
+      font-style: normal;
+    }    
 
     body {
       margin: 0;
@@ -39,12 +50,14 @@
     }
 
     section#app {
-      font-size: 18px;
+      background: #303030;
       background-image: url(assets/tweed.png);
+      font-size: 18px;
       padding: 0.1em 1em 2em 1em;
     }
 
     section#content {
+      background: whitesmoke;
       background-image: url(assets/pixel_weave.png);
       border-radius: 3px;
       box-shadow: inset 0 0 10px #333;
@@ -61,9 +74,9 @@
       margin: 0 !important;*/
     }
 
-    article#display-area {
+    main#display-area {
       margin-left: 20%;
-      height: 88%;
+      height: 89%;
       overflow-y: auto;
       padding: 0em 2em 0em 1em;
     }
@@ -159,17 +172,214 @@
 
 
     section#info {
-      margin: 0.5em;
+      margin: 0.25em;
       padding: 0.5em;
-      background-color: whitesmoke;
-      width: 10em;
+      width: 13em;
+      border-radius: 8px;
+      color: whitesmoke;
+      background-color: #303030;
+      background-image: url(assets/tweed.png);
       box-shadow: 3px 3px 5px 6px #ccc;
     }  
       
       output {
-        display: block;
         font-style: italic;
       }
+
+        output#file-name {
+          display: block;        
+        }
+
+        output#file-name, output#filesize, output#new-filesize {
+          
+        }
+
+
+
+    .tab-view {
+      display: none;
+    }
+
+      .tab-view:target {
+        display: block;
+      }
+
+    #code > code {
+/*      
+      width: 70%;
+      height: 90%;
+*/      
+      display: inline-block;
+      color: gainsboro;
+      background-color: black;
+      border: 2px solid hsla(0, 0%, 25%, 1.0);
+      overflow-y: auto;
+      white-space: pre-wrap;
+      padding: 1em 2em;
+    }
+   
+
+    .tabs { 
+      list-style: none; 
+      position: absolute;
+      top: 0;
+      left: 20%;
+    }
+      
+      .tabs li { 
+        display: inline; 
+      }
+      
+      .tabs li a { 
+        color: whitesmoke; 
+        background: gray;
+        float: left; 
+        display: block; 
+        padding: 4px 10px; 
+        margin-left: -1px; 
+        position: relative; 
+        left: 1px; 
+        text-decoration: none; 
+      }
+      
+      .tabs li a:hover { 
+        background: #ccc; 
+        background-image: url(assets/pixel_weave.png);
+        color: black;
+      }
+      
+      .tabs li a:active { 
+        background: white; 
+      }
+/*      
+      .tabs:after { 
+        visibility: hidden; 
+        display: block; 
+        font-size: 0; 
+        content: " "; 
+        clear: both; 
+        height: 0; 
+      }
+
+*/  
+  
+    /*
+    //  edit list view
+    */
+    .tree-view {
+      /*padding: 0em 2em 0em 1em;*/
+      font-family: "Overlock", sans-serif;
+      font-size: 18px;
+    }
+  
+    .tree-view > p:first-of-type > strong {
+      font-style: italic;
+      font-weight: normal;
+      font-size: 1.5em;
+      margin-left: -0.75em;
+    }
+
+
+    .tree-view ul {
+      padding-left: 1em;
+    }
+    
+      .tree-view ul li {
+        font-family: "Overlock", sans-serif;
+        font-size: 18px;
+        margin-bottom: 0.4em;
+        margin-top: 0.4em;
+        list-style-type: none;
+      }
+    
+      .tree-view ul li span {
+        /*     box-shadow: 1px 1px 3px 3px #ccc;*/
+      }
+    
+    .tree-view span.namespaced {
+      font-size: 14px;
+      background-color: gray;
+      border-radius: 0.7em;
+    }
+    
+    .tree-view span.graphics, 
+    .tree-view span.metadata, 
+    .tree-view span.namespaced,
+    .tree-view span.misc,
+    .tree-view span.add-title,
+    .tree-view span.add-desc {
+      color: whitesmoke;
+      padding: 0.08em 0.5em 0.2em 0.5em;
+      /*     vertical-align: top;*/
+    }
+    
+      .tree-view span.graphics {
+        background-color: hsl(197, 100%, 32%);
+        border-radius: 0.7em;
+      }
+  
+      .tree-view span.misc {
+/*        background-color: hsl(290, 70%, 50%);*/
+        background-color: hsl(31, 93%, 54%);
+        border-radius: 0.7em;
+      }
+    
+      .tree-view span.metadata {
+        background-color: hsl(85, 76%, 29%);
+        border-radius: 0.7em 0em 0em 0.7em;
+        padding: 0.08em 0.5em 0.2em 0.5em;
+      }
+      
+      .tree-view span.add-title,
+      .tree-view span.add-desc {
+        font-size: 15px;
+        background-color: hsl(282, 100%, 40%);
+        border-radius: 0.7em;
+        margin-left: 0.5em;
+        padding-left: 0.em;
+        font-weight: bold;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+    .tree-view span.att {
+      background-color: gray;
+      color: black;
+      margin-left: 0.5em;
+      padding: 0em 0.3em 0.05em 0.3em;
+      font-style: italic;
+      font-size: 16px;
+      border-radius: 0.4em;
+    }
+    
+      .tree-view span.graphics span.att {
+        background-color: hsl(197, 100%, 55%);
+      }
+    
+      .tree-view span.metadata span.att {
+        background-color: hsl(85, 76%, 55%);
+        margin-right: -0.25em;
+      }
+  
+      .tree-view span.misc span.att {
+        background-color: hsl(31, 93%, 74%);
+        margin-right: -0.25em;
+      }
+
+    .tree-view span.textvalue {
+      background-color: gainsboro;
+      background-color: white;
+      border-radius: 0em 0.7em 0.7em 0em;
+      padding: 0.08em 0.7em 0.2em 0.5em;
+      max-width: 500px;
+      display: inline-block;
+      vertical-align: top;
+      margin-top: -0.05em;
+      min-height: 1.2em;
+    }
+    
+
+
   </style>
 	
 	<script src="describler.js"> </script>
@@ -188,11 +398,22 @@
       this.file = null;
 
       this.displayArea = document.getElementById( "display-area" );
+      
+      // views
+      this.introView = document.getElementById( "intro" );
+      this.imageView = document.getElementById( "image" );
+      this.imageContent = document.querySelector("#image article");
+      this.treeView = document.getElementById( "tree" );
+      this.treeContent = document.querySelector("#tree article");
+      this.codeView = document.getElementById( "code" );
+      this.codeContent = document.querySelector("#code code");
+
+      // controls
       this.downloadLink = document.getElementById( "download-button" );
       this.selectFileButton = document.getElementById( "select_file-button" );
       this.uploadFileButton = document.getElementById( "upload_file-button" );
-      this.codeView = document.querySelector("#code-view code");
 
+      this.elIndex = 0;
       this.lang = "en-US";
 
       this.sampleList = [
@@ -223,6 +444,8 @@
 
       this.selectFileButton.addEventListener("change", bind(this, this.loadFileFromServer), false);
       this.uploadFileButton.addEventListener("change", bind(this, this.uploadFile), false);
+
+      window.location.hash = "#intro";
     }
 
     appObj.prototype.loadFileFromServer = function (){
@@ -257,7 +480,7 @@
       }
 
       if ( svgContent ) { 
-        var fileSize = (this.file.size ? this.file.size : "n/a");
+        var fileSize = (this.file.size ? this.byteSized( this.file.size ) : "n/a");
         var lastMod = (this.file.lastModifiedDate ? this.file.lastModifiedDate.toLocaleDateString() : "n/a");
         this.setFileInfo( this.file.name, fileSize, lastMod );
 
@@ -267,12 +490,21 @@
         svgContent = svgContent.substring( svgStart );
         
         // insert SVG file into HTML page
-        this.displayArea.innerHTML = svgContent;
-        this.svgroot = this.displayArea.firstElementChild;
+        this.imageContent.innerHTML = svgContent;
+        this.svgroot = this.imageContent.firstElementChild;
+
+        // set focus to SVG image
+        this.svgroot.setAttribute("tabindex", "1");
+        this.svgroot.focus();
+        // console.log(document.activeElement)
+
+        // switch to image view
+        window.location.hash = "#image";
+
 
         // initialize download link
         this.createSaveLink( svgContent );
-        // this.createSaveLink( this.displayArea.innerHTML );
+        // this.createSaveLink( this.imageContent.innerHTML );
 
         // optimizations
         this.setScalability( this.svgroot );
@@ -283,8 +515,11 @@
           this.lang = langAttr;
         }
 
-        // write source code to lightbox
-        // this.writeSource();
+        // write source code to code view
+        this.writeSource();
+
+        this.elIndex = 0;
+        this.drawTree();
 
         // invoke screenreader
         this.describler = new describlerObj(this.svgroot); 
@@ -294,7 +529,7 @@
     appObj.prototype.setFileInfo = function ( name, filesize, lastMod ){
         document.getElementById("file-name").innerHTML = "<strong title='last modified: " 
           + lastMod
-          + "''>" + escape(name) + "</strong>";
+          + "'>" + escape(name) + "</strong>";
         document.getElementById("filesize").textContent = filesize;
     } 
 
@@ -308,6 +543,122 @@
         document.getElementById("new-filesize").textContent = "(revised: " + this.byteSized( blob.size ) + ")";        
       }
     } 
+
+    appObj.prototype.writeSource = function () {
+      var code = document.createTextNode(this.imageContent.innerHTML);
+      this.codeContent.replaceChild( code, this.codeContent.firstChild );
+    } 
+
+    appObj.prototype.drawTree = function ( el ) {
+      var displayArea = document.getElementById( "display-area" );
+      var str = this.elementToListItem( this.svgroot );
+      this.treeContent.innerHTML = str;
+      // svgEls = displayArea.querySelectorAll( "*" );            
+    }
+
+    appObj.prototype.elementToListItem = function ( el ) {
+      var name = el.tagName;
+      var namespace = el.nameSpace;
+
+
+      var str = "<ul>";
+
+      var id = el.getAttribute("id");
+      var idStr = "";
+      if ( id ) {
+        // idStr = " <span class='id att' title='id attribute' contenteditable onblur='updateMetadata(this)'>" 
+        //       + id + "</span>";
+        idStr = " <span class='id att' title='id attribute'>" 
+              + id + "</span>"; // temp
+      }
+
+      // check for 'title' or 'xlink:title' attribute, as on <a>
+      var titleAtt = el.getAttribute("title");
+      if (!titleAtt) {
+        titleAtt = el.getAttributeNS(this.xlinkns, "title");
+      }
+      var titleAttStr = "";
+      if ( titleAtt ) {
+        // titleAttStr = " <span class='title att' title='title attribute' contenteditable onblur='updateMetadata(this)'>"
+        //               + titleAtt + "</span>";
+        titleAttStr = " <span class='title att' title='title attribute'>"
+                      + titleAtt + "</span>"; //temp
+      }
+      
+      // var contextStr = " onmousedown='contextMenu(event)' onmouseup='contextMenu(event)'";
+      // var evtStr = " onmouseover='hilite(event)' onmouseout='lolite(event)'";
+      var contextStr = ""; // temp
+      var evtStr = ""; // temp
+      
+      if ( -1 != name.indexOf(":") ) {
+        //elements in another namespace
+        str += "<li data-el='" + this.elIndex + "'><span class='namespaced'" + contextStr + ">" + name + idStr + titleAttStr + "</span>";
+      } else if ( "title" == name 
+               || "desc" == name 
+               || "text" == name 
+               || "tspan" == name 
+               || "textPath" == name  ) {
+        // textual elements
+        var text = "";
+        if ( el.childNodes[0] ) {
+          text = ( 1 == el.childNodes[0].nodeType ) ? "" : el.childNodes[0].textContent;
+        }
+        
+        if (  "title" == name || "desc" == name ) {
+          evtStr = "";
+        }
+        
+        str += "<li data-el='" + this.elIndex + "'><span class='metadata'" + evtStr + contextStr + ">" + name + idStr + titleAttStr + "</span>";
+        // str += "<span class='textvalue' contenteditable onblur='updateMetadata(this)'>" + text + "</span>";
+        str += "<span class='textvalue' contenteditable>" + text + "</span>"; // temp
+             
+        // store current text for speech review
+        // if ( "title" == name || "desc" == name || "text" == name ) {
+        //   var elText = el.textContent;
+        //   speechArray.push( elText );
+        // }  
+      } else if ( "path" == name 
+               || "rect" == name 
+               || "polygon" == name 
+               || "polyline" == name  
+               || "circle" == name 
+               || "line" == name ) {
+        // graphical and all other elements
+        str += "<li data-el='" + this.elIndex + "'><span class='graphics'" + evtStr + contextStr + ">" + name + idStr + titleAttStr + "</span>";
+      } else {
+        // all other elements
+        str += "<li data-el='" + this.elIndex + "'><span class='misc'" + contextStr + ">" + name + idStr + titleAttStr + "</span>";
+      }
+      
+      if ( "title" != name && "desc" != name && -1 == name.indexOf(":") ) {
+        var t = el.querySelector("title");
+        if ( !t || el != t.parentNode ) { 
+          // console.log( el.tagName + " doesn't have a <title>" )
+          // str += "<span class='add-title' title='add title to this element' aria-role='button' onclick='addMetadata(this)'>+ &lt;title&gt;</span>";
+          str += "<span class='add-title' title='add title to this element' aria-role='button'>+ &lt;title&gt;</span>"; // temp
+        }     
+
+        var d = el.querySelector("desc");
+        if ( !d || el != d.parentNode ) { 
+          // console.log( el.tagName + " doesn't have a <desc>" )
+          // str += "<span class='add-desc' title='add description to this element' aria-role='button' onclick='addMetadata(this)'>+ &lt;desc&gt;</span>";
+          str += "<span class='add-desc' title='add description to this element' aria-role='button'>+ &lt;desc&gt;</span>"; // temp
+        }     
+      } 
+      
+      this.elIndex++;
+      
+      // recursive function to find child or sibling elements
+      var child = el.firstElementChild;
+      if ( child ) {
+        while ( child ) {
+          str += this.elementToListItem( child )
+          child = child.nextElementSibling;
+        }
+      }
+      str += "</li></ul>";
+      return str;
+    }
 
     appObj.prototype.setScalability = function ( svgEl ) {
       var vb = svgEl.getAttribute("viewBox");
@@ -377,6 +728,13 @@
 
   <section id="app">
     <h1>Describler</h1>  
+    <ul class="tabs">
+      <li><a href="#intro">Intro</a></li>
+      <li><a href="#image">Image</a></li>
+      <li><a href="#tree">Editor</a></li>
+      <li><a href="#code">Code</a></li>
+    </ul>
+
     <section id="content"> 
       <section id="controls"> 
         <div class="upload button icon-upload">
@@ -387,43 +745,64 @@
           <option>Select a file:</option>
         </select>
 
-       <section id="info">
+        <section id="info">
           <output id="file-name"> </output>
           <output id="filesize"> </output>
           <output id="new-filesize"> </output>
         </section>
 
         <a id="download-button" class="button icon-download download" href="#"><span>Download…</span></a>     
-
-       </section>
+      </section>
     
-      <article id="display-area">
-        <p><strong>Describler</strong> is an experimental screen reader (audio browser for blind people) for SVG, and specifically SVG data visualizations.</p>
+      <main id="display-area">
+        <section id="intro" class="tab-view">
+          <!-- <h2><a href="#intro">Intro</a></h2> -->
+          <article>
+            <p><strong>Describler</strong> is an experimental screen reader (audio browser for blind people) for SVG, and specifically SVG data visualizations.</p>
 
-        <h2 id="screenreader">How do I use the Describler screen reader?</h2>
-        <p>First, load an SVG image. You can find some <a href="http://describler.com/samples/">sample SVG images on this site</a>.</p>
-        <p>Next, tab to the chart. For each focusable item, you will hear a spoken description. <i>Note that this uses the Web Speech API, which is not yet supported by all browsers. Note also that you should be a bit patient; it might take a second or so before the description is read aloud.</i>
-        <p>Once the description has been read out, you can press the <code>d</code> key to hear more details about that part of the chart. For some items, such as datapoints, there are multiple levels of details, which you can activate by subsequent presses of the <code>d</code> key.</p>
-        <p>Describler also has an experimental sonifier help the user understand the trend of the data visualization, by playing a tone that rises or falls the animated cursor runs along the trend line. You can activate this by pressing the <code>s</code> key to create the trend line, then the <code>p</code> key to "play" the tone.</a>
-        
-        <h2 id="authoring">How do I make accessible SVGs?</h2>
-        <p>Describler also has an <a href="edit.html">online editing tool</a> that helps you to make your SVG images accessible and reusable. It shows you all of the text content of your SVG in an editable list, including both visible text and metadata, and makes it easy for you to add descriptive content, or change the text that's already there. And you can use the “audio preview” feature to hear how your SVG sounds in common screenreaders. The Describler editor also makes your SVG auto-scaling by default, rather than a fixed size; this allows you to use your SVG at whatever size you need, or to change the size dynamically, and it allows users to zoom and pan easily.</p>
-        
-        <h2 id="svg">What is SVG?</h2>
-        <p>SVG stands for Scalable Vector Graphics, and it is a vector-based format, that can be created in popular drawing tools like Inkscape and Adobe Illustrator. Because each shape is made up of one or more markup elements, and the document has a DOM like HTML, it can be styled with CSS, and made interactive or animated with JavaScript.</p>
-        <p>Like HTML, the text in SVG is simply text, and so screenreaders can read it. In addition to the visible text elements, like <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, and <code>&lt;textPath&gt;</code> elements, SVG has special metadata elements, <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code>, which allow you to annotate your shapes for mouseover tooltips and special screenreader descriptions.</p>
-        <h2 id="using-describler">How do I use Describler to make my SVG accessible?</h2>
-        <ol>
-          <li><b>Upload your SVG file.</b> Click on the orange button with the up-arrow icon, and select an SVG file.</li>
-          <li><b>Add or edit the text, titles, and descriptions.</b> Click on any text in the list view, and edit it. Hit <code>Enter</code> or click off the text to commit your change to the SVG image. To add a title or description to any element, click one of the purple buttons next to that list item. Remember: titles should be short, and descriptions should be longer; don’t duplicate text… write your descriptions just the way you yourself would like to hear the image described.</li>
-          <li><b>Listen to the SVG image!</b> Click on the green button with the speaker icon to hear your SVG spoken aloud like a person using a screenreader will hear it. <i>This is an experimental feature in browsers, so you’ll have to <a href="#audio-help">enable it in your browser</a> to use this feature.</i></li>
-          <li><b>Save your SVG file.</b> Click on the purple button with the down-arrow icon to save your SVG file locally.</li>
-        </ol>
-        <h2 id="notes">Notes</h2>
-        <p>Describler is meant to add accessibility to SVG images, not to interactive SVG applications or GUIs; use ARIA markup for that.</p>
-        <p>For more background on accessible SVG, see my <a href="http://schepers.cc/authoring-accessible-svg ‎">blog post</a>. Suggestions or code improvements are welcome! See the <a href="https://github.com/shepazu/describler">source on github</a>, where you can also check out some <a href="https://github.com/shepazu/describler/tree/gh-pages/samples">sample SVG files to play with.</a></p>
-        <p>Thanks! <br>–<a id="sig" href="http://twitter.com/shepazu" target="_blank">Shepazu</a></p>
-      </article>
+            <h2 id="screenreader">How do I use the Describler screen reader?</h2>
+            <p>First, load an SVG image. You can find some <a href="http://describler.com/samples/">sample SVG images on this site</a>.</p>
+            <p>Next, tab to the chart. For each focusable item, you will hear a spoken description. <i>Note that this uses the Web Speech API, which is not yet supported by all browsers. Note also that you should be a bit patient; it might take a second or so before the description is read aloud.</i>
+            <p>Once the description has been read out, you can press the <code>d</code> key to hear more details about that part of the chart. For some items, such as datapoints, there are multiple levels of details, which you can activate by subsequent presses of the <code>d</code> key.</p>
+            <p>Describler also has an experimental sonifier help the user understand the trend of the data visualization, by playing a tone that rises or falls the animated cursor runs along the trend line. You can activate this by pressing the <code>s</code> key to create the trend line, then the <code>p</code> key to "play" the tone.</a>
+            
+            <h2 id="authoring">How do I make accessible SVGs?</h2>
+            <p>Describler also has an <a href="edit.html">online editing tool</a> that helps you to make your SVG images accessible and reusable. It shows you all of the text content of your SVG in an editable list, including both visible text and metadata, and makes it easy for you to add descriptive content, or change the text that's already there. And you can use the “audio preview” feature to hear how your SVG sounds in common screenreaders. The Describler editor also makes your SVG auto-scaling by default, rather than a fixed size; this allows you to use your SVG at whatever size you need, or to change the size dynamically, and it allows users to zoom and pan easily.</p>
+            
+            <h2 id="svg">What is SVG?</h2>
+            <p>SVG stands for Scalable Vector Graphics, and it is a vector-based format, that can be created in popular drawing tools like Inkscape and Adobe Illustrator. Because each shape is made up of one or more markup elements, and the document has a DOM like HTML, it can be styled with CSS, and made interactive or animated with JavaScript.</p>
+            <p>Like HTML, the text in SVG is simply text, and so screenreaders can read it. In addition to the visible text elements, like <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, and <code>&lt;textPath&gt;</code> elements, SVG has special metadata elements, <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code>, which allow you to annotate your shapes for mouseover tooltips and special screenreader descriptions.</p>
+            <h2 id="using-describler">How do I use Describler to make my SVG accessible?</h2>
+            <ol>
+              <li><b>Upload your SVG file.</b> Click on the orange button with the up-arrow icon, and select an SVG file.</li>
+              <li><b>Add or edit the text, titles, and descriptions.</b> Click on any text in the list view, and edit it. Hit <code>Enter</code> or click off the text to commit your change to the SVG image. To add a title or description to any element, click one of the purple buttons next to that list item. Remember: titles should be short, and descriptions should be longer; don’t duplicate text… write your descriptions just the way you yourself would like to hear the image described.</li>
+              <li><b>Listen to the SVG image!</b> Click on the green button with the speaker icon to hear your SVG spoken aloud like a person using a screenreader will hear it. <i>This is an experimental feature in browsers, so you’ll have to <a href="#audio-help">enable it in your browser</a> to use this feature.</i></li>
+              <li><b>Save your SVG file.</b> Click on the purple button with the down-arrow icon to save your SVG file locally.</li>
+            </ol>
+            <h2 id="notes">Notes</h2>
+            <p>Describler is meant to add accessibility to SVG images, not to interactive SVG applications or GUIs; use ARIA markup for that.</p>
+            <p>For more background on accessible SVG, see my <a href="http://schepers.cc/authoring-accessible-svg ‎">blog post</a>. Suggestions or code improvements are welcome! See the <a href="https://github.com/shepazu/describler">source on github</a>, where you can also check out some <a href="https://github.com/shepazu/describler/tree/gh-pages/samples">sample SVG files to play with.</a></p>
+            <p>Thanks! <br>–<a id="sig" href="http://twitter.com/shepazu" target="_blank">Shepazu</a></p>
+          </article>          
+        </section>
+
+        <section id="image" class="tab-view">
+          <!-- <h2><a href="#image">Image</a></h2> -->
+          <article tabindex="1"> </article>
+        </section>
+
+        <section id="tree" class="tree-view">
+          <!-- <h2><a href="#tree">Editor</a></h2> -->
+          <article> </article>
+        </section>
+
+        <section id="code" class="tab-view">
+          <!-- <h2><a href="#code">Code</a></h2> -->
+          <code>
+          </code>
+        </section>
+      </main>
+
     </section>
   </section>
 

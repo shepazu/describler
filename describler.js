@@ -25,12 +25,9 @@ function describlerObj(root) {
   this.svgns = "http://www.w3.org/2000/svg";
 
 
-  // find appropriate sizes
-  var vb = root.getAttribute("viewBox").split(" ");
-	var basesize = (Math.max(vb[2], vb[3]) / 100);
-  this.padding = basesize;
-  this.strokewidth = basesize / 2;
-  
+  // create a list of all focusable elements, including the root
+  this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
+
   // focus properties
   this.focusIndex = 0;
   this.activeElement = null;
@@ -38,9 +35,12 @@ function describlerObj(root) {
   this.strokewidth = 0;
   this.navDirection = 0;
 
-  // create a list of all focusable elements, including the root
-  this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
-
+  // find appropriate sizes
+  var vb = root.getAttribute("viewBox").split(" ");
+  var basesize = (Math.max(vb[2], vb[3]) / 100);
+  this.padding = basesize;
+  this.strokewidth = basesize / 2;
+  
   // create focus box
   this.focusBox = document.createElementNS(this.svgns, "rect");
   this.focusBox.setAttribute("rx", this.padding/2 );
@@ -155,13 +155,13 @@ describlerObj.prototype.navNext = function () {
   // console.log( "tabNext: " + focus.index );
 	this.navDirection = 1;
 	
-  this.activeElement = this.focusList[ this.focusIndex ];
-	document.activeElement = this.activeElement;
   this.focusIndex++;
   if (this.focusList.length - 1 < this.focusIndex) {
     this.focusIndex = 0;
   }
-  
+  this.activeElement = this.focusList[ this.focusIndex ];
+  document.activeElement = this.activeElement;
+
   this.showFocus();
 }
 
@@ -169,18 +169,21 @@ describlerObj.prototype.navPrev = function () {
   // console.log( "tabPrev: " + this.focusIndex );
 	this.navDirection = -1;
   
-  this.activeElement = this.focusList[ this.focusIndex ];
-	document.activeElement = this.activeElement;
   this.focusIndex--;
-  if (-1 > this.focusIndex) {
+  if (-1 >= this.focusIndex) {
     this.focusIndex = this.focusList.length - 1;
   }
+  this.activeElement = this.focusList[ this.focusIndex ];
+  document.activeElement = this.activeElement;
 
   this.showFocus();
 }
 
 describlerObj.prototype.showFocus = function () {
   // console.log( el );
+  if (!this.activeElement) {
+    console.log("oops")
+  }
   var bbox = this.activeElement.getBBox();
 	var transform = this.root.getTransformToElement(this.activeElement).inverse();
 	
@@ -582,20 +585,25 @@ describlerObj.prototype.getInfo = function (option){
 								if ( (0 != dp && 1 == this.navDirection ) 
 										|| (dpLen - 1 != dp && -1 == this.navDirection )) {
 											
-									var previousValue = dataset[dp - 1].value;
-									if ( -1 == this.navDirection){
-										previousValue = dataset[dp + 1].value;
-									}
+                  var lastValue = "";
+                  // var dirName = "previous";
+									if ( 1 == this.navDirection){
+										lastValue = dataset[dp - 1].value;
+									} else {
+                    lastValue = dataset[dp + 1].value;
+                    // dirName = "next";
+                  }
 
 									var delta = "";
-									if ( value > previousValue){
-										delta += "This is an increase of " + (value - previousValue);
-									}	else if ( value < previousValue) {
-										delta += "This is a decrease of " + (previousValue - value);
+									if ( value > lastValue){
+										delta += "This is an increase of " + (value - lastValue);
+									}	else if ( value < lastValue) {
+										delta += "This is a decrease of " + (lastValue - value);
 									} else {
 										delta += "There is no change";
 									}
-									delta += " from the previous value of " + previousValue;
+                  // delta += " from the " + dirName + " value of " + lastValue;
+									delta += " from the last value of " + lastValue;
 									this.speeches.push( delta );
 								}
 
