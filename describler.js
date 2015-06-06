@@ -11,7 +11,7 @@ function showEvent(event) {
 function describlerObj(root) {
   this.root = root;
 
-  // chart properties
+  // chart propertiesdocument.activeElement
   this.charts = [];
 
   // voice and sonification properties
@@ -160,7 +160,7 @@ describlerObj.prototype.navNext = function () {
     this.focusIndex = 0;
   }
   this.activeElement = this.focusList[ this.focusIndex ];
-  document.activeElement = this.activeElement;
+  // document.activeElement = this.activeElement;
 
   this.showFocus();
 }
@@ -174,7 +174,7 @@ describlerObj.prototype.navPrev = function () {
     this.focusIndex = this.focusList.length - 1;
   }
   this.activeElement = this.focusList[ this.focusIndex ];
-  document.activeElement = this.activeElement;
+  // document.activeElement = this.activeElement;
 
   this.showFocus();
 }
@@ -275,7 +275,7 @@ describlerObj.prototype.click = function (event){
   console.log( this.focusIndex );
 
   this.activeElement = focusEl;
-	document.activeElement = this.activeElement;
+	// document.activeElement = this.activeElement;
 	this.showFocus();
 }
 
