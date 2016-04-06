@@ -185,8 +185,7 @@ describlerObj.prototype.showFocus = function () {
     console.log("oops")
   }
   var bbox = this.activeElement.getBBox();
-	var transform = this.root.getTransformToElement(this.activeElement).inverse();
-	
+  var transform = this.activeElement.getScreenCTM().inverse().multiply(this.root.getScreenCTM()).inverse();
 	// console.log(transform)
 
   var x = bbox.x - this.padding;
