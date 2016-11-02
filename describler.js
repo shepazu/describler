@@ -4,6 +4,10 @@ window.onfocus = function (event) {
 	event.target.blur();
 };
 
+SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) {
+    return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM());
+};
+
 function showEvent(event) {
   console.log(event.type)
 }
@@ -186,7 +190,8 @@ describlerObj.prototype.showFocus = function () {
   }
   var bbox = this.activeElement.getBBox();
   var transform = this.activeElement.getScreenCTM().inverse().multiply(this.root.getScreenCTM()).inverse();
-	// console.log(transform)
+
+  // console.log(transform)
 
   var x = bbox.x - this.padding;
   var y = bbox.y - this.padding;
@@ -205,12 +210,13 @@ describlerObj.prototype.showFocus = function () {
 }   
 
 describlerObj.prototype.trackKeys = function (event) {
-  var key = event.keyIdentifier.toLowerCase();
+  // var key = event.keyIdentifier.toLowerCase();
+  var key = event.key.toLowerCase();
   // var key = parseInt(event.keyIdentifier.substr(2), 16);
   // console.log( key );
   // console.log( "key: " + event.key);
 
-  if ("u+0009" == key) {
+  if ("tab" == key || "u+0009" == key) {
     // tab
    	event.preventDefault();
     event.stopPropagation();
@@ -221,13 +227,23 @@ describlerObj.prototype.trackKeys = function (event) {
     } else {
       this.navNext();
     }
-	} else if ("u+0044" == key) {
+	} else if ("d" == key || "u+0044" == key) {
 		// d
 		this.getInfo( true );
-	} else if ("u+0053" == key) {
+	} else if ("s" == key || "u+0053" == key) {
 		// s
 		this.sonify();
-	} else if ( "u+0030" == key
+	} else if ( "0" == key
+          ||  "1" == key
+          ||  "2" == key 
+          ||  "3" == key 
+          ||  "4" == key 
+          ||  "5" == key 
+          ||  "6" == key 
+          ||  "7" == key 
+          ||  "8" == key 
+          ||  "9" == key  
+          ||  "u+0030" == key
           ||  "u+0031" == key
           ||  "u+0032" == key 
           ||  "u+0033" == key 
@@ -238,7 +254,8 @@ describlerObj.prototype.trackKeys = function (event) {
           ||  "u+0038" == key 
           ||  "u+0039" == key ) {
 		// 1 to 9
-    var number = parseInt(key.substr(2)) - 30;
+    // var number = parseInt(key.substr(2)) - 30;
+    var number = parseInt(key);
     // console.log( "key: " + number);
 		this.getInfo( number );
 	}
@@ -328,6 +345,32 @@ describlerObj.prototype.getFraction = function (decimal){
 		}
 	}
 	return msg;
+}
+
+describlerObj.prototype.getOrdinalNumber = function (number){
+
+  var ordinal = "";
+  if ( 3 < ordinal && 21 > number ){
+    ordinal += number + "th";
+  } else {
+    switch ( number.toString().split("").pop() ){
+      case "1":
+        ordinal += number + "st";
+        break;
+
+      case "2":
+        ordinal += number + "nd";
+        break;
+
+      case "3":
+        ordinal += number + "rd";
+        break;
+
+      default:
+        ordinal += number + "th";
+    }
+  }
+  return ordinal;
 }
 
 describlerObj.prototype.convertNumberToWords = function (number){
@@ -441,7 +484,8 @@ describlerObj.prototype.getInfo = function (option){
     // this.speeches.push( choices.join(" ") );
 	} else if ( "xaxis" == role || "yaxis" == role){
     this.options = [
-      "Press 1 for axis labels"
+      "Press 1 for axis labels" //,
+      // "Press 2 to select a datapoint by axis label"
     ];
 		
 		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
@@ -478,7 +522,12 @@ describlerObj.prototype.getInfo = function (option){
             for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
               this.speeches.push( axis.labels[l] );
             }
-          }
+          } // else if ( 2 == option ){
+          //   this.speeches.push( ", with the following labels: " );
+          //   for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
+          //     this.speeches.push( axis.labels[l] );
+          //   }
+          // }
 
 					// no need to iterate further
 					continue;
@@ -580,20 +629,24 @@ describlerObj.prototype.getInfo = function (option){
 						if ( null != option ){
 							var value = datapoint.value;
 							if ( 1 == option ){
+
 								// describe change of value
 								if ( (0 != dp && 1 == this.navDirection ) 
 										|| (dpLen - 1 != dp && -1 == this.navDirection )) {
 											
                   var lastValue = "";
+                  var lastField = "";
                   // var dirName = "previous";
 									if ( 1 == this.navDirection){
 										lastValue = dataset[dp - 1].value;
+                    lastField = dataset[dp - 1].labelElementText;
 									} else {
                     lastValue = dataset[dp + 1].value;
+                    lastField = dataset[dp + 1].labelElementText;
                     // dirName = "next";
                   }
 
-									var delta = "";
+                  var delta = "";
 									if ( value > lastValue){
 										delta += "This is an increase of " + (value - lastValue);
 									}	else if ( value < lastValue) {
@@ -602,11 +655,11 @@ describlerObj.prototype.getInfo = function (option){
 										delta += "There is no change";
 									}
                   // delta += " from the " + dirName + " value of " + lastValue;
-									delta += " from the last value of " + lastValue;
+									delta += " from the last value of " + lastValue + " for " + lastField;
 									this.speeches.push( delta );
 								}
 
-								// describe change of value
+								// describe statistical status of value
 								if ( dataset["low"] == value){
 									this.speeches.push( "This is the lowest value." );
 								} 
@@ -622,6 +675,17 @@ describlerObj.prototype.getInfo = function (option){
 								if ( dataset["mean"] == value){
 									this.speeches.push( "This is the average value." );
 								}
+
+                // indicate datapoint index
+                var index_message = "This is the "
+                index_message += this.getOrdinalNumber( dp + 1 );
+                if ( dpLen == dp + 1 ) {
+                  index_message += " and final "
+                }
+                index_message += " data point."
+                this.speeches.push( index_message );  
+                // this.speeches.push( "This is the " + this.getOrdinalNumber( dp + 1 ) + " data point." ); 
+                            
 							} else if ( 2 == option ){ // more details
 								var firstItem = true;
 								for (var odp = 0, odpLen = dataset.length; odpLen > odp; ++odp) {
@@ -1182,7 +1246,8 @@ Sonifier.prototype.init = function (svgroot, metaGroup, dataLine,
 }
 
 Sonifier.prototype.trackKeys = function (event) {
-	var key = event.keyIdentifier.toLowerCase();
+  // var key = event.keyIdentifier.toLowerCase();
+  var key = event.key.toLowerCase();
   
   switch ( key){
     case "down":
