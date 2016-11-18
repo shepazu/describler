@@ -756,29 +756,34 @@
     
       <main id="display-area">
         <section id="intro" class="tab-view">
-          <!-- <h2><a href="#intro">Intro</a></h2> -->
           <article>
-            <p><strong>Describler</strong> is an experimental screen reader (audio browser for blind people) for SVG, and specifically SVG data visualizations.</p>
+            <p><strong>Describler</strong> is an experimental prototype screen reader (audio browser for blind people) for SVG, and specifically SVG data visualizations.</p>
 
             <h2 id="screenreader">How do I use the Describler screen reader?</h2>
-            <p>First, load an SVG image. You can find some <a href="http://describler.com/samples/">sample SVG images on this site</a>.</p>
-            <p>Next, tab to the chart. For each focusable item, you will hear a spoken description. <i>Note that this uses the Web Speech API, which is not yet supported by all browsers. Note also that you should be a bit patient; it might take a second or so before the description is read aloud.</i>
-            <p>Once the description has been read out, you can press the <code>d</code> key to hear more details about that part of the chart. For some items, such as datapoints, there are multiple levels of details, which you can activate by subsequent presses of the <code>d</code> key.</p>
-            <p>Describler also has an experimental sonifier help the user understand the trend of the data visualization, by playing a tone that rises or falls the animated cursor runs along the trend line. You can activate this by pressing the <code>s</code> key to create the trend line, then the <code>p</code> key to "play" the tone.</a>
-            
-            <h2 id="authoring">How do I make accessible SVGs?</h2>
-            <p>Describler also has an <a href="edit.html">online editing tool</a> that helps you to make your SVG images accessible and reusable. It shows you all of the text content of your SVG in an editable list, including both visible text and metadata, and makes it easy for you to add descriptive content, or change the text that's already there. And you can use the “audio preview” feature to hear how your SVG sounds in common screenreaders. The Describler editor also makes your SVG auto-scaling by default, rather than a fixed size; this allows you to use your SVG at whatever size you need, or to change the size dynamically, and it allows users to zoom and pan easily.</p>
+            <ol>
+              <li>Load a file from the "Select a file" dropdown (I suggest loading the first file, <i>aria-bar-chart.svg</i>).</li>
+              <li>Navigate to and through the dataviz by pressing the <code>tab</code> or arrow keys
+                <ul>
+                  <li><b>next item:</b> <code>tab</code> or <code>→</code> (right arrow)</li>
+                  <li><b>previous item:</b> <code>shift</code>+<code>tab</code> or <code>←</code> (left arrow)</li>
+                </ul>
+              </li> 
+              <li>For each item, a number of options for more information will be listed. Press the appropriate number key (<code>1</code>–<code>9</code>) for each option.</li>
+            </ol>
+
+            <p>To understand how Describler preserves context and lets the user truly explore the data visualization, try closing your eyes (if you're sighted), and moving back and forth through the datapoints.</p>
             
             <h2 id="svg">What is SVG?</h2>
             <p>SVG stands for Scalable Vector Graphics, and it is a vector-based format, that can be created in popular drawing tools like Inkscape and Adobe Illustrator. Because each shape is made up of one or more markup elements, and the document has a DOM like HTML, it can be styled with CSS, and made interactive or animated with JavaScript.</p>
             <p>Like HTML, the text in SVG is simply text, and so screenreaders can read it. In addition to the visible text elements, like <code>&lt;text&gt;</code>,  <code>&lt;tspan&gt;</code>, and <code>&lt;textPath&gt;</code> elements, SVG has special metadata elements, <code>&lt;title&gt;</code> and <code>&lt;desc&gt;</code>, which allow you to annotate your shapes for mouseover tooltips and special screenreader descriptions.</p>
-            <h2 id="using-describler">How do I use Describler to make my SVG accessible?</h2>
-            <ol>
-              <li><b>Upload your SVG file.</b> Click on the orange button with the up-arrow icon, and select an SVG file.</li>
-              <li><b>Add or edit the text, titles, and descriptions.</b> Click on any text in the list view, and edit it. Hit <code>Enter</code> or click off the text to commit your change to the SVG image. To add a title or description to any element, click one of the purple buttons next to that list item. Remember: titles should be short, and descriptions should be longer; don’t duplicate text… write your descriptions just the way you yourself would like to hear the image described.</li>
-              <li><b>Listen to the SVG image!</b> Click on the green button with the speaker icon to hear your SVG spoken aloud like a person using a screenreader will hear it. <i>This is an experimental feature in browsers, so you’ll have to <a href="#audio-help">enable it in your browser</a> to use this feature.</i></li>
-              <li><b>Save your SVG file.</b> Click on the purple button with the down-arrow icon to save your SVG file locally.</li>
-            </ol>
+
+            <h2 id="sonification">What is sonfication?</h2>
+            <p>Sonfication is a technique to represent signals or data patterns through sound. The most popular example is a Geiger counter.</p>
+            <p>Describler has an experimental sonifier help the user understand the trend of the data visualization, by playing a tone that rises or falls the animated cursor runs along the trend line. You can activate this by pressing the <code>s</code> key to create the trend line, then the <code>p</code> key to "play" the tone.</a>
+
+            <h2 id="authoring">How do I make accessible SVGs?</h2>
+            <p>Coming soon…</p>
+
             <h2 id="notes">Notes</h2>
             <p>Describler is meant to add accessibility to SVG images, not to interactive SVG applications or GUIs; use ARIA markup for that.</p>
             <p>For more background on accessible SVG, see my <a href="http://schepers.cc/authoring-accessible-svg ‎">blog post</a>. Suggestions or code improvements are welcome! See the <a href="https://github.com/shepazu/describler">source on github</a>, where you can also check out some <a href="https://github.com/shepazu/describler/tree/gh-pages/samples">sample SVG files to play with.</a></p>
