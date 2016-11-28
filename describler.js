@@ -824,7 +824,6 @@ describlerObj.prototype.handle_datapoint = function (){
         }
 
         if ( default_menu ) {
-          default_menu = true;
           this.menu.reset();
           this.menu.add( "details", "more details" );
           this.menu.add( "compare", "comparison to all other data points" );        
@@ -876,6 +875,8 @@ describlerObj.prototype.handle_axis = function (){
             //                      + axis.labels[axis.labels.length - 1] );
             // }
           }
+
+          var default_menu = true;
           
           if ( this.menu.selected ){
             if ( "labels" == this.menu.selected.id ){
@@ -883,16 +884,70 @@ describlerObj.prototype.handle_axis = function (){
               for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
                 this.speeches.push( axis.items[l].label );
               }
-            } else if ( "select" == this.menu.selected.id ){
+            } else if ( "select" == this.menu.selected.id
+                  ||  "select" == this.menu.selected.type ) {
               // TODO: let user select axis label by menu or typing name 
               // TODO: account for nested/group axis labels
+              if ( "select" == this.menu.selected.id ){
+                this.speeches.push( "Select axis label:" );
+
+                default_menu = false;
+                this.menu.reset();
+                for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
+                  this.menu.add( axis.items[l].label, axis.items[l].label, "select" );
+                }
+              } else {
+                var axisitem = axis.items.find( function (axis) {
+                  return axis.label == this;
+                }, this.menu.selected.id );
+                console.log(axisitem)
+
+                default_menu = false;
+                this.menu.reset();
+
+                if (axisitem) {
+                  var refsLength = axisitem.refs.length
+                  var axisitem_msg = axisitem.label + " has " 
+                    + axisitem.refs.length + " datapoint";
+
+                  if ( 1 != refsLength){
+                    axisitem_msg += "s"; // make it plural
+                  }
+                    
+                  this.speeches.push( axisitem_msg );
+                  this.speak();
+
+
+                      // temporary hack
+                      // TODO: let user select datapoint explicitly, in case there are multiples
+                      var datapoint = axisitem.refs[0].element;
+                      this.activeElement = datapoint;
+                      this.showFocus();
+
+                } else {
+                  console.log("error")
+                } 
+              }
             }
           }
 
+          if ( default_menu ) {
+            this.menu.reset();
+            this.menu.add( "labels", "axis labels" );
 
-          this.menu.reset();
-          this.menu.add( "labels", "axis labels" );
-          // this.menu.add( "select", "select datapoints by axis label" );
+            // only show "select" option if one of the axis labels has datapoints
+            var select_possible = false;
+            for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
+              if (axis.items[l].refs.length) {
+                select_possible = true;
+                break;
+              }
+            }
+
+            if ( select_possible ) {
+              this.menu.add( "select", "select datapoints by axis label" );
+            }
+          }
 
           // no need to iterate further
           continue;
@@ -907,6 +962,50 @@ describlerObj.prototype.handle_axis = function (){
 describlerObj.prototype.handle_axisitem = function (){
   console.log("handle_axisitem");
   this.speeches.push( "axisitem" );     
+
+
+          // } else if ( "compare-single" == this.menu.selected.id 
+          //         ||  "compare-single" == this.menu.selected.type ) {
+          //   if ( "compare-single" == this.menu.selected.id ) {
+          //     this.speeches.push( "Select datapoint for comparison:" );
+
+          //     default_menu = false;
+          //     this.menu.reset();
+          //     for (var odp = 0, odpLen = dataset.datapoints.length; odpLen > odp; ++odp) {
+          //       var otherDatapoint = dataset.datapoints[odp];
+          //       if ( datapoint.element != otherDatapoint.element){
+          //         var other_label = otherDatapoint.label_text;
+          //         this.menu.add( other_label, other_label, "compare-single" );
+          //       }
+          //     }
+          //   } else {
+          //     var otherDatapoint = dataset.datapoints.find( function (datapoint) {
+          //       return datapoint.label_text == this;
+          //     }, this.menu.selected.id );
+
+          //     if ( otherDatapoint ){
+          //       // var value = datapoint.value;
+          //       var otherValue = otherDatapoint.value;
+          //       var delta_msg = "Comparison to " + otherDatapoint.label_text + ": ";
+
+          //       var mean_delta = value - otherValue;
+          //       var mean_delta_comp = " above";
+          //       if ( 0 > mean_delta ) {
+          //         mean_delta_comp = " below";
+          //       }
+          //       delta_msg += "This is " + Math.abs(mean_delta) + mean_delta_comp 
+          //                 + " the value of " + otherValue + " for "
+          //                 + otherDatapoint.label_text;
+          //       delta_msg += ", which is ";
+          //       // delta_msg += this.getFraction(value/otherValue);
+          //       delta_msg += ((value/otherValue) * 100).toFixed() + "%";
+          //       delta_msg += " the amount.";
+
+          //       this.speeches.push( delta_msg );
+          //     }
+          //   }
+          // }
+
 }
 
 
@@ -1613,7 +1712,7 @@ function axisItemObj( el, axis ) {
   this.label = el.textContent;
   this.axis = axis;
   this.group = null;
-  this.datapoints = [];
+  this.refs = []; // rename datapoints? here and in legenditems?
 
 
   this.init();
@@ -1621,6 +1720,23 @@ function axisItemObj( el, axis ) {
 
 axisItemObj.prototype.init = function (){
   // TODO: populate datapoints 
+
+  var allRefs = document.querySelectorAll("[aria-labelledby~='" + this.element.id + "']");
+  for (var r = 0, rLen = allRefs.length; rLen > r; ++r) {
+    var eachRef = allRefs[ r ]; 
+    
+    var ref = eachRef;
+    var role = eachRef.getAttribute("role");
+    while ( "datapoint" != role){
+      ref = ref.parentNode;
+      role = ref.getAttribute("role");
+    }   
+    
+    // TODO: find existing datapoint and link to that instead of creating a new one?
+    var datapoint = new datapointObj( ref );
+    this.refs.push(datapoint); // list of referencing datapoints
+    // console.log( min + ", " + max );
+  }
 }
 
 
