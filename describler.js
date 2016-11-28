@@ -13,8 +13,15 @@ function showEvent(event) {
   console.log(event.type)
 }
 
+function matchElement( obj ) { 
+  return obj.element === this;
+}
+
+
 function describlerObj(root) {
   this.root = root;
+
+  this.app = null;
 
   // chart propertiesdocument.activeElement
   this.charts = [];
@@ -22,6 +29,7 @@ function describlerObj(root) {
   // voice and sonification properties
   this.speeches = [];
   this.options = [];
+  this.menu = new menuObj();
 
   // this.voice = new SpeechSynthesisUtterance();
   this.sonifier = null;
@@ -42,6 +50,7 @@ function describlerObj(root) {
   // focus properties
   this.focusIndex = 0;
   this.activeElement = null;
+  this.activeObject = null;
   this.padding = 0;
   this.strokewidth = 0;
   this.navDirection = 0;
@@ -214,6 +223,7 @@ describlerObj.prototype.showFocus = function () {
 	// TODO: figure out how to apply matrix transform to this element
   this.focusBox.setAttribute("transform", "translate(" + transform.e + ","  + transform.f + ")" );
 
+  this.menu.reset();
 	this.getInfo();
 }   
 
@@ -242,7 +252,9 @@ describlerObj.prototype.trackKeys = function (event) {
     }
 	} else if ("d" == key ) {
 		// d
-		this.getInfo( true );
+
+    // TODO: set "more details"
+		this.getInfo();
 	} else if ("s" == key) {
 		// s
 		this.sonify();
@@ -260,7 +272,15 @@ describlerObj.prototype.trackKeys = function (event) {
     // var number = parseInt(key.substr(2)) - 30;
     var number = parseInt(key);
     // console.log( "key: " + number);
-		this.getInfo( number );
+
+    var selection = this.menu.select( number );
+    if (selection) {
+      this.getInfo();
+    } else {
+      this.speeches.length = 0;
+      this.speeches.push( "Invalid option." );
+      this.speak();   
+    }
 	 } else if ("escape" == key ) {
     // escape
     if ( speechSynthesis && speechSynthesis.speaking ){
@@ -303,7 +323,7 @@ describlerObj.prototype.click = function (event){
 			continue;
 		}
   };
-  console.log( this.focusIndex );
+  // console.log( this.focusIndex );
 
   this.activeElement = focusEl;
 	// document.activeElement = this.activeElement;
@@ -321,7 +341,13 @@ describlerObj.prototype.mapToRange = function (val, range1, range2){
 
 
 describlerObj.prototype.getFraction = function (decimal){
+  console.log("decimal: " + decimal);
 	var msg = "The same as ";
+
+  if ( isNaN(decimal) ){
+    return "not a number!";
+  }
+
 	if ( 1 != decimal){
 		var fraction = 1;
 		var numerator = 1;
@@ -420,383 +446,591 @@ describlerObj.prototype.convertNumberToWords = function (number){
 	}, false);
 }
 
-describlerObj.prototype.getInfo = function (option){
-	this.speeches.length = 0;
+
+describlerObj.prototype.getInfo = function (){
+  this.speeches.length = 0;
   this.options.length = 0;
-	
-	if (!this.activeElement) {
-		return false;
-	}
-	
-	var role = this.activeElement.getAttribute("role");
-	   
-  if ( "chart" == role){
-    this.options = [
-      "Press 1 for chart statistics",
-      "Press 2 for datapoints from lowest to highest",
-      "Press 3 for datapoints from highest to lowest",
-      "Press 4 for trend sonification"
-    ];
+  
+  if (!this.activeElement) {
+    return false;
+  }
+  
+  var role = this.activeElement.getAttribute("role");
 
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			if ( this.activeElement == chart.element){
-				for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
-					var dataset = chart.datasets[d];
+  // if ( "chart" != role){
+  // }
 
-					if ( chart.label){
-						this.speeches.push( "Chart: " + chart.label );
-					}
+  // TODO: cycle through charts, find matching element
 
-					
-					if ( null != option ){
-            console.log( "option: " + option.toString(16) );
-  					if ( 1 == option ){
-  						// this.speeches.push( "This is a " + chart.type + " chart, with " 
-  						// 										+ dataset.length + " data points" );
-  						this.speeches.push( "" + chart.type + " chart, with " 
-  																+ dataset.length + " data points" );
-  						this.speeches.push( "The highest value is " + +dataset.high.toFixed(2)
-  																+ ", and the lowest value is " + +dataset.low.toFixed(2)
-  																+ ", with a range of " + +dataset.range.toFixed(2) );
-  						this.speeches.push( "The average is " + +dataset.mean.toFixed(2)
-  																+ ", the median is " + +dataset.median.toFixed(2)
-  																+ ", and the total is " + +dataset.sum.toFixed(2) );
-  																// + ", and the total of all data points is " + dataset.sum );				
-  					} else if ( 2 == option || 3 == option ){
-  						// list datapoints lowest to highest, or highest to lowests
-  						// create a copy of the dataset, so we don't mess with the original ordering
-  						var datasort = dataset.slice();
-						
-  						if ( 2 == option){
-  							datasort.sort( function (a, b) {
-  							  return a.value - b.value;
-  							}); 
-  							this.speeches.push( "Lowest to highest: " );
-  						} else if ( 3 == option){
-  							datasort.sort( function (a, b) {
-  							  return b.value - a.value;
-  							}); 
-  							this.speeches.push( "Highest to lowest: " );
-  						}
-							
-  						for (var dp = 0, dpLen = datasort.length; dpLen > dp; ++dp) {
-  							var datapoint = datasort[dp];
-  							this.speeches.push( datapoint.label );
-  						}
-            } else if ( 4 == option ){
-              // cancel speech  
-              this.speeches.length = 0;
+  switch ( role ){
+    case "chart":
+      this.handle_chart();
+      break;
 
-              this.interaction_mode = "sonifier";
+    case "datapoint":
+      this.handle_datapoint();
+      break;
 
-              this.sonify();
-              this.sonifier.togglePlay();
-  					}
-					}
-				}
-				continue;
-			}
-		}
-    // this.speeches.push( choices.join(" ") );
-	} else if ( "xaxis" == role || "yaxis" == role){
-    this.options = [
-      "Press 1 for axis labels" //,
-      // "Press 2 to select a datapoint by axis label"
-    ];
-		
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			for (var a in chart.axes) {
-			  // console.log(key, chart[axis]);
-				var axis = chart.axes[a];
-				if ( this.activeElement == axis.element){
-					if ( axis.label){
-						this.speeches.push( axis.type + " axis: " + axis.label );
-					}
-		
-					if ( !isNaN(axis.min) && !isNaN(axis.max)){
-						this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
-																+ axis.min + " to " + axis.max );
-					} else {
-            this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
-                               + axis.labels[0] + " to " 
-                               + axis.labels[axis.labels.length - 1] );
-						// if ( 1 == option ){
-						// 	this.speeches.push( ", with the following labels: " );
-						// 	for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
-						// 		this.speeches.push( axis.labels[l] );
-						// 	}
-						// } else {
-						// 	this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
-						// 											+ axis.labels[0] + " to " 
-						// 											+ axis.labels[axis.labels.length - 1] );
-						// }
-					}
-					
-          if ( 1 == option ){
-            this.speeches.push( ", with the following labels: " );
-            for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
-              this.speeches.push( axis.labels[l] );
+    case "datagroup":
+      this.handle_datagroup();
+      break;
+
+    case "axis":
+    case "xaxis":
+    case "yaxis":
+      this.handle_axis();
+      break;
+
+    case "axisitem":
+      this.handle_axisitem();
+      break;
+
+    case "legend":
+      this.handle_legend();
+      break;
+
+    case "legenditem":
+      this.handle_legenditem();
+      break;
+
+    default:
+      this.handle_default();
+      break;
+
+  }
+  
+  if ( this.speeches.length){
+    this.speak();   
+  }
+}
+
+
+describlerObj.prototype.handle_chart = function (){
+  // console.log("handle_chart");
+  // this.speeches.push( "chart" );     
+
+  var chart = this.charts.find( matchElement, this.activeElement );
+  if (chart) {
+    var chart_index = this.charts.findIndex( matchElement, this.activeElement );
+    this.activeObject = chart;
+
+    // console.log("chart:");
+    // console.log(chart);
+    // console.log("index: " + chart_index);
+
+    for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
+      var dataset = chart.datasets[d];
+
+      if ( chart.label){
+        this.speeches.push( "Chart: " + chart.label );
+      }
+      
+      if ( this.menu.selected ){
+        // console.log( "option: " + this.menu.selected.id );
+        if ( "stats" == this.menu.selected.id ){
+          // this.speeches.push( "This is a " + chart.type + " chart, with " 
+          //                    + dataset.length + " data points" );
+          this.speeches.push( "" + chart.type + " chart, with " 
+                              + dataset.statistics.count + " data points" );
+          this.speeches.push( "The highest value is " + +dataset.statistics.high.toFixed(2)
+                              + ", and the lowest value is " + +dataset.statistics.low.toFixed(2)
+                              + ", with a range of " + +dataset.statistics.range.toFixed(2) );
+          this.speeches.push( "The average is " + +dataset.statistics.mean.toFixed(2)
+                              + ", the median is " + +dataset.statistics.median.toFixed(2)
+                              + ", and the total is " + +dataset.statistics.sum.toFixed(2) );
+                              // + ", and the total of all data points is " + dataset.sum );        
+        } else if ( "low-high" == this.menu.selected.id 
+                 || "high-low" == this.menu.selected.id ){
+          // list datapoints lowest to highest, or highest to lowest
+          // create a copy of the dataset, so we don't mess with the original ordering
+          var datasort = dataset.datapoints.slice();
+        
+          if ( "low-high" == this.menu.selected.id ){
+            datasort.sort( function (a, b) {
+              return a.value - b.value;
+            }); 
+            this.speeches.push( "Lowest to highest: " );
+          } else if ( "high-low" == this.menu.selected.id ){
+            datasort.sort( function (a, b) {
+              return b.value - a.value;
+            }); 
+            this.speeches.push( "Highest to lowest: " );
+          }
+          
+          for (var dp = 0, dpLen = datasort.length; dpLen > dp; ++dp) {
+            var datapoint = datasort[dp];
+            this.speeches.push( datapoint.label );
+          }
+        } else if ( "sonification" == this.menu.selected.id ){
+          // cancel speech  
+          this.speeches.length = 0;
+
+          this.interaction_mode = "sonifier";
+
+          this.sonify();
+          this.sonifier.togglePlay();
+        }
+      }
+    }
+
+    this.menu.reset();
+    this.menu.add( "stats", "chart statistics" );
+    this.menu.add( "low-high", "datapoints from lowest to highest" );
+    this.menu.add( "high-low", "datapoints from highest to lowest" );
+    this.menu.add( "sonification", "trend sonification" );
+    // console.log(this.menu);
+  }
+}
+
+
+describlerObj.prototype.handle_datapoint = function (){
+  // console.log("handle_datapoint");
+  // this.speeches.push( "datapoint" );   
+
+  for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+    var chart = this.charts[c];
+    // if ( this.activeElement == chart.element){
+    for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
+      var dataset = chart.datasets[d];
+      console.log(dataset);
+
+      var datapoint = dataset.datapoints.find( matchElement, this.activeElement );
+      if (datapoint) {
+        var dp_index = dataset.datapoints.findIndex( matchElement, this.activeElement );
+        this.activeObject = datapoint;
+
+        // console.log("datapoint:");
+        // console.log(datapoint);
+        // console.log("index: " + dp_index);
+
+        // console.log( datapoint );
+        if ( !this.menu.selected ){
+          this.speeches.push( "Data point " + (dp_index + 1) + " of " + dataset.statistics.count );
+        }
+
+        this.speeches.push( datapoint.label );
+
+        var default_menu = true;
+
+        if ( this.menu.selected ){
+          var value = datapoint.value;
+          // if ( 1 == option ){
+          if ( "details" == this.menu.selected.id ){
+
+            // describe change of value
+            if ( (0 != dp_index && 1 == this.navDirection ) 
+                || (dataset.statistics.count - 1 != dp_index && -1 == this.navDirection )) {
+                  
+              var lastValue = "";
+              var lastField = "";
+              // var dirName = "previous";
+              if ( 1 == this.navDirection){
+                lastValue = dataset.datapoints[dp_index - 1].value;
+                lastField = dataset.datapoints[dp_index - 1].label_text;
+              } else {
+                lastValue = dataset.datapoints[dp_index + 1].value;
+                lastField = dataset.datapoints[dp_index + 1].label_text;
+                // dirName = "next";
+              }
+
+              var delta = "";
+              if ( value > lastValue){
+                delta += "This is an increase of " + (value - lastValue);
+              } else if ( value < lastValue) {
+                delta += "This is a decrease of " + (lastValue - value);
+              } else {
+                delta += "There is no change";
+              }
+              // delta += " from the " + dirName + " value of " + lastValue;
+              delta += " from the last value of " + lastValue + " for " + lastField;
+              this.speeches.push( delta );
             }
-          } // else if ( 2 == option ){
-          //   this.speeches.push( ", with the following labels: " );
-          //   for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
-          //     this.speeches.push( axis.labels[l] );
-          //   }
-          // }
 
-					// no need to iterate further
-					continue;
-					c = cLen;
-				}
-			}
-		}
-	} else if ( "legend" == role){
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
-				var eachLegend = chart.legends[ l ]; 
-				if ( this.activeElement == eachLegend.element){
-					var legendItemsCount = eachLegend.items.length + " legend item";
-					if ( 1 != eachLegend.items.length){
-						legendItemsCount += "s"; // make it plural
-					}
-					
-					this.speeches.push( "Legend: " + eachLegend.label + " with " + legendItemsCount );	
-					// if ( !1 == option ){
-					// 	this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
-					// }
-					
-					// no need to iterate further
-					continue;
-					l = lLen;
-					c = cLen;
-				}
-			}
-		}
-	} else if ( "legenditem" == role){
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
-				var eachLegend = chart.legends[ l ]; 
-				for (var li = 0, liLen = eachLegend.items.length; liLen > li; ++li) {
-					var eachLegendItem = eachLegend.items[ li ]; 
-					if ( this.activeElement == eachLegendItem.element){
-						if ( null == option ){
-							this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
-						}
-						
-						this.speeches.push( eachLegendItem.label );	
+            // describe statistical status of value
+            if ( dataset.statistics["low"] == value){
+              this.speeches.push( "This is the lowest value." );
+            } 
 
+            if ( dataset.statistics["high"] == value){
+              this.speeches.push( "This is the highest value." );
+            }
 
-            this.options = [
-              "Press 1 for list of all applicable data points"
-            ];
+            if ( dataset.statistics["median"] == value){
+              this.speeches.push( "This is the median value." );
+            }
 
-						if ( 1 == option ){
-							var total = 0;
-							var refsLength = eachLegendItem.refs.length;
-							
-							var refsCount = refsLength + " datapoint";
-							if ( 1 != refsLength){
-								refsCount += "s"; // make it plural
-							}
-							
-							this.speeches.push( "This legend item applies to " + refsCount);	
+            if ( dataset.statistics["mean"] == value){
+              this.speeches.push( "This is the average value." );
+            }
 
-							for (var r = 0; refsLength > r; ++r) {
-								var eachRef = eachLegendItem.refs[ r ];
-								this.speeches.push( eachRef.label );	
-								// TODO: make sure the value is numeric
-								total += eachRef.value
-							}
-							
-							this.speeches.push( "The total of all items is " + total );	
-						}
-					
-						// no need to iterate further
-						continue;
-						l = lLen;
-						c = cLen;
-					}
-				}
-			}
-		}
-	} else if ( "datapoint" == role) {
-		for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-			var chart = this.charts[c];
-			for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
-				var dataset = chart.datasets[d];
-				for (var dp = 0, dpLen = dataset.length; dpLen > dp; ++dp) {
-					var datapoint = dataset[dp];
-					if ( this.activeElement == datapoint.element){
-					  // console.log( datapoint );
-						if ( null == option ){
-							this.speeches.push( "Data point " + (dp + 1) + " of " + dataset.length );
-						}
+            // indicate datapoint index
+            var index_message = "This is the "
+            index_message += this.getOrdinalNumber( dp_index + 1 );
+            if ( dataset.statistics.count == dp_index + 1 ) {
+              index_message += " and final "
+            }
+            index_message += " data point."
+            this.speeches.push( index_message );  
+            // this.speeches.push( "This is the " + this.getOrdinalNumber( dp_index + 1 ) + " data point." ); 
 
-						this.speeches.push( datapoint.label );
+            // describe colors
+            var fills = [];
+            var strokes = [];
 
-            this.options = [
-              "Press 1 for more details",
-              "Press 2 for comparison to other data points"
-            ];
+            for (var c = 0, c_len = datapoint.colors.length; c_len > c; ++c) {
+              var eachColor = datapoint.colors[ c ]; 
 
-						if ( null != option ){
-							var value = datapoint.value;
-							if ( 1 == option ){
+              if ( eachColor.fill_name && !fills.includes(eachColor.fill_name) ) {
+                fills.push( eachColor.fill_name );
+              }
 
-								// describe change of value
-								if ( (0 != dp && 1 == this.navDirection ) 
-										|| (dpLen - 1 != dp && -1 == this.navDirection )) {
-											
-                  var lastValue = "";
-                  var lastField = "";
-                  // var dirName = "previous";
-									if ( 1 == this.navDirection){
-										lastValue = dataset[dp - 1].value;
-                    lastField = dataset[dp - 1].labelElementText;
-									} else {
-                    lastValue = dataset[dp + 1].value;
-                    lastField = dataset[dp + 1].labelElementText;
-                    // dirName = "next";
-                  }
+              if ( eachColor.stroke_name && !strokes.includes(eachColor.stroke_name) ) {
+                strokes.push( eachColor.stroke_name );
+              }
+            }  
+            
+            var color_message = "";
+            var fill_message = this.arrayToSentence(fills, "color", "colors" );
+            var stroke_message = this.arrayToSentence(strokes, "outline", "outlines" );
 
-                  var delta = "";
-									if ( value > lastValue){
-										delta += "This is an increase of " + (value - lastValue);
-									}	else if ( value < lastValue) {
-										delta += "This is a decrease of " + (lastValue - value);
-									} else {
-										delta += "There is no change";
-									}
-                  // delta += " from the " + dirName + " value of " + lastValue;
-									delta += " from the last value of " + lastValue + " for " + lastField;
-									this.speeches.push( delta );
-								}
+            if ( fill_message && stroke_message ) {
+              color_message += fill_message + ", and " + stroke_message.replace("The", "the") + ".";
+            } else {
+              color_message += fill_message + stroke_message + ".";
+            }
 
-								// describe statistical status of value
-								if ( dataset["low"] == value){
-									this.speeches.push( "This is the lowest value." );
-								} 
-
-								if ( dataset["high"] == value){
-									this.speeches.push( "This is the highest value." );
-								}
-
-								if ( dataset["median"] == value){
-									this.speeches.push( "This is the median value." );
-								}
-
-								if ( dataset["mean"] == value){
-									this.speeches.push( "This is the average value." );
-								}
-
-                // indicate datapoint index
-                var index_message = "This is the "
-                index_message += this.getOrdinalNumber( dp + 1 );
-                if ( dpLen == dp + 1 ) {
-                  index_message += " and final "
+            this.speeches.push( color_message );  
+                        
+          } else if ( "compare" == this.menu.selected.id ) {
+            var firstItem = true;
+            for (var odp = 0, odpLen = dataset.datapoints.length; odpLen > odp; ++odp) {
+              var otherDatapoint = dataset.datapoints[odp];
+              if ( datapoint.element != otherDatapoint.element){
+                var otherValue = otherDatapoint.value;
+                var delta = "";
+                if (firstItem) {
+                  firstItem = false;
+                  delta = "This is ";
+                } else if ( odpLen - 1 == odp 
+                          || ( odpLen - 1 == dp_index && odpLen - 2 == odp )){
+                  delta = " and ";
                 }
-                index_message += " data point."
-                this.speeches.push( index_message );  
-                // this.speeches.push( "This is the " + this.getOrdinalNumber( dp + 1 ) + " data point." ); 
 
-                // describe colors
-                var fills = [];
-                var strokes = [];
-
-                for (var c = 0, c_len = datapoint.colors.length; c_len > c; ++c) {
-                  var eachColor = datapoint.colors[ c ]; 
-
-                  if ( eachColor.fill_name && !fills.includes(eachColor.fill_name) ) {
-                    fills.push( eachColor.fill_name );
-                  }
-
-                  if ( eachColor.stroke_name && !strokes.includes(eachColor.stroke_name) ) {
-                    strokes.push( eachColor.stroke_name );
-                  }
-                }  
+                // delta += (value/otherValue).toFixed(2);
+                // delta += this.getFraction(value/otherValue) + " the value of ";
+                delta += ((value/otherValue) * 100).toFixed() + "%" + " the value of ";
                 
-                var color_message = "";
-                var fill_message = this.arrayToSentence(fills, "color", "colors" );
-                var stroke_message = this.arrayToSentence(strokes, "outline", "outlines" );
-
-                if ( fill_message && stroke_message ) {
-                  color_message += fill_message + ", and " + stroke_message.replace("The", "the") + ".";
+                if ( otherDatapoint.label_text){
+                  delta +=  otherDatapoint.label_text;
                 } else {
-                  color_message += fill_message + stroke_message + ".";
+                  delta +=  otherDatapoint.label;
                 }
+                
+                this.speeches.push( delta );
+              }
+            }
+          } else if ( "compare-single" == this.menu.selected.id 
+                  ||  "compare-single" == this.menu.selected.type ) {
+            if ( "compare-single" == this.menu.selected.id ) {
+              this.speeches.push( "Select datapoint for comparison:" );
 
-                this.speeches.push( color_message );  
-                            
-							} else if ( 2 == option ){ // more details
-								var firstItem = true;
-								for (var odp = 0, odpLen = dataset.length; odpLen > odp; ++odp) {
-									var otherDatapoint = dataset[odp];
-									if ( datapoint.element != otherDatapoint.element){
-										var otherValue = otherDatapoint.value;
-										var delta = "";
-										if (firstItem) {
-											firstItem = false;
-											delta = "This is ";
-										} else if ( odpLen - 1 == odp 
-															|| ( odpLen - 1 == dp && odpLen - 2 == odp )){
-											delta = " and ";
-										}
+              default_menu = false;
+              this.menu.reset();
+              for (var odp = 0, odpLen = dataset.datapoints.length; odpLen > odp; ++odp) {
+                var otherDatapoint = dataset.datapoints[odp];
+                if ( datapoint.element != otherDatapoint.element){
+                  var other_label = otherDatapoint.label_text;
+                  this.menu.add( other_label, other_label, "compare-single" );
+                }
+              }
+            } else {
+              var otherDatapoint = dataset.datapoints.find( function (datapoint) {
+                return datapoint.label_text == this;
+              }, this.menu.selected.id );
 
-										// delta += (value/otherValue).toFixed(2);
-										delta += this.getFraction(value/otherValue);
-										delta += " the value of ";
-										
-										if ( otherDatapoint.labelElementText){
-											delta +=  otherDatapoint.labelElementText;
-										} else {
-											delta +=  otherDatapoint.label;
-										}
-										
-										this.speeches.push( delta );
-									}
-								}
+              if ( otherDatapoint ){
+                // var value = datapoint.value;
+                var otherValue = otherDatapoint.value;
+                var delta_msg = "Comparison to " + otherDatapoint.label_text + ": ";
 
-							}
-						}
-						
-						// no need to iterate further
-						continue;
-						d = dLen;
-						c = cLen;
-					}
-				}
-			}
-		}
-	} else {
-		var el = this.activeElement;
-		if ( "text" != this.activeElement.localName){
-		  el = this.activeElement.querySelector("title");
-		
-			if ( !el){
-			  el = this.activeElement.querySelector("text");
-			}
-		}
-		// var dataText = el.textContent;
-		
-		if ( el){
-			this.speeches.push( el.textContent );			
-		}
-		
-		if ( 1 == option ){
-			var desc = this.activeElement.querySelector("[tabindex] > desc");
-			if ( desc){
-				this.speeches.push( desc.textContent );			
-			}
-		}
-	}
-	
-	if ( this.speeches.length){
-		this.speak();		
-	}
+                var mean_delta = value - otherValue;
+                var mean_delta_comp = " above";
+                if ( 0 > mean_delta ) {
+                  mean_delta_comp = " below";
+                }
+                delta_msg += "This is " + Math.abs(mean_delta) + mean_delta_comp 
+                          + " the value of " + otherValue + " for "
+                          + otherDatapoint.label_text;
+                delta_msg += ", which is ";
+                // delta_msg += this.getFraction(value/otherValue);
+                delta_msg += ((value/otherValue) * 100).toFixed() + "%";
+                delta_msg += " the amount.";
+
+                this.speeches.push( delta_msg );
+              }
+            }
+          } else if ( "stats" == this.menu.selected.id ) {
+            var stats_msg = "";
+            if ( dataset.statistics["mean"] == value){
+              stats_msg += "This is the mean value, ";
+            } else {
+              // describe statistical status of value
+              var mean_delta = value - dataset.statistics["mean"];
+              var mean_delta_comp = " above";
+              if ( 0 > mean_delta ) {
+                mean_delta_comp = " below";
+              }
+              stats_msg += "This is " + Math.abs(mean_delta) + mean_delta_comp 
+                        + " the mean value of " + dataset.statistics["mean"] + ", ";
+            }
+
+            if ( dataset.statistics["median"] == value){
+              stats_msg += "and this is the median value. ";
+            } else {
+              // describe statistical status of value
+              var median_delta = value - dataset.statistics["median"];
+              var median_delta_comp = " above";
+              if ( 0 > median_delta ) {
+                median_delta_comp = " below";
+              }
+              stats_msg += "and " + Math.abs(median_delta) + median_delta_comp 
+                        + " the median value of " + dataset.statistics["median"] + ". ";
+            }
+
+            if ( dataset.statistics["low"] == value){
+              stats_msg += "This is the lowest value, ";
+            } else {
+              var low_delta = value - dataset.statistics["low"];
+              stats_msg += "This is " + low_delta 
+                        + " above the low value of " + dataset.statistics["low"] + ", ";
+            }
+
+            if ( dataset.statistics["high"] == value){
+              stats_msg += " and is the highest value. ";
+            } else {
+              var high_delta = dataset.statistics["high"] - value;
+              stats_msg += " and " + high_delta 
+                        + " below the high value of " + dataset.statistics["high"] + ". ";
+            }
+
+            stats_msg += datapoint.label_text + " is "
+                      // + this.getFraction(value/dataset.statistics["sum"])
+                      + ((value/dataset.statistics["sum"]) * 100).toFixed() + "%"
+                      + " of the total value of " + dataset.statistics["sum"] + ". ";
+
+            this.speeches.push( stats_msg );  
+
+          }
+        }
+
+        if ( default_menu ) {
+          default_menu = true;
+          this.menu.reset();
+          this.menu.add( "details", "more details" );
+          this.menu.add( "compare", "comparison to all other data points" );        
+          this.menu.add( "compare-single", "comparison to a specific data point" );        
+          this.menu.add( "stats", "datapoint statistics" );
+        }
+      }
+    }
+  }
+}
+
+
+describlerObj.prototype.handle_datagroup = function (){
+  console.log("handle_datagroup");
+  this.speeches.push( "datagroup" );     
+}
+
+describlerObj.prototype.handle_axis = function (){
+  // console.log("handle_axis");
+  // this.speeches.push( "axis" );     
+
+  for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+    var chart = this.charts[c];
+      for (var a in chart.axes) {
+        // console.log(key, chart[axis]);
+        var axis = chart.axes[a];
+        if ( this.activeElement == axis.element){
+          this.activeObject = axis;
+
+          if ( axis.label){
+            this.speeches.push( axis.type + " axis: " + axis.label );
+          }
+    
+          if ( !isNaN(axis.min) && !isNaN(axis.max)){
+            this.speeches.push( ", " + axis.items.length + " items, ranging from " 
+                                + axis.min + " to " + axis.max );
+          } else {
+            this.speeches.push( ", " + axis.items.length + " items, ranging from " 
+                               + axis.items[0].label + " to " 
+                               + axis.items[axis.items.length - 1].label );
+            // if ( 1 == option ){
+            //  this.speeches.push( ", with the following labels: " );
+            //  for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
+            //    this.speeches.push( axis.labels[l] );
+            //  }
+            // } else {
+            //  this.speeches.push( ", " + axis.labels.length + " items, ranging from " 
+            //                      + axis.labels[0] + " to " 
+            //                      + axis.labels[axis.labels.length - 1] );
+            // }
+          }
+          
+          if ( this.menu.selected ){
+            if ( "labels" == this.menu.selected.id ){
+              this.speeches.push( ", with the following labels: " );
+              for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
+                this.speeches.push( axis.items[l].label );
+              }
+            } else if ( "select" == this.menu.selected.id ){
+              // TODO: let user select axis label by menu or typing name 
+              // TODO: account for nested/group axis labels
+            }
+          }
+
+
+          this.menu.reset();
+          this.menu.add( "labels", "axis labels" );
+          // this.menu.add( "select", "select datapoints by axis label" );
+
+          // no need to iterate further
+          continue;
+          c = cLen;
+        }
+
+    }
+  }
+}
+
+
+describlerObj.prototype.handle_axisitem = function (){
+  console.log("handle_axisitem");
+  this.speeches.push( "axisitem" );     
+}
+
+
+describlerObj.prototype.handle_legend = function (){
+  // console.log("handle_legend");
+  // this.speeches.push( "legend" );     
+
+    for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+      var chart = this.charts[c];
+      for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
+        var eachLegend = chart.legends[ l ]; 
+        if ( this.activeElement == eachLegend.element){
+          this.activeObject = eachLegend;
+
+          var legendItemsCount = eachLegend.items.length + " legend item";
+          if ( 1 != eachLegend.items.length){
+            legendItemsCount += "s"; // make it plural
+          }
+          
+          this.speeches.push( "Legend: " + eachLegend.label + " with " + legendItemsCount );  
+          // if ( !1 == option ){
+          //  this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
+          // }
+          
+          // no need to iterate further
+          continue;
+          l = lLen;
+          c = cLen;
+        }
+      }
+    }
+
+}
+
+
+describlerObj.prototype.handle_legenditem = function (){
+  // console.log("handle_legenditem");
+  // this.speeches.push( "legenditem" );
+
+  for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+    var chart = this.charts[c];
+    for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
+      var eachLegend = chart.legends[ l ]; 
+
+      var legenditem = eachLegend.items.find( matchElement, this.activeElement );
+      if (legenditem) {
+        var legenditem_index = eachLegend.items.findIndex( matchElement, this.activeElement );
+        this.activeObject = legenditem;
+
+        if ( !this.menu.selected ){
+          this.speeches.push( "Legend item " + (legenditem_index + 1) + " of " + eachLegend.items.length );
+        }
+        
+        this.speeches.push( legenditem.label );
+
+        if ( this.menu.selected ) {
+          if ( "datapoints" == this.menu.selected.id ){
+            var total = 0;
+            var refsLength = legenditem.refs.length;
+            
+            var refsCount = refsLength + " datapoint";
+            if ( 1 != refsLength){
+              refsCount += "s"; // make it plural
+            }
+            
+            this.speeches.push( "This legend item applies to " + refsCount);  
+
+            for (var r = 0; refsLength > r; ++r) {
+              var eachRef = legenditem.refs[ r ];
+              this.speeches.push( eachRef.label );  
+              // TODO: make sure the value is numeric
+              total += eachRef.value
+            }
+            
+            this.speeches.push( "The total of all items is " + total ); 
+          }
+        }
+      
+        this.menu.reset();
+        this.menu.add( "datapoints", "a list of all applicable data points" );
+
+        // no need to iterate further
+        continue;
+        l = lLen;
+        c = cLen;
+      }
+    }
+  }
+}
+
+
+describlerObj.prototype.handle_default = function (){
+  // console.log("handle_default");
+  // this.speeches.push( "default" );  
+
+  this.activeObject = null;
+
+  var el = this.activeElement;
+  if ( "text" != this.activeElement.localName){
+    el = this.activeElement.querySelector("title");
+  
+    if ( !el ){
+      el = this.activeElement.querySelector("text");
+    }
+  }
+  // var dataText = el.textContent;
+  
+  if ( el ){
+    this.speeches.push( el.textContent );     
+  }
+
+  if ( this.menu.selected ){
+    var value = datapoint.value;
+    if ( "details" == this.menu.selected.id ){ 
+      var desc = this.activeElement.querySelector("[tabindex] > desc");
+      if ( desc ){
+        this.speeches.push( desc.textContent );     
+      }
+    }
+  } 
+
+  this.menu.reset();
+  this.menu.add( "details", "more details" );
+
 }
 
 describlerObj.prototype.arrayToSentence = function ( arr, singular_noun, plural_noun ) {
@@ -831,18 +1065,21 @@ describlerObj.prototype.speak = function () {
     voice.lang = "en-US";
     voice.rate = 1.1;
     speechSynthesis.speak( voice );
-  
-    if (this.options.length) {
-      voice.onend = (function (optionList) {
-        var optionsMsg = "Options: " + optionList.join(". \n");
-        console.log( optionsMsg );
 
-      	var voice = new SpeechSynthesisUtterance();
-        voice.text = optionsMsg;
+    this.app.showText( msg );
+
+    var options_msg = this.menu.list();
+    this.app.populateOptions( this.menu.options.slice() );
+
+    if (options_msg) {
+      voice.onend = (function (options_msg) {
+        var voice = new SpeechSynthesisUtterance();
+        voice.text = options_msg;
         voice.lang = "en-US";
         voice.rate = 1.1;
         speechSynthesis.speak( voice );
-      })(this.options);
+        // console.log( options_msg );
+      })( options_msg );
     }
   }
 
@@ -872,8 +1109,8 @@ describlerObj.prototype.sonify = function () {
 		for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
 			var dataset = chart.datasets[d];
       var datalinePoints = "";
-			for (var dp = 0, dpLen = dataset.length; dpLen > dp; ++dp) {
-				var datapoint = dataset[dp].element;
+			for (var dp = 0, dpLen = dataset.datapoints.length; dpLen > dp; ++dp) {
+				var datapoint = dataset.datapoints[dp].element;
 			  var bbox = datapoint.getBBox();
 		    datalinePoints += (bbox.x + (bbox.width/2)) + "," + bbox.y + " "; 
 			}
@@ -908,7 +1145,86 @@ describlerObj.prototype.sonify = function () {
 													xAxisPos, yAxisPos, "red" );
 		}
   }      
+}
+
+
+describlerObj.prototype.selectOption = function ( option_id, option_type ) {
+  var selection = this.menu.select( null, option_id );
+  if (selection) {
+    this.getInfo();
+  }
+  
+  if ( this.speeches.length){
+    this.speak();   
+  }
 }   
+
+
+
+/*
+*  Menu Object
+*/
+
+function menuObj() {
+  this.options = [];
+  this.selected = null;
+
+  this.init();
+}
+
+menuObj.prototype.init = function (){
+  // TODO: add history to options chosen,
+  //       use "repeat" in options menu
+}
+
+menuObj.prototype.add = function ( id, label, type ){
+  var option = new optionObj( id, label, type );
+  this.options.push(option);
+}
+
+menuObj.prototype.list = function (){
+  // var options_msg = "Options: " + this.options.join(". \n");
+  var options_msg = null;
+
+  if ( this.options.length ) {
+    options_msg = "Options: ";
+
+    for (var o = 0, o_len = this.options.length; o_len > o; ++o) {
+      options_msg += "Press " + (o + 1) + " for " + this.options[o].label + ". \n";
+    }
+  }
+
+  return options_msg;
+}
+
+menuObj.prototype.select = function ( number, id ){
+  this.selected = null;
+  if ( null != number ) {
+    this.selected = this.options[ (number - 1) ];
+  } else if ( null != id ) {
+    this.selected = this.options.find( function (option) {
+      return option.id == this;
+    }, id );
+  }
+
+  if ( this.selected ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+menuObj.prototype.reset = function (){
+  this.options = [];
+  this.selected = null;
+}
+
+
+function optionObj( id, label, type ) {
+  this.id = id;
+  this.label = label;
+  this.type = type;
+}
 
 
 /*
@@ -949,11 +1265,8 @@ chartObj.prototype.init = function (el){
 	
 	if ( "pie" != this.type){
 		// get chart axes
-		this.axes["x"] = new axisObj;
-		this.axes["x"].init( this.element, "x", "horizontal" )
-
-		this.axes["y"] = new axisObj;
-		this.axes["y"].init( this.element, "y", "vertical" )
+		this.axes["x"] = new axisObj( this.element, "x", "horizontal" );
+		this.axes["y"] = new axisObj( this.element, "y", "vertical" );
 	}
 
   var datasetEls = this.element.querySelectorAll("[role='dataset']");
@@ -968,62 +1281,141 @@ chartObj.prototype.init = function (el){
   var legendEls = this.element.querySelectorAll("[role='legend']");
 	for (var l = 0, lLen = legendEls.length; lLen > l; ++l) {
 		var eachLegend = legendEls[ l ]; 
-		var legend = new legendObj();
-		legend.init( eachLegend );
+		var legend = new legendObj( eachLegend );
 		this.legends.push( legend );
 	}
 }   
 
 chartObj.prototype.extractDataset = function (datapoints){
-	var dataset = [];
-	dataset["values"] = [];
+  // var dataset = [];
+  // dataset.values = [];
+  var dataset = new datasetObj;
 
 	for (var dp = 0, dpLen = datapoints.length; dpLen > dp; ++dp) {
 		var eachDatapoint = datapoints[dp];
 		var datapoint = new datapointObj( eachDatapoint );
 		// datapoint.init( eachDatapoint ); 
-		dataset["values"].push( datapoint.value );
-		dataset.push( datapoint );
+		dataset.values.push( datapoint.value );
+		dataset.datapoints.push( datapoint );
   };
 
+  // TODO: switch to generateStats
+
 	// sort values
-	dataset["values"].sort( function (a, b) {
+	dataset.values.sort( function (a, b) {
 	  return a - b;
 	}); 
 
-	// find low
-	dataset["low"] = dataset["values"][0];
+  var stats = new statisticsObj( dataset.values.slice() );
+  dataset.statistics = stats.stats;
 
-	// find high
-	dataset["high"] = dataset["values"][ dataset.length - 1 ];
+  // TODO: find multiple lows/highs, etc.
+  // TODO: find stats for:
+  //       each datagroup
+  //       sets of datagroups
+  //       collective datapoints in all datagroups
+  //       different items in same series across datagroups (e.g. 3rd datapoint in each datagroup)
 
-	// find range 
-	dataset["range"] = dataset["high"] - dataset["low"];
+	return dataset;	
+}   
 
-	// find sum
-	dataset["sum"] = dataset["values"].reduce( function (a, b) {
-	  return a + b;
-	}); 
 
-	// find mean 
-	dataset["mean"] = dataset["sum"] / dataset.length;
+function statisticsObj( values_arr ) {
+  this.values = values_arr;
+  this.stats = {};
 
-	// find median  
-  var mid = Math.floor(dataset.length/2);
+  this.init();
+}   
+
+statisticsObj.prototype.init = function (){  
+  // TODO: do stats appropriate for different data types (NOIR)
+  this.count();
+  this.sum();
+  this.low();
+  this.high();
+  this.range();
+  this.mean();
+  this.median();
+  this.mode();
+  // TODO: number of "classes":
+  //       for histogram, may be multiple datapoints for each bin;
+  //       find way to embed all this data in each datapoint, for distribution?
+  // TODO: inner quartile range?
+
+  return this.stats; 
+}   
+
+statisticsObj.prototype.count = function (){  
+  // find low
+  this.stats["count"] = this.values.length;
+}   
+
+statisticsObj.prototype.sum = function (){  
+  // find sum
+  this.stats["sum"] = this.values.reduce( function (a, b) {
+    return a + b;
+  }); 
+}   
+
+statisticsObj.prototype.low = function (){  
+  // find low
+  this.stats["low"] = this.values[0];
+}   
+
+statisticsObj.prototype.high = function (){  
+  if (!this.stats["count"]) {
+    this.count();
+  }
+
+  // find high
+  this.stats["high"] = this.values[ this.stats["count"] - 1 ];
+}   
+
+statisticsObj.prototype.range = function (){
+  if (!this.stats["high"]) {
+    this.high();
+  }
+
+  if (!this.stats["low"]) {
+    this.low();
+  }
+
+  // find range 
+  this.stats["range"] = this.stats["high"] - this.stats["low"];
+}   
+
+statisticsObj.prototype.mean = function (){  
+  if (!this.stats["sum"]) {
+    this.sum();
+  }
+
+  if (!this.stats["count"]) {
+    this.count();
+  }
+
+  // find mean 
+  this.stats["mean"] = this.stats["sum"] / this.stats["count"];
+}   
+
+statisticsObj.prototype.median = function (){  
+  // find median  
+  var mid = Math.floor(this.values.length/2);
   // if ( 1 == dataset.length%2){
-  if (dataset.length % 2) {
-  	dataset["median"] = dataset["values"][mid];
-	} else {
-    dataset["median"] = ( dataset["values"][mid - 1] + dataset["values"][mid]) / 2;
-	}
+  if (this.values.length % 2) {
+    this.stats["median"] = this.values[mid];
+  } else {
+    this.stats["median"] = ( this.values[mid - 1] + this.values[mid]) / 2;
+  }
+}   
 
-	// find mode 
-	var modeMap = {},
+statisticsObj.prototype.mode = function (){  
+  // find mode 
+  var modeMap = {},
       maxCount = 1, 
-      modes = [dataset["values"][0]];
+      modes = [this.values[0]];
 
-  for(var i = 0; i < dataset["values"].length; ++i) {
-    var val = dataset["values"][i];
+  for(var i = 0; i < this.values.length; ++i) {
+    var val = this.values[i];
 
     if (modeMap[val] == null) {
       modeMap[val] = 1;
@@ -1039,85 +1431,167 @@ chartObj.prototype.extractDataset = function (datapoints){
       maxCount = modeMap[val];
     }
   }
-	dataset["mode"] = modes;	
-	
-	return dataset;	
+  this.stats["mode"] = modes; 
+}   
+
+
+function datasetObj() {
+  this.datapoints = [];
+  this.datagroups = [];
+  this.values = [];
+  this.statistics = {};
+
+  this.init();
+}
+
+datasetObj.prototype.init = function (){  
 }   
 
 
 function datapointObj( el ) {
-	this.element = el;
-	this.value = null;
-	this.values = [];
-	this.label = null;
+  this.element = el;
+  this.value = null;
+  this.values = [];
+  this.label = null;
   this.label_els = [];
-  this.label_text = null;
-  this.labelElement = null;
-	this.labelElementText = null;
+  this.label_text = "";
+
+  this.datagroup = null; // element or object? should this be an array?
+
   this.colors = [];
 
   this.init();
 }
 
-datapointObj.prototype.init = function (){	
-	var datavalueEL = this.element.querySelector("[role='datavalue']");
-	var dataText = datavalueEL.textContent;
-	this.value = parseFloat( dataText );
-	
-	var labelEl = datavalueEL.getAttribute("aria-labelledby");
-	this.labelElement = labelEl;
-	var labelContent = "";
-	if (labelEl) {
-	  var label = document.getElementById(labelEl);
-		if (label) {
-	    labelContent = label.textContent.trim();
-			this.labelElementText = labelContent;
-		}
-		labelContent += ": ";
-	}
-	this.label = labelContent + dataText;
+datapointObj.prototype.init = function (){  
+  var datavalue_el = this.element.querySelector("[role='datavalue']");
+  if (datavalue_el) {
+    var data_text = datavalue_el.textContent;
+    // remove label commas and parse numeric portion as float
+    this.value = parseFloat( data_text.replace(/\,/g,'') );
+    
+    // TODO: allow multiple data values per datapoint, 
+    //       for different data types or axes;
+    //       for example:
+    //       * raw number and percentage (same value expressed differently)
+    //       * x and y value
 
-  if ( "g" == this.element.localName ) {
-    var shapes = this.element
-              .querySelectorAll("circle, ellipse, rect, line, polyline, polygon, path, use");
-    for (var s = 0, s_len = shapes.length; s_len > s; ++s) {
-      var eachShape = shapes[ s ]; 
-      var colorItem = new colorObj(eachShape);
-      // console.log( this.element.id + ": " + eachShape.localName 
-      //               + "\n fill: " + colorItem.fill 
-      //               + "\n stroke: " + colorItem.stroke 
-      //             );
+    // compose accessible name
+    var aria_labels = this.element.getAttribute("aria-labelledby");
+    aria_labels += " " + datavalue_el.getAttribute("aria-labelledby");
+    var aria_label_array = aria_labels.match(/\S+/g) || [];
+
+    // var aria_labels = datavalue_el.getAttribute("aria-labelledby").match(/\S+/g) || [];
+    // console.log(aria_labels)
+    for (var l = 0, l_len = aria_label_array.length; l_len > l; ++l) {
+      var each_label = aria_label_array[ l ]; 
+      var label_el = document.getElementById( each_label );
+
+      // don't include datavalue element text, in case it's included as an AT hack
+      if (label_el && this.element != label_el && datavalue_el != label_el) {
+        this.label_text += label_el.textContent.trim();
+        this.label_els.push(label_el);
+        if ( l_len != l + 1 ) {
+          this.label_text += ", ";
+        }
+      }
+    } 
+    this.label = this.label_text + ": " + data_text;
+
+    if ( "g" == this.element.localName ) {
+      var shapes = this.element
+                .querySelectorAll("circle, ellipse, rect, line, polyline, polygon, path, use");
+      for (var s = 0, s_len = shapes.length; s_len > s; ++s) {
+        var eachShape = shapes[ s ]; 
+        var colorItem = new colorObj(eachShape);
+        // console.log( this.element.id + ": " + eachShape.localName 
+        //               + "\n fill: " + colorItem.fill 
+        //               + "\n stroke: " + colorItem.stroke 
+        //             );
+        this.colors.push(colorItem);
+      }  
+    } else {
+      var colorItem = new colorObj(this.element);
       this.colors.push(colorItem);
-    }  
-  } else {
-    var colorItem = new colorObj(this.element);
-    this.colors.push(colorItem);
+    }
   }
 }
 
-function axisObj() {
-	this.element = null;
-	this.direction = null;
-	this.min = null;
-	this.max = null;
-	this.units = null;
-	this.label = null;
-	this.labels = [];
+function datagroupObj( el, parent_el ) {
+  this.element = el;
+  this.parent_el = parent_el;
+  this.datapoint_els = [];
+  this.datagroups = [];
+  this.label = null;
+  this.label_els = [];
+  this.label_text = "";
+
+  this.statistics = {};
+
+  this.init();
 }
 
-axisObj.prototype.init = function (chartEl, type, dir){
-	this.element = chartEl.querySelector("[role='" + type + "axis']");
-	this.type = type;
-	this.direction = dir;
-	this.min = parseFloat(this.element.getAttribute("aria-valuemin"));
-	this.max = parseFloat(this.element.getAttribute("aria-valuemax"));
-	this.units = null;	
-	
-	// get axis title
-	var title = chartEl.querySelector("[role='" + type + "axis'] > [role='heading']");
-	if ( title){
-		this.label = title.textContent;
-	}
+datagroupObj.prototype.init = function (){  
+  var parent = this.element.parentNode;
+
+  // detect if this is a direct child of the parent element,
+  // or if it's a subgroup
+  while ( this.parent_el != parent ) {
+    var parent_role = parent.getAttribute("role");
+    if ( "datagroup" == parent_role ) {
+      this.element = null;
+      return;
+    }
+    parent = parent.parentNode;
+  }
+
+  // var datavalue_el = this.element.querySelector("[role='datavalue']");
+
+  // TODO: get all child elements 
+  this.datapoint_els = this.element.querySelector("[role='datapoint']");
+
+  // TODO: get all child datagroups 
+  // this.datagroup_els = this.element.querySelector("[role='datagroup']");
+
+  // get all child datagroups 
+  var datagroup_els = this.element.querySelector("[role='datagroup']");
+  // make sure that no subgroups are included
+  for (var d = 0, d_len = datagroup_els.length; d_len > d; ++d) {
+    var each_datagroup = datagroup_els[ d ]; 
+    var datagroupItem = new datagroupObj( each_datagroup, this.element );
+    if ( datagroupItem.element ) {
+      this.datagroups.push(each_datagroup);
+    }
+  }
+
+  // TODO: generate stats for each datagroup
+}
+
+function axisObj(chart_el, type, dir) {
+  this.element = chart_el.querySelector("[role='" + type + "axis']");
+  this.chart_el = chart_el;
+  this.type = type;
+  this.direction = dir;
+  this.min = null;
+  this.max = null;
+  this.units = null;
+  this.label = null;
+  this.labels = [];
+  this.items = [];
+
+  this.init();
+}
+
+axisObj.prototype.init = function (){
+  this.min = parseFloat(this.element.getAttribute("aria-valuemin"));
+  this.max = parseFloat(this.element.getAttribute("aria-valuemax"));
+  this.units = null;  
+  
+  // get axis title
+  var title = this.chart_el.querySelector("[role='" + this.type + "axis'] > [role='heading']");
+  if ( title){
+    this.label = title.textContent;
+  }
 
 	// first extract all the axis labels
 	var axislabels = this.element.querySelectorAll("[role='axislabel']");
@@ -1126,23 +1600,39 @@ axisObj.prototype.init = function (chartEl, type, dir){
 		// var axisValues = [];
 		for (var a = 0, aLen = axislabels.length; aLen > a; ++a) {
 			var eachLabel = axislabels[ a ]; 
-			this.labels.push( eachLabel.textContent );
+			// this.labels.push( eachLabel.textContent );
+      this.items.push( new axisItemObj( eachLabel, this ) );
 			// axisValues.push( parseFloat(eachLabel.textContent) );
 		}
 	  // console.log( min + ", " + max );
 	}
 }
 
+function axisItemObj( el, axis ) {
+  this.element = el;
+  this.label = el.textContent;
+  this.axis = axis;
+  this.group = null;
+  this.datapoints = [];
 
-function legendObj() {
-	this.element = null;
-	this.label = null;
-	this.items = []; // each item has: element, label, list of referencing datapoints
+
+  this.init();
 }
 
-legendObj.prototype.init = function (el){
-	this.element = el;
-	
+axisItemObj.prototype.init = function (){
+  // TODO: populate datapoints 
+}
+
+
+function legendObj( el ) {
+  this.element = el;
+	this.label = null;
+	this.items = []; // each item has: element, label, list of referencing datapoints
+
+  this.init();
+}
+
+legendObj.prototype.init = function (){
 	// get legend title
 	var title = this.element.querySelector("[role='legend'] > [role='heading']");
 	if ( title){
@@ -1153,20 +1643,20 @@ legendObj.prototype.init = function (el){
 	var legendItems = this.element.querySelectorAll("[role='legenditem']");
 	for (var l = 0, lLen = legendItems.length; lLen > l; ++l) {
 		var eachItem = legendItems[ l ]; 
-		var legendItem = new legendItemObj();
-		legendItem.init( eachItem )
+		var legendItem = new legendItemObj( eachItem );
 		this.items.push( legendItem );
 	}
 }
 
-function legendItemObj() {
-  this.element = null;
+function legendItemObj(el) {
+  this.element = el;
   this.label = null;
   this.refs = []; // list of referencing datapoints
+
+  this.init()
 }
 
-legendItemObj.prototype.init = function (el){
-  this.element = el;
+legendItemObj.prototype.init = function (){
   var title = this.element.querySelector("[role='legenditem'] > text,[role='legenditem'] > title");
   if ( title){
     this.label = title.textContent;
@@ -1195,7 +1685,7 @@ legendItemObj.prototype.init = function (el){
     
     var datapoint = new datapointObj( ref );
     // datapoint.init( ref ); 
-    // dataset["values"].push( datapoint.value );
+    // dataset.values.push( datapoint.value );
     // dataset.push( datapoint );
     
     
