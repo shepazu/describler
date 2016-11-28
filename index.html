@@ -136,6 +136,38 @@
       top: 1px;
     }
 
+      button#next_button, button#previous_button {
+        width: 2em;
+        height: 2em;
+        /*margin: 0;*/
+        padding: 0;
+      }
+
+      button#next_button span, button#previous_button span {
+        visibility: hidden;
+        /*font-size: 0.1em;*/
+      }
+
+        button#next_button:before {
+          padding-left: 0.5em;
+          content: "▶";
+        }
+
+        button#previous_button:before {
+          padding-left: 0.5em;
+          content: "◀";
+        }
+
+    textarea#details {
+      font-size: 0.8em;
+      width: 100%;
+      height: 15em;
+      resize: none;
+      overflow: auto;
+      border: 2px solid #765942;
+      border-radius: 5px;
+    }
+
     .upload {
       color: #fef4e9;
       border: solid 1px #da7c0c;
@@ -193,6 +225,14 @@
         output#file-name, output#filesize, output#new-filesize {
           
         }
+
+        output#filesize, output#new-filesize {
+          display: none;
+        }
+
+    #download-button {
+      display: none;
+    }    
 
 
 
@@ -412,6 +452,10 @@
       this.downloadLink = document.getElementById( "download-button" );
       this.selectFileButton = document.getElementById( "select_file-button" );
       this.uploadFileButton = document.getElementById( "upload_file-button" );
+      this.optionMenu = document.getElementById("menu_options");
+      this.detailText = document.getElementById("details");
+      this.previousButton = document.getElementById("previous_button");
+      this.nextButton = document.getElementById("next_button");
 
       this.elIndex = 0;
       this.lang = "en-US";
@@ -444,6 +488,12 @@
 
       this.selectFileButton.addEventListener("change", bind(this, this.loadFileFromServer), false);
       this.uploadFileButton.addEventListener("change", bind(this, this.uploadFile), false);
+
+      // populateOptions 
+      this.optionMenu.addEventListener("change", bind(this, this.optionSelection), false);
+
+      this.previousButton.addEventListener("click", bind(this, this.previous), false);
+      this.nextButton.addEventListener("click", bind(this, this.next), false);
 
       window.location.hash = "#intro";
     }
@@ -523,6 +573,8 @@
 
         // invoke screenreader
         this.describler = new describlerObj(this.svgroot); 
+
+        this.describler.app = this;
       }
     }
 
@@ -716,6 +768,46 @@
     }
 
 
+
+    appObj.prototype.showText = function ( text ){
+      this.detailText.value = text;
+    }
+
+    appObj.prototype.populateOptions = function ( options_array ){
+      // console.log(options_array);
+      while (this.optionMenu.firstChild) {
+        this.optionMenu.removeChild(this.optionMenu.firstChild);
+      }
+
+      for (var c = 0, c_len = options_array.length; c_len > c; ++c) {
+        var each_option = options_array[c];
+        var new_option = document.createElement("option");
+        new_option.value = each_option["id"];
+        new_option.text = each_option["label"] + " (" + (c + 1) + ")";
+        new_option.setAttribute( "data-type", each_option["type"] );
+        this.optionMenu.appendChild(new_option);
+      } 
+      this.optionMenu.addEventListener("focus", function () { this.selectedIndex = -1; }, false);
+    }
+
+    appObj.prototype.optionSelection = function (event){
+      // console.log(event.target.value);
+      event.target.blur();
+      var option = event.target.value;
+      var type = event.target.getAttribute( "data-type" );
+      this.describler.selectOption( option, type );
+    }
+
+    appObj.prototype.next = function (){
+      event.target.blur();
+      this.describler.navNext();
+    }
+
+    appObj.prototype.previous = function (){
+      event.target.blur();
+      this.describler.navPrev();
+    }
+
     function bind (scope, fn) {
       return function () {
         return fn.apply( scope, arguments );
@@ -731,19 +823,19 @@
     <ul class="tabs">
       <li><a href="#intro">Intro</a></li>
       <li><a href="#image">Image</a></li>
-      <li><a href="#tree">Editor</a></li>
+      <!-- <li><a href="#tree">Editor</a></li> -->
       <li><a href="#code">Code</a></li>
     </ul>
 
     <section id="content"> 
       <section id="controls"> 
+        <select id="select_file-button" class="upload button">
+          <option>Select a file:</option>
+        </select>
         <div class="upload button icon-upload">
             <span>Upload an SVG file…</span>
             <input type="file" id="upload_file-button" accept="image/svg+xml">
         </div>
-        <select id="select_file-button" class="upload button">
-          <option>Select a file:</option>
-        </select>
 
         <section id="info">
           <output id="file-name"> </output>
@@ -752,6 +844,20 @@
         </section>
 
         <a id="download-button" class="button icon-download download" href="#"><span>Download…</span></a>     
+
+        <div id="io">
+          <textarea id="details" readonly>
+            
+          </textarea>
+
+          <select id="menu_options">
+          </select>
+          <br>
+          <button id="previous_button"><span>previous</span></button>
+          <button id="next_button"><span>next</span></button>
+        </div>
+
+
       </section>
     
       <main id="display-area">
@@ -772,6 +878,8 @@
             </ol>
 
             <p>To understand how Describler preserves context and lets the user truly explore the data visualization, try closing your eyes (if you're sighted), and moving back and forth through the datapoints.</p>
+
+            <p>Alternately, you can use the controls on the left sidebar to navigate and choose options.</p>
             
             <h2 id="svg">What is SVG?</h2>
             <p>SVG stands for Scalable Vector Graphics, and it is a vector-based format, that can be created in popular drawing tools like Inkscape and Adobe Illustrator. Because each shape is made up of one or more markup elements, and the document has a DOM like HTML, it can be styled with CSS, and made interactive or animated with JavaScript.</p>
@@ -797,10 +905,10 @@
         </section>
 
         <section id="tree" class="tree-view">
-          <!-- <h2><a href="#tree">Editor</a></h2> -->
           <article> </article>
         </section>
-
+<!-- 
+ -->
         <section id="code" class="tab-view">
           <!-- <h2><a href="#code">Code</a></h2> -->
           <code>
