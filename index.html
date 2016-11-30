@@ -168,6 +168,10 @@
       border-radius: 5px;
     }
 
+    select#menu_options {
+      width: 100%;
+    }
+
     .upload {
       color: #fef4e9;
       border: solid 1px #da7c0c;
@@ -206,7 +210,7 @@
     section#info {
       margin: 0.25em;
       padding: 0.5em;
-      width: 13em;
+      width: 100%;
       border-radius: 8px;
       color: whitesmoke;
       background-color: #303030;
@@ -465,7 +469,8 @@
         "aria-pie-chart.svg",
         "barchart-labels.svg",
         "barchart-text-only.svg",
-        "simple-car.svg"
+        "simple-car.svg",
+        "assessment-demo.svg"
       ];
    
 
@@ -784,6 +789,7 @@
         var new_option = document.createElement("option");
         new_option.value = each_option["id"];
         new_option.text = each_option["label"] + " (" + (c + 1) + ")";
+        new_option.setAttribute( "data-context", each_option["context"] );
         new_option.setAttribute( "data-type", each_option["type"] );
         this.optionMenu.appendChild(new_option);
       } 
@@ -793,9 +799,11 @@
     appObj.prototype.optionSelection = function (event){
       // console.log(event.target.value);
       event.target.blur();
-      var option = event.target.value;
-      var type = event.target.getAttribute( "data-type" );
-      this.describler.selectOption( option, type );
+      var option = event.target.selectedOptions[0];
+      var value = option.value;
+      var context = option.getAttribute( "data-context" );
+      var type = option.getAttribute( "data-type" );
+      this.describler.selectOption( value, context, type );
     }
 
     appObj.prototype.next = function (){
