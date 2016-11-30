@@ -596,15 +596,14 @@ describlerObj.prototype.handle_chart = function (){
     }
 
     this.menu.reset();
-
-    if ( this.taskAssessments.length ) {
-      this.menu.add( "task-assessment", "starting the test", null, "assessment" );
-    }
-
     this.menu.add( "stats", "chart statistics" );
     this.menu.add( "low-high", "datapoints from lowest to highest" );
     this.menu.add( "high-low", "datapoints from highest to lowest" );
     this.menu.add( "sonification", "trend sonification" );
+
+    if ( this.taskAssessments.length ) {
+      this.menu.add( "task-assessment", "starting the test", null, "assessment" );
+    }
 
     // console.log(this.menu);
   }
