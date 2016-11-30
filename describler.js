@@ -42,6 +42,7 @@ function describlerObj(root) {
 
   ntc.init();
 
+  this.taskAssessments = [];
 
 
   // create a list of all focusable elements, including the root
@@ -82,6 +83,9 @@ function describlerObj(root) {
 	this.metaGroup = document.createElementNS(this.svgns, "g");
   this.metaGroup.setAttribute("id", "describler-metadata" );
   this.root.appendChild( this.metaGroup );
+
+  console.log(this);
+
 }
 
 describlerObj.prototype.createModel = function () {
@@ -106,7 +110,10 @@ describlerObj.prototype.createModel = function () {
 		var chartEl = charts[c];
 		var chart = new chartObj();
 		chart.init( chartEl );
-		this.charts.push( chart );
+		this.charts.push( chart );  
+
+    var taskAssessment = new taskAssessmentObj( this, this.root, chart );  
+    this.taskAssessments.push( taskAssessment );
 	}
   console.log( this.charts );
 	this.exportCSV();
@@ -273,9 +280,23 @@ describlerObj.prototype.trackKeys = function (event) {
     var number = parseInt(key);
     // console.log( "key: " + number);
 
-    var selection = this.menu.select( number );
-    if (selection) {
-      this.getInfo();
+    var is_selection = this.menu.select( number );
+    if (is_selection) {
+      var selected = this.menu.selected;
+
+      if ( "assessment" != selected.type ) {
+        this.getInfo();
+        
+        if ( this.speeches.length){
+          this.speak();   
+        }
+      } else {
+        if ( "answer" == selected.context ){
+          this.taskAssessments[0].evaluateAnswer( selected.id, selected.label, selected.context, selected.type );
+        } else {
+          this.taskAssessments[0].runTest();
+        }
+      }
     } else {
       this.speeches.length = 0;
       this.speeches.push( "Invalid option." );
@@ -530,15 +551,16 @@ describlerObj.prototype.handle_chart = function (){
         if ( "stats" == this.menu.selected.id ){
           // this.speeches.push( "This is a " + chart.type + " chart, with " 
           //                    + dataset.length + " data points" );
-          this.speeches.push( "" + chart.type + " chart, with " 
-                              + dataset.statistics.count + " data points" );
-          this.speeches.push( "The highest value is " + +dataset.statistics.high.toFixed(2)
-                              + ", and the lowest value is " + +dataset.statistics.low.toFixed(2)
-                              + ", with a range of " + +dataset.statistics.range.toFixed(2) );
-          this.speeches.push( "The average is " + +dataset.statistics.mean.toFixed(2)
-                              + ", the median is " + +dataset.statistics.median.toFixed(2)
-                              + ", and the total is " + +dataset.statistics.sum.toFixed(2) );
-                              // + ", and the total of all data points is " + dataset.sum );        
+          var stats_msg = chart.type + " chart, with " 
+                        + dataset.statistics.count + " data points. "
+                        + "The highest value is " + this.getStat(dataset, "high")
+                        + ", and the lowest value is " + this.getStat(dataset, "low")
+                        + ", with a range of " + this.getStat(dataset, "range") +". "
+                        + "The average is " + this.getStat(dataset, "mean")
+                        + ", the median is " + this.getStat(dataset, "median")
+                        + ", and the total is " + this.getStat(dataset, "sum") +". ";
+
+          this.speeches.push( stats_msg );                
         } else if ( "low-high" == this.menu.selected.id 
                  || "high-low" == this.menu.selected.id ){
           // list datapoints lowest to highest, or highest to lowest
@@ -574,10 +596,16 @@ describlerObj.prototype.handle_chart = function (){
     }
 
     this.menu.reset();
+
+    if ( this.taskAssessments.length ) {
+      this.menu.add( "task-assessment", "starting the test", null, "assessment" );
+    }
+
     this.menu.add( "stats", "chart statistics" );
     this.menu.add( "low-high", "datapoints from lowest to highest" );
     this.menu.add( "high-low", "datapoints from highest to lowest" );
     this.menu.add( "sonification", "trend sonification" );
+
     // console.log(this.menu);
   }
 }
@@ -730,7 +758,7 @@ describlerObj.prototype.handle_datapoint = function (){
               }
             }
           } else if ( "compare-single" == this.menu.selected.id 
-                  ||  "compare-single" == this.menu.selected.type ) {
+                  ||  "compare-single" == this.menu.selected.context ) {
             if ( "compare-single" == this.menu.selected.id ) {
               this.speeches.push( "Select datapoint for comparison:" );
 
@@ -743,7 +771,7 @@ describlerObj.prototype.handle_datapoint = function (){
                   this.menu.add( other_label, other_label, "compare-single" );
                 }
               }
-            } else {
+            } else if ( "compare-single" == this.menu.selected.context) {
               var otherDatapoint = dataset.datapoints.find( function (datapoint) {
                 return datapoint.label_text == this;
               }, this.menu.selected.id );
@@ -781,7 +809,7 @@ describlerObj.prototype.handle_datapoint = function (){
                 mean_delta_comp = " below";
               }
               stats_msg += "This is " + Math.abs(mean_delta) + mean_delta_comp 
-                        + " the mean value of " + dataset.statistics["mean"] + ", ";
+                        + " the mean value of " + this.getStat(dataset, "mean") + ", ";
             }
 
             if ( dataset.statistics["median"] == value){
@@ -794,7 +822,7 @@ describlerObj.prototype.handle_datapoint = function (){
                 median_delta_comp = " below";
               }
               stats_msg += "and " + Math.abs(median_delta) + median_delta_comp 
-                        + " the median value of " + dataset.statistics["median"] + ". ";
+                        + " the median value of " + this.getStat(dataset, "median") + ". ";
             }
 
             if ( dataset.statistics["low"] == value){
@@ -802,7 +830,7 @@ describlerObj.prototype.handle_datapoint = function (){
             } else {
               var low_delta = value - dataset.statistics["low"];
               stats_msg += "This is " + low_delta 
-                        + " above the low value of " + dataset.statistics["low"] + ", ";
+                        + " above the low value of " + this.getStat(dataset, "low") + ", ";
             }
 
             if ( dataset.statistics["high"] == value){
@@ -810,13 +838,13 @@ describlerObj.prototype.handle_datapoint = function (){
             } else {
               var high_delta = dataset.statistics["high"] - value;
               stats_msg += " and " + high_delta 
-                        + " below the high value of " + dataset.statistics["high"] + ". ";
+                        + " below the high value of " + this.getStat(dataset, "high") + ". ";
             }
 
             stats_msg += datapoint.label_text + " is "
                       // + this.getFraction(value/dataset.statistics["sum"])
                       + ((value/dataset.statistics["sum"]) * 100).toFixed() + "%"
-                      + " of the total value of " + dataset.statistics["sum"] + ". ";
+                      + " of the total value of " + this.getStat(dataset, "sum") + ". ";
 
             this.speeches.push( stats_msg );  
 
@@ -885,7 +913,7 @@ describlerObj.prototype.handle_axis = function (){
                 this.speeches.push( axis.items[l].label );
               }
             } else if ( "select" == this.menu.selected.id
-                  ||  "select" == this.menu.selected.type ) {
+                  ||  "select" == this.menu.selected.context ) {
               // TODO: let user select axis label by menu or typing name 
               // TODO: account for nested/group axis labels
               if ( "select" == this.menu.selected.id ){
@@ -896,7 +924,7 @@ describlerObj.prototype.handle_axis = function (){
                 for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
                   this.menu.add( axis.items[l].label, axis.items[l].label, "select" );
                 }
-              } else {
+              } else if ( "select" == this.menu.selected.context ) {
                 var axisitem = axis.items.find( function (axis) {
                   return axis.label == this;
                 }, this.menu.selected.id );
@@ -1148,7 +1176,7 @@ describlerObj.prototype.arrayToSentence = function ( arr, singular_noun, plural_
   return msg;
 }
 
-describlerObj.prototype.speak = function () {
+describlerObj.prototype.speak = function ( callback, callbackObj ) {
   var msg = this.speeches.join(". \n");
    // check Speech Synthesis support
   if ("speechSynthesis" in window) {
@@ -1157,7 +1185,7 @@ describlerObj.prototype.speak = function () {
     if ( speechSynthesis.speaking ){
       speechSynthesis.cancel();
     }
-    console.log( msg );
+    console.log( "speak: " + msg );
 
   	var voice = new SpeechSynthesisUtterance();
     voice.text = msg;
@@ -1179,6 +1207,12 @@ describlerObj.prototype.speak = function () {
         speechSynthesis.speak( voice );
         // console.log( options_msg );
       })( options_msg );
+    }
+
+    if ( "function" === typeof callback ) {
+      voice.onend = (function (callback, callbackObj) {
+        callback.apply( callbackObj );
+      })( callback, callbackObj );
     }
   }
 
@@ -1247,15 +1281,39 @@ describlerObj.prototype.sonify = function () {
 }
 
 
-describlerObj.prototype.selectOption = function ( option_id, option_type ) {
+describlerObj.prototype.selectOption = function ( option_id, option_context, option_type ) {
   var selection = this.menu.select( null, option_id );
   if (selection) {
-    this.getInfo();
+    if ( "assessment" != option_type ) {
+      this.getInfo();
+      
+      if ( this.speeches.length){
+        this.speak();   
+      }
+    } else {
+      console.log("assessment");
+      this.speeches.length = 0;
+      this.speeches.push( "assessment" );
+
+      if ( "answer" == option_context ){
+        this.taskAssessments[0].evaluateAnswer( option_id, option_context, option_type );
+      } else {
+        this.taskAssessments[0].runTest();
+      }
+    }
   }
+}   
+
+
+describlerObj.prototype.getStat = function ( dataset, stat ) {
+  var value = +dataset.statistics[ stat ];
   
-  if ( this.speeches.length){
-    this.speak();   
+  // hack, proof of concept 
+  if ( this.taskAssessments[0].tasks[ stat ] ) {
+    value = '"a hidden value"';
   }
+
+  return value;
 }   
 
 
@@ -1276,8 +1334,8 @@ menuObj.prototype.init = function (){
   //       use "repeat" in options menu
 }
 
-menuObj.prototype.add = function ( id, label, type ){
-  var option = new optionObj( id, label, type );
+menuObj.prototype.add = function ( id, label, context, type ){
+  var option = new optionObj( id, label, context, type );
   this.options.push(option);
 }
 
@@ -1319,11 +1377,182 @@ menuObj.prototype.reset = function (){
 }
 
 
-function optionObj( id, label, type ) {
+function optionObj( id, label, context, type ) {
   this.id = id;
   this.label = label;
+  this.context = context;
   this.type = type;
 }
+
+
+
+
+/*
+*  Task Assessment Object (proof-of-concept)
+*/
+
+function taskAssessmentObj( app, doc, chart ) {
+  // TODO: create more robust assessment tool
+  this.app = app;
+  this.doc = doc;
+  this.chart = chart;
+  this.element = this.doc.querySelector("metadata[role='assessment']");;
+  this.tasks = [];
+
+  this.scores = [];
+
+  this.current_task = null;
+
+  this.init();
+}
+
+taskAssessmentObj.prototype.init = function (){
+  this.buildAssessment();
+}
+
+taskAssessmentObj.prototype.buildAssessment = function (){
+  var task_els = this.element.querySelectorAll("metadata[role='task']");
+
+  for (var t = 0, t_len = task_els.length; t_len > t; ++t) {
+    var each_task_el = task_els[t];
+    var each_task = each_task_el.getAttribute("data-task");
+    var answer = each_task_el.getAttribute("data-answer");
+    var choices = each_task_el.getAttribute("data-choices").split(",");
+    // total hack, should be targetted at specific dataset
+    // var answer = this.chart.datasets[0].statistics[ each_task ];
+
+    this.tasks[ each_task ] = new taskObj( each_task, answer, choices );
+  };
+}  
+
+taskAssessmentObj.prototype.runTest = function (){
+  console.log("runTest");
+
+  this.app.menu.reset();
+  var complete = true;
+  for ( var t in this.tasks ){
+    var task = this.tasks[t];
+    this.current_task = task;
+    // if ( task && taskObj === typeof task && null == task.selection ) {
+    console.log(typeof task);
+    if ( task && null == task.selection && task.choices ) {
+      for (var c = 0, c_len = task.choices.length; c_len > c; ++c) {
+        var choice = task.choices[c];
+        this.app.menu.add( choice, choice, "answer", "assessment" );
+      }
+
+      this.app.speeches.length = 0;
+      this.app.speeches.push( "Question " + (this.scores.length + 1) + ": " );
+      this.app.speeches.push( "What is the " + task.task + " of all datapoints?" );
+      complete = false;
+
+      break; 
+    } 
+  }
+
+  if (complete) {
+    this.report();
+  }
+
+  if ( this.app.speeches.length ){
+    this.app.speak();   
+  }
+}  
+
+taskAssessmentObj.prototype.evaluateAnswer = function ( option_id, option_context, option_type ){
+  var task = this.current_task;
+  // this.tasks[ option_id ];
+
+  task.selection = option_id;
+
+  if (task) {
+    var is_correct = false;
+    var msg = "incorrect. ";
+    if ( task.selection == task.answer ) {
+      is_correct = true;
+      // msg = "correct. The " + task + " is " + task.answer + ". ";
+      msg = "correct. ";
+    }
+
+    this.scores.push(is_correct);
+
+    console.log( "correct: " + is_correct );
+
+    this.app.speeches.length = 0;
+    this.app.speeches.push( "That answer is " + msg );
+
+    this.app.menu.reset();
+    this.app.menu.add( "next", "next question", "next", "assessment" );
+
+    if ( this.app.speeches.length){
+      var self = this;
+      // use callback to delay next result
+      // this.app.speak( self.runTest, self );   
+      this.app.speak();   
+    }
+  }
+}  
+
+taskAssessmentObj.prototype.report = function (){
+  var score = 0;
+  var total = this.scores.length;
+  for (var s = 0; total > s; ++s) {
+    var each_score = this.scores[s];
+    if ( true == each_score ) {
+      score++;
+    }
+  }
+
+  this.app.menu.reset();
+  this.app.speeches.length = 0;
+  this.app.speeches.push( "You have completed all questions. Your score is " + score + " out of a possible " + total + ". " );
+  this.app.speak();   
+}
+
+
+function taskObj( task, answer, choices ) {
+  this.task = task;
+  this.answer = answer;
+  this.choices = choices;
+  this.selection = null;
+
+  this.init();
+}
+
+taskObj.prototype.init = function (){
+  // if ( this.answer ) {
+  //   // generate fake answers
+  //   var answer_index = randomNumber(0, 4);
+
+  //   this.answers[ answer_index ] = this.answer;
+  //   for (var a = 0; 6 > a; ++a) {
+  //     if ( null == this.answers[a] ) {
+  //       this.answers[a] = this.answer + randomNumber(-2, 2);
+  //     }
+  //   }
+  // }
+}
+
+
+//generates a quasi-random number in the ranges between the two parameters
+randomNumber.today = new Date();
+randomNumber.seed = randomNumber.today.getTime();
+function randomNumber(min, max) {
+  var range = Number(max) - Number(min);
+  var offset = 0;
+  if (0 == min) {
+    range = max + 1;
+    offset = 1;
+  }
+  else if (0 > min) {
+    range += 1;
+    offset = 1;
+  }
+  randomNumber.seed = (randomNumber.seed * 9301 + 49297) % 233280;
+  var result = Math.ceil(randomNumber.seed / (233280.0) * range);
+  return Number(result) + Number(min) - Number(offset);
+};
+
 
 
 /*
@@ -1388,22 +1617,22 @@ chartObj.prototype.init = function (el){
 chartObj.prototype.extractDataset = function (datapoints){
   // var dataset = [];
   // dataset.values = [];
-  var dataset = new datasetObj;
+  var dataset = new datasetObj();
 
-	for (var dp = 0, dpLen = datapoints.length; dpLen > dp; ++dp) {
-		var eachDatapoint = datapoints[dp];
-		var datapoint = new datapointObj( eachDatapoint );
-		// datapoint.init( eachDatapoint ); 
-		dataset.values.push( datapoint.value );
-		dataset.datapoints.push( datapoint );
+  for (var dp = 0, dpLen = datapoints.length; dpLen > dp; ++dp) {
+    var eachDatapoint = datapoints[dp];
+    var datapoint = new datapointObj( eachDatapoint );
+    // datapoint.init( eachDatapoint ); 
+    dataset.values.push( datapoint.value );
+    dataset.datapoints.push( datapoint );
   };
 
   // TODO: switch to generateStats
 
-	// sort values
-	dataset.values.sort( function (a, b) {
-	  return a - b;
-	}); 
+  // sort values
+  dataset.values.sort( function (a, b) {
+    return a - b;
+  }); 
 
   var stats = new statisticsObj( dataset.values.slice() );
   dataset.statistics = stats.stats;
@@ -1415,7 +1644,7 @@ chartObj.prototype.extractDataset = function (datapoints){
   //       collective datapoints in all datagroups
   //       different items in same series across datagroups (e.g. 3rd datapoint in each datagroup)
 
-	return dataset;	
+  return dataset; 
 }   
 
 
