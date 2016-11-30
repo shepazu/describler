@@ -500,26 +500,12 @@
       this.previousButton.addEventListener("click", bind(this, this.previous), false);
       this.nextButton.addEventListener("click", bind(this, this.next), false);
 
-      // window.location.hash = "#intro";
-
-      // console.log("url: " + window.location.search)
-      var filename = window.location.search;
-      if (filename) {
-        filename = filename.split("=")[0];
-        this.loadFileFromServer( filename );
-        // assessment-demo.svg
-      }
+      window.location.hash = "#intro";
     }
 
-    appObj.prototype.loadFileFromServer = function ( filename ){
-      if (filename) {
-        this.file = {
-          "name": filename
-        }
-      } else {
-        this.file = {
-          "name": event.target.value
-        }
+    appObj.prototype.loadFileFromServer = function (){
+      this.file = {
+        "name": event.target.value
       }
 
       var xhr = new XMLHttpRequest;
