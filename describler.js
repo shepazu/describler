@@ -23,7 +23,8 @@ function describlerObj(root) {
 
   this.app = null;
 
-  // chart propertiesdocument.activeElement
+  // chart properties 
+  // document.activeElement
   this.charts = [];
 
   // voice and sonification properties
@@ -208,10 +209,17 @@ describlerObj.prototype.navPrev = function () {
 }
 
 describlerObj.prototype.showFocus = function () {
+  // TODO: fix bug where clicking on a datapoint then causes 
+  //       the next datapoint to be skipped when navigating via keyboard
+
   // console.log( el );
   if (!this.activeElement) {
     console.log("oops")
   }
+
+  this.activeElement.focus();
+
+  // simulate focus
   var bbox = this.activeElement.getBBox();
   var transform = this.activeElement.getScreenCTM().inverse().multiply(this.root.getScreenCTM()).inverse();
 
@@ -1145,7 +1153,6 @@ describlerObj.prototype.handle_default = function (){
   }
 
   if ( this.menu.selected ){
-    var value = datapoint.value;
     if ( "details" == this.menu.selected.id ){ 
       var desc = this.activeElement.querySelector("[tabindex] > desc");
       if ( desc ){
@@ -1155,8 +1162,10 @@ describlerObj.prototype.handle_default = function (){
   } 
 
   this.menu.reset();
-  this.menu.add( "details", "more details" );
-
+  var desc = this.activeElement.querySelector("[tabindex] > desc");
+  if ( desc ){
+    this.menu.add( "details", "more details" );
+  }
 }
 
 describlerObj.prototype.arrayToSentence = function ( arr, singular_noun, plural_noun ) {
@@ -1281,6 +1290,8 @@ describlerObj.prototype.sonify = function () {
 
 
 describlerObj.prototype.selectOption = function ( option_id, option_context, option_type ) {
+  this.activeElement.focus();
+
   var selection = this.menu.select( null, option_id );
   if (selection) {
     if ( "assessment" != option_type ) {
