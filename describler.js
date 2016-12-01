@@ -113,8 +113,10 @@ describlerObj.prototype.createModel = function () {
 		chart.init( chartEl );
 		this.charts.push( chart );  
 
-    var taskAssessment = new taskAssessmentObj( this, this.root, chart );  
-    this.taskAssessments.push( taskAssessment );
+    var taskAssessment = new taskAssessmentObj( this, this.root, chart ); 
+    if (taskAssessment.element) {
+      this.taskAssessments.push( taskAssessment );
+    }
 	}
   console.log( this.charts );
 	this.exportCSV();
@@ -1319,7 +1321,7 @@ describlerObj.prototype.getStat = function ( dataset, stat ) {
   var value = +dataset.statistics[ stat ];
   
   // hack, proof of concept 
-  if ( this.taskAssessments[0].tasks[ stat ] ) {
+  if ( this.taskAssessments[0] && this.taskAssessments[0].tasks[ stat ] ) {
     value = '"a hidden value"';
   }
 
@@ -1421,18 +1423,20 @@ taskAssessmentObj.prototype.init = function (){
 }
 
 taskAssessmentObj.prototype.buildAssessment = function (){
-  var task_els = this.element.querySelectorAll("metadata[role='task']");
+  if (this.element) {
+    var task_els = this.element.querySelectorAll("metadata[role='task']");
 
-  for (var t = 0, t_len = task_els.length; t_len > t; ++t) {
-    var each_task_el = task_els[t];
-    var each_task = each_task_el.getAttribute("data-task");
-    var answer = each_task_el.getAttribute("data-answer");
-    var choices = each_task_el.getAttribute("data-choices").split(",");
-    // total hack, should be targetted at specific dataset
-    // var answer = this.chart.datasets[0].statistics[ each_task ];
+    for (var t = 0, t_len = task_els.length; t_len > t; ++t) {
+      var each_task_el = task_els[t];
+      var each_task = each_task_el.getAttribute("data-task");
+      var answer = each_task_el.getAttribute("data-answer");
+      var choices = each_task_el.getAttribute("data-choices").split(",");
+      // total hack, should be targetted at specific dataset
+      // var answer = this.chart.datasets[0].statistics[ each_task ];
 
-    this.tasks[ each_task ] = new taskObj( each_task, answer, choices );
-  };
+      this.tasks[ each_task ] = new taskObj( each_task, answer, choices );
+    }
+  }
 }  
 
 taskAssessmentObj.prototype.runTest = function (){
@@ -1476,20 +1480,23 @@ taskAssessmentObj.prototype.evaluateAnswer = function ( option_id, option_contex
   task.selection = option_id;
 
   if (task) {
+    var msg = "";
     var is_correct = false;
-    var msg = "incorrect. ";
     if ( task.selection == task.answer ) {
       is_correct = true;
-      // msg = "correct. The " + task + " is " + task.answer + ". ";
-      msg = "correct. ";
+      msg = "Correct";
+    } else {
+      msg = "Incorrect";
     }
+    
+    msg += ". The " + task.task + " is " + task.answer + ". ";
 
     this.scores.push(is_correct);
 
-    console.log( "correct: " + is_correct );
+    // console.log( "correct: " + is_correct );
 
     this.app.speeches.length = 0;
-    this.app.speeches.push( "That answer is " + msg );
+    this.app.speeches.push( msg );
 
     this.app.menu.reset();
     this.app.menu.add( "next", "next question", "next", "assessment" );
