@@ -535,12 +535,12 @@
       var filename = window.location.search;
       if (filename) {
         filename = filename.split("=")[1];
-        this.loadFileFromServer( filename );
+        this.loadFileFromServer( null, filename );
         // assessment-demo.svg
       }
     }
 
-    appObj.prototype.loadFileFromServer = function ( filename ){
+    appObj.prototype.loadFileFromServer = function ( event, filename ){
       if (filename) {
         this.file = {
           "name": filename
