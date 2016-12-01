@@ -26,6 +26,15 @@
       font-weight: normal;
       font-style: normal;
     }    
+    
+    @font-face {
+      font-family: "sickness";
+      src: local("☺"), 
+        url("assets/sickness.woff") format("woff"), 
+        url("assets/sickness.ttf") format("truetype");
+      font-weight: normal;
+      font-style: normal;
+    }    
 
     body {
       margin: 0;
@@ -35,13 +44,13 @@
     }
 
     h1 {
-      font-family: "Galberik", cursive;      
-      font-style: italic;
-      font-weight: bold;
+      font-family: "sickness", cursive;      
+      /*font-style: italic;*/
+      font-weight: normal;
       text-transform: lowercase;
-      font-size: 1.5em;
+      font-size: 2em;
       color: whitesmoke;
-      margin: 2px 0em 10px 0em;
+      margin: 2px 0em 2px 0em;
     }
 
     h2 {
@@ -101,14 +110,14 @@
       }
 
       select {
-        width: 14em;
-        padding: 0.25em;
+        width: 100%;
+        /*padding: 0.25em;*/
         height: 2em;      
         border-radius: 10em;     
       }
 
     .button, button {
-      font-family: "icomoon", "Overlock", sans-serif;
+      font-family: "Overlock", sans-serif;
       font-size: 1em;
       display: inline-block;
       margin: 0.15em;
@@ -117,23 +126,32 @@
       text-align: center;
       text-decoration: none;
       padding: .5em 2em .3em;
-      text-shadow: 0 1px 1px rgba(0,0,0,.3);
-      box-shadow: 0 1px 2px rgba(0,0,0,.2);
-      border: solid 1px #da7c0c;
+      /*text-shadow: 0 1px 1px rgba(0,0,0,.3);*/
+      /*box-shadow: 0 1px 2px rgba(0,0,0,.2);*/
+      /*border: solid 1px #da7c0c;*/
       border-radius: 8px;
+
+      border: solid 1px #4D4D4F;
+      background-color: #4D4D4F;
+      color: white;
     }
 
     .button > span, button > span {
       margin-left: 0.5em;
+      background-color: #5C5C55;
+      color: #D8B0E8;
     }
 
-    .button:hover {
+    .button:hover, button:hover {
       text-decoration: none;
+      background-color: #5C5C55;
+      color: #D8B0E8;
     }
 
-    .button:active {
+    .button:active, button:active {
       position: relative;
       top: 1px;
+      color: #D8B0E8;
     }
 
       button#next_button, button#previous_button {
@@ -174,19 +192,23 @@
 
     .upload {
       color: #fef4e9;
-      border: solid 1px #da7c0c;
-      background: hsl(31, 93%, 54%); /* Old browsers */
-      background: linear-gradient(top, #faa51a 35%, #f47a20 100%)
+      /*border: solid 1px #da7c0c;*/
+      border: solid 1px #4D4D4F;
+      background-color: #4D4D4F;
+      /*background: hsl(31, 93%, 54%);*/ /* Old browsers */
+      /*background: linear-gradient(top, #faa51a 35%, #f47a20 100%)*/
     }
       
       .upload:hover {
-        background: #f47c20;
-        background: linear-gradient(top, #f88e11 35%, #f06015 100%)
+        background-color: #5C5C55;
+        /*background: #f47c20;*/
+        /*background: linear-gradient(top, #f88e11 35%, #f06015 100%)*/
       }
       
       .upload:active {
-        color: #fcd3a5;
-        background: linear-gradient(top, #f47a20 35%, #faa51a 100%)
+        background-color: #5C5C55;
+        color: #D8B0E8;
+        /*background: linear-gradient(top, #f47a20 35%, #faa51a 100%)*/
       }
 
     .download {
@@ -208,22 +230,30 @@
 
 
     section#info {
-      margin: 0.25em;
-      padding: 0.5em;
+      /* margin: 0.25em;*/
+
+      margin-bottom: 0.5em;
+      padding: 0.25em;
       width: 100%;
-      border-radius: 8px;
-      color: whitesmoke;
-      background-color: #303030;
-      background-image: url(assets/tweed.png);
-      box-shadow: 3px 3px 5px 6px #ccc;
+      min-height: 1em;
+      border-radius: 5px;
+      color: black;
+      font-weight: bold;
+      hyphens: none;
+      /*background-color: #303030;*/
+      /*color: whitesmoke;*/
+      /*background-color: #303030;*/
+      /*background-image: url(assets/tweed.png);*/
+      /*box-shadow: 3px 3px 5px 6px #ccc;*/
     }  
       
       output {
-        font-style: italic;
+        /*font-style: italic;*/
+        width: 100%;
       }
 
         output#file-name {
-          display: block;        
+          /*display: block;        */
         }
 
         output#file-name, output#filesize, output#new-filesize {
@@ -889,7 +919,7 @@
 
             <h2 id="screenreader">How do I use the Describler screen reader?</h2>
             <ol>
-              <li>Load a file from the "Select a file" dropdown (I suggest loading the first file, <i>aria-bar-chart.svg</i>).</li>
+              <li>Load a file from the "Select a file" dropdown (I suggest loading the first file, <i><a href="">aria-bar-chart.svg</a></i>).</li>
               <li>Navigate to and through the dataviz by pressing the <code>tab</code> or arrow keys
                 <ul>
                   <li><b>next item:</b> <code>tab</code> or <code>→</code> (right arrow)</li>
