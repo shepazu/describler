@@ -97,6 +97,7 @@
     .upload {
       position: relative;
       cursor: pointer;
+      color: white;
     }
 
       .upload input {
@@ -138,8 +139,6 @@
 
     .button > span, button > span {
       margin-left: 0.5em;
-      background-color: #5C5C55;
-      color: #D8B0E8;
     }
 
     .button:hover, button:hover {
@@ -182,7 +181,7 @@
       height: 15em;
       resize: none;
       overflow: auto;
-      border: 2px solid #765942;
+      border: 2px solid #4D4D4F;
       border-radius: 5px;
     }
 
@@ -897,17 +896,19 @@
 
         <a id="download-button" class="button icon-download download" href="#"><span>Download…</span></a>     
 
-        <div id="io">
-          <textarea id="details" readonly>
-            
-          </textarea>
+        <section id="io">
+          <section id="output-options" aria-live="polite">
+            <textarea id="details" readonly>
+              
+            </textarea>
 
-          <select id="menu_options">
-          </select>
+            <select id="menu_options">
+            </select>
+          </section>
           <br>
           <button id="previous_button"><span>previous</span></button>
           <button id="next_button"><span>next</span></button>
-        </div>
+        </section>
 
 
       </section>
