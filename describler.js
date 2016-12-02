@@ -1525,6 +1525,7 @@ function taskObj( task, answer, choices ) {
 }
 
 taskObj.prototype.init = function (){
+  this.shuffle();
   // if ( this.answer ) {
   //   // generate fake answers
   //   var answer_index = randomNumber(0, 4);
@@ -1538,6 +1539,20 @@ taskObj.prototype.init = function (){
   // }
 }
 
+taskObj.prototype.shuffle = function (){
+  var m = this.choices.length, t, i;
+
+  // While there remain elements to shuffle…
+  while (m) {
+    // Pick a remaining element…
+    i = Math.floor(Math.random() * m--);
+
+    // And swap it with the current element.
+    t = this.choices[m];
+    this.choices[m] = this.choices[i];
+    this.choices[i] = t;
+  }
+}
 
 //generates a quasi-random number in the ranges between the two parameters
 randomNumber.today = new Date();
