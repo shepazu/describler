@@ -47,11 +47,13 @@ function describlerObj(root) {
 
 
   // create a list of all focusable elements, including the root
-  this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
+  var focusList = this.root.parentNode.querySelectorAll("[tabindex]");
+  this.focusList = Array.from( focusList );
 
   // focus properties
   this.focusIndex = 0;
   this.activeElement = null;
+  this.previous_datapoint = null;
   this.activeObject = null;
   this.padding = 0;
   this.strokewidth = 0;
@@ -190,10 +192,8 @@ describlerObj.prototype.navNext = function () {
   if (this.focusList.length - 1 < this.focusIndex) {
     this.focusIndex = 0;
   }
-  this.activeElement = this.focusList[ this.focusIndex ];
-  // document.activeElement = this.activeElement;
-
-  this.showFocus();
+  
+  this.setActiveElement( this.focusList[ this.focusIndex ] );
 }
 
 describlerObj.prototype.navPrev = function () {
@@ -204,19 +204,23 @@ describlerObj.prototype.navPrev = function () {
   if (-1 >= this.focusIndex) {
     this.focusIndex = this.focusList.length - 1;
   }
-  this.activeElement = this.focusList[ this.focusIndex ];
-  // document.activeElement = this.activeElement;
+  this.setActiveElement( this.focusList[ this.focusIndex ] );
+}
 
+describlerObj.prototype.setActiveElement = function ( el ) {
+  if ( this.activeElement ) {
+    if ( "datapoint" == this.activeElement.getAttribute("role") ) {
+      this.previous_datapoint = this.activeElement;
+      console.log( this.previous_datapoint );
+    }
+  }
+  this.activeElement = el;
   this.showFocus();
 }
 
 describlerObj.prototype.showFocus = function () {
-  // TODO: fix bug where clicking on a datapoint then causes 
-  //       the next datapoint to be skipped when navigating via keyboard
-
-  // console.log( el );
   if (!this.activeElement) {
-    console.log("oops")
+    console.log("oops");
   }
 
   this.activeElement.focus();
@@ -344,21 +348,16 @@ describlerObj.prototype.click = function (event){
 
 	focusEl.blur();
 
-  // console.log( this.focusIndex );
-	for (var l = 0, lLen = this.focusList.length; lLen > l; ++l) {
-		if ( focusEl == this.focusList[l]){
-			this.focusIndex = l + 1;
-		  if (this.focusList.length - 1 < this.focusIndex) {
-		    this.focusIndex = 0;
-		  }
-			continue;
-		}
-  };
-  // console.log( this.focusIndex );
+  var new_focus_el = this.focusList.find( function ( element ) {
+      return element == this;
+    }, focusEl );
+  if ( new_focus_el ) {
+    this.focusIndex = this.focusList.findIndex( function ( element ) {
+        return element == this;
+      }, focusEl );
 
-  this.activeElement = focusEl;
-	// document.activeElement = this.activeElement;
-	this.showFocus();
+    this.setActiveElement( new_focus_el );
+  }
 }
 
 describlerObj.prototype.mapToRange = function (val, range1, range2){
@@ -654,21 +653,11 @@ describlerObj.prototype.handle_datapoint = function (){
           // if ( 1 == option ){
           if ( "details" == this.menu.selected.id ){
 
-            // describe change of value
-            if ( (0 != dp_index && 1 == this.navDirection ) 
-                || (dataset.statistics.count - 1 != dp_index && -1 == this.navDirection )) {
-                  
-              var lastValue = "";
-              var lastField = "";
-              // var dirName = "previous";
-              if ( 1 == this.navDirection){
-                lastValue = dataset.datapoints[dp_index - 1].value;
-                lastField = dataset.datapoints[dp_index - 1].label_text;
-              } else {
-                lastValue = dataset.datapoints[dp_index + 1].value;
-                lastField = dataset.datapoints[dp_index + 1].label_text;
-                // dirName = "next";
-              }
+            // describe change of value from previous datapoint
+            if ( this.previous_datapoint ) {
+              var prev_datapoint = dataset.datapoints.find( matchElement, this.previous_datapoint );
+              var lastValue = prev_datapoint.value;
+              var lastField = prev_datapoint.label_text;
 
               var delta = "";
               if ( value > lastValue){
@@ -678,11 +667,11 @@ describlerObj.prototype.handle_datapoint = function (){
               } else {
                 delta += "There is no change";
               }
-              // delta += " from the " + dirName + " value of " + lastValue;
               delta += " from the last value of " + lastValue + " for " + lastField;
               this.speeches.push( delta );
             }
-
+            
+        
             // describe statistical status of value
             if ( dataset.statistics["low"] == value){
               this.speeches.push( "This is the lowest value." );
@@ -958,8 +947,7 @@ describlerObj.prototype.handle_axis = function (){
                       // temporary hack
                       // TODO: let user select datapoint explicitly, in case there are multiples
                       var datapoint = axisitem.refs[0].element;
-                      this.activeElement = datapoint;
-                      this.showFocus();
+                      this.setActiveElement( datapoint );
 
                 } else {
                   console.log("error")
