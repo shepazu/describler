@@ -552,9 +552,16 @@
         }
       }
 
+      // set filename in URL, for easy copy-paste
+      var query_str = encodeURIComponent( "filename=" + this.file.name);
+      window.location.href = window.location.href.split('?')[0] 
+                           + "?" + query_str
+                           + "#" + window.location.hash
+
+      // load remote file
       var xhr = new XMLHttpRequest;
       xhr.open("GET", "samples/" + this.file.name);
-      xhr.onload = bind(this, this.insertFile);;
+      xhr.onload = bind(this, this.insertFile);
       // xhr.onload = this.insertFile;
       xhr.send()
     }
@@ -803,7 +810,7 @@
         if (0 == i) {
           size = bytes + " " + units[i];
         } else {
-          size = (bytes / Math.pow(1024, i)).toFixed(1) + " " + units[i];;
+          size = (bytes / Math.pow(1024, i)).toFixed(1) + " " + units[i];
         } 
       }
       return size;
@@ -921,7 +928,7 @@
 
             <h2 id="screenreader">How do I use the Describler screen reader?</h2>
             <ol>
-              <li>Load a file from the "Select a file" dropdown (I suggest loading the first file, <i><a href="">aria-bar-chart.svg</a></i>).</li>
+              <li>Load a file from the "Select a file" dropdown (I suggest loading the first file, <i><a href="http://describler.com/?filename=aria-bar-chart.svg#image">aria-bar-chart.svg</a></i>).</li>
               <li>Navigate to and through the dataviz by pressing the <code>tab</code> or arrow keys
                 <ul>
                   <li><b>next item:</b> <code>tab</code> or <code>→</code> (right arrow)</li>
