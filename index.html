@@ -552,18 +552,18 @@
         }
       }
 
-      // set filename in URL, for easy copy-paste
-      var query_str = encodeURIComponent( "filename=" + this.file.name);
-      window.location.href = window.location.href.split('?')[0] 
-                           + "?" + query_str
-                           + "#" + window.location.hash
-
       // load remote file
       var xhr = new XMLHttpRequest;
       xhr.open("GET", "samples/" + this.file.name);
       xhr.onload = bind(this, this.insertFile);
       // xhr.onload = this.insertFile;
-      xhr.send()
+      xhr.send();
+
+      // set filename in URL, for easy copy-paste
+      var query_str = "filename=" + encodeURIComponent(this.file.name);
+      window.location.href = window.location.href.split("#")[0].split("?")[0] 
+                           + "?" + query_str
+                           + window.location.hash
     }
 
     appObj.prototype.uploadFile = function (event){
