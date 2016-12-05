@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  
+  width="100%" height="100%" viewBox="0 0 460 430" role="flowchart" tabindex="0">
+  <title>Decision Tree</title>  
+  <desc>A proof-of-concept demo of a decision tree flowchart</desc>
+
+  <style type="text/css">
+    text {
+      fill: #370733;
+      text-anchor: middle;
+      stroke: none;
+      font-family: Verdana, sans-serif;
+      font-size: 9px;
+      font-weight: bold;
+    }
+
+      .connector text {
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      text[role="heading"] {
+        stroke: none;
+        fill: #370733;
+        font-size: 15px;
+      }
+
+    *[role="connector"] {
+      stroke: #370733;
+      stroke-width: 2px;
+      stroke-linecap: round;
+      fill: none;
+      marker-end: url(#endArrow);
+    }
+
+    marker#endArrow {
+      stroke: #370733;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      fill: #370733;
+    }
+
+    *[role="node"] {
+      stroke: #370733;
+      fill: #D8B0E8;
+      filter: url(#dropshadow);
+    }
+
+  </style>
+
+  <defs>
+    <rect id="state-node" x="-45" y="-17" width="90" height="34" rx="12" ry="15">
+      <desc role="shape">rectangle with rounded corners</desc>
+    </rect> 
+    <path id="decision-node" d="M0,-34 L60,0 L0,34 L-60,0 Z">
+      <desc role="shape">diamond</desc>
+    </path>   
+
+    <marker id="endArrow" viewBox="-13 -6 37.5 30" markerUnits="strokeWidth"
+      refX="-4" refY="0" markerWidth="10" markerHeight="20" orient="auto">
+      <path id="endArrow-path" d="M-10,-5 L0,0 -10,5 Z"/>
+    </marker>
+
+    <filter id="dropshadow" height="130%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feMerge> <feMergeNode/> <feMergeNode in="SourceGraphic"/> </feMerge>
+    </filter>    
+  </defs>
+  
+  <text x="230" y="20" role="heading" tabindex="0">Should I do this?</text> 
+
+  <g id="decision-tree" transform="translate(0,20)">
+    <g id="start" transform="translate(230,34)" role="node" aria-nodetype="state" tabindex="0">
+      <use xlink:href="#state-node" />
+      <text y="3" tabindex="-1">Start</text> 
+    </g>  
+
+    <path d="M230,52 V83" 
+      role="connector" aria-flowfrom="want" aria-flowto="dont-do-it" aria-directed="true" 
+      tabindex="0"/>   
+
+    <g id="want" transform="translate(230,122)" role="node" aria-nodetype="decision" tabindex="0">
+      <use xlink:href="#decision-node" />
+      <text x="0" y="-2" tabindex="-1">Do I want to<tspan x="0" dy="1.1em">do this?</tspan></text> 
+    </g>  
+
+    <g id="want-no-connector" class="connector">
+      <path id="want-to-dont" d="M170,122 H65 V188" 
+        role="connector" aria-flowfrom="want" aria-flowto="dont-do-it" aria-directed="true" 
+        aria-labelledby="want-no" tabindex="0"/>   
+      <text id="want-no" x="155" y="116" tabindex="-1">No</text>
+    </g>
+    <g id="want-yes-connector" class="connector">
+      <path id="want-to-disaster" d="M230,156 V193" 
+            role="connector" aria-flowfrom="want" aria-flowto="disaster" aria-directed="true" 
+            aria-labelledby="want-yes" tabindex="0"/>   
+      <text id="want-yes" x="212" y="172" tabindex="-1">Yes</text>
+    </g>
+
+    <g id="disaster" transform="translate(230,232)" role="node" aria-nodetype="decision" tabindex="0">
+      <use xlink:href="#decision-node" />
+      <text x="0" y="-3">Will it likely <tspan x="0" dy="1.1em">end in disaster?</tspan></text> 
+    </g>  
+
+    <g id="disaster-no-connector" class="connector">
+      <path id="disaster-to-do" d="M290,232 H395 V320" 
+        role="connector" aria-flowfrom="disaster" aria-flowto="do-it" aria-directed="true" 
+        aria-labelledby="disaster-no" tabindex="0"/>   
+      <text id="disaster-no" x="305" y="226">No</text>
+    </g>
+    <g id="disaster-yes-connector" class="connector">
+      <path id="disaster-to-story" d="M230,266 V303" 
+        role="connector" aria-flowfrom="disaster" aria-flowto="story" aria-directed="true"
+         aria-labelledby="disaster-yes" tabindex="0"/>   
+      <text id="disaster-yes" x="211" y="282">Yes</text>
+    </g>
+
+    <g id="story" transform="translate(230,342)" role="node" aria-nodetype="decision" tabindex="0">
+      <use xlink:href="#decision-node" />
+      <text x="0" y="-5">Will it make <tspan x="0" dy="1.1em">a good story</tspan> <tspan x="0" dy="1.1em">anyway?</tspan></text>
+    </g>  
+
+    <g id="story-no-connector" class="connector">
+      <path id="story-to-dont" d="M170,342 H65 V232" 
+        role="connector" aria-flowfrom="story" aria-flowto="dont-do-it" aria-directed="true" 
+        aria-labelledby="story-no" tabindex="0"/>   
+      <text id="story-no" x="155" y="336">No</text>
+    </g>
+    <g id="story-yes-connector" class="connector">
+      <path id="story-to-do" d="M290,342 H345" 
+        role="connector" aria-flowfrom="story" aria-flowto="do-it" aria-directed="true" 
+        aria-labelledby="story-yes" tabindex="0"/>   
+      <text id="story-yes" x="305" y="336">Yes</text>
+    </g>
+
+    <g id="dont-do-it" transform="translate(65,210)" role="node" aria-nodetype="state" tabindex="0">
+      <use xlink:href="#state-node"/>
+      <text y="3">Don't Do It</text> 
+    </g>  
+
+    <g id="do-it" transform="translate(395,342)" role="node" aria-nodetype="state" tabindex="0">
+      <use xlink:href="#state-node"/>
+      <text y="3">Do It</text> 
+    </g>  
+
+
+  </g>     
+
+</svg>
