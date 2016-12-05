@@ -1,7 +1,7 @@
 "use strict";
 
 window.onfocus = function (event) {
-	event.target.blur();
+  event.target.blur();
 };
 
 SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement 
@@ -79,11 +79,11 @@ function describlerObj(root) {
 
 
   console.log( this.focusList );
-	this.createModel();
-	
-	this.sonifier = new Sonifier();
+  this.createModel();
+  
+  this.sonifier = new Sonifier();
 
-	this.metaGroup = document.createElementNS(this.svgns, "g");
+  this.metaGroup = document.createElementNS(this.svgns, "g");
   this.metaGroup.setAttribute("id", "describler-metadata" );
   this.root.appendChild( this.metaGroup );
 
@@ -93,101 +93,120 @@ function describlerObj(root) {
 
 describlerObj.prototype.createModel = function () {
 
-	var charts = this.root.querySelectorAll("[role='chart']");
-	if (!charts.length) {
-		var role = this.root.getAttribute("role");
-		
-		if ( "chart" == role){
-			charts = [this.root];			
-		}		
-	}
+  var charts = this.root.querySelectorAll("[role='chart']");
+  if (!charts.length) {
+    var role = this.root.getAttribute("role");
+    
+    if ( "chart" == role){
+      charts = [this.root];     
+    }   
+  }
   // console.log( charts );
 
-	if (!charts.length) {
-		this.findTextContent();
-	  // console.log( charts );
-	}
-
-	// parse all charts
-	for (var c = 0, cLen = charts.length; cLen > c; ++c) {
-		var chartEl = charts[c];
-		var chart = new chartObj();
-		chart.init( chartEl );
-		this.charts.push( chart );  
+  // parse all charts
+  for (var c = 0, c_len = charts.length; c_len > c; ++c) {
+    var chartEl = charts[c];
+    var chart = new chartObj( chartEl );
+    this.charts.push( chart );  
 
     var taskAssessment = new taskAssessmentObj( this, this.root, chart ); 
     if (taskAssessment.element) {
       this.taskAssessments.push( taskAssessment );
     }
-	}
+  }
   console.log( this.charts );
-	this.exportCSV();
+  this.exportCSV();
 
-	// this.mapToRange();
+  var flowcharts = this.root.querySelectorAll("[role='flowchart']");
+  if (!flowcharts.length) {
+    var role = this.root.getAttribute("role");
+    
+    if ( "flowchart" == role){
+      flowcharts = [this.root];     
+    }   
+  }
+  // console.log( charts );
+
+  // parse all charts
+  for (var f = 0, f_len = flowcharts.length; f_len > f; ++f) {
+    var flowchart_el = flowcharts[f];
+    var flowchart = new flowchartObj(flowchart_el);
+    this.charts.push( flowchart );  
+  }
+/*
+ */
+
+  // generic unstructured graphics/text content
+  if (!charts.length) {
+    this.findTextContent();
+    // console.log( charts );
+  }
+
+  // this.mapToRange();
 }   
 
 describlerObj.prototype.exportCSV = function () {
-	for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-		var chart = this.charts[c];
-		
-		var csv = "";
-		for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
-			var dataset = chart.datasets[d];
-			
-			var allies = [];
-			for (var a in chart.axes) {
-			  // console.log(key, chart[axis]);
-				var eachAxis = chart.axes[a];
-				if (eachAxis["labels"]) {
-					if ( dataset.length == eachAxis["labels"].length){
-						allies.push({
-							"label": eachAxis.label,
-							"fields": eachAxis["labels"]
-						});
-					}
-				}
-			}
-			
-			if ( "bar" == chart.type){
-				if ( 1 == allies.length){
-					var axis = allies[0]
-					csv = axis["label"] + ",values\n";
+  for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
+    var chart = this.charts[c];
+    
+    var csv = "";
+    for (var d = 0, d_len = chart.datasets.length; d_len > d; ++d) {
+      var dataset = chart.datasets[d];
+      
+      var allies = [];
+      for (var a in chart.axes) {
+        // console.log(key, chart[axis]);
+        var eachAxis = chart.axes[a];
+        if (eachAxis["labels"]) {
+          if ( dataset.length == eachAxis["labels"].length){
+            allies.push({
+              "label": eachAxis.label,
+              "fields": eachAxis["labels"]
+            });
+          }
+        }
+      }
+      
+      if ( "bar" == chart.type){
+        if ( 1 == allies.length){
+          var axis = allies[0]
+          csv = axis["label"] + ",values\n";
 
-					for (var i = 0, iLen = axis["fields"].length; iLen > i; ++i) {
-						csv += axis["fields"][i] + "," + dataset[i].value + "\n";
-					}	
-				}
-			} else if ( "pie" == chart.type){
-				for (var i = 0, iLen = dataset.length; iLen > i; ++i) {
-					csv += dataset[i].label + "\n";
-				}	
-			}
-		}
-	  console.log( "CSV file: \n" + csv );
-	}
+          for (var i = 0, i_len = axis["fields"].length; i_len > i; ++i) {
+            csv += axis["fields"][i] + "," + dataset[i].value + "\n";
+          } 
+        }
+      } else if ( "pie" == chart.type){
+        for (var i = 0, i_len = dataset.length; i_len > i; ++i) {
+          csv += dataset[i].label + "\n";
+        } 
+      }
+    }
+    console.log( "CSV file: \n" + csv );
+  }
 
 
 }
 
 describlerObj.prototype.findTextContent = function () {
   var textContents = document.querySelectorAll("text,title");
-	for (var t = 0, tLen = textContents.length; tLen > t; ++t) {
-		var eachTextContent= textContents[t];
-		var el = eachTextContent;
-		if ( "title" == el.localName){
-		  el = el.parentNode;
-		}
-		
-	  el.setAttribute("tabindex", 0 );
-	}
+  for (var t = 0, t_len = textContents.length; t_len > t; ++t) {
+    var eachTextContent= textContents[t];
+    var el = eachTextContent;
+    if ( "title" == el.localName){
+      el = el.parentNode;
+    }
+    
+    el.setAttribute("tabindex", 0 );
+  }
   this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
-	// console.log(this.focusList)
+  // console.log(this.focusList)
 }   
 
 describlerObj.prototype.navNext = function () {
   // console.log( "tabNext: " + focus.index );
-	this.navDirection = 1;
-	
+  this.navDirection = 1;
+  
   this.focusIndex++;
   if (this.focusList.length - 1 < this.focusIndex) {
     this.focusIndex = 0;
@@ -198,7 +217,7 @@ describlerObj.prototype.navNext = function () {
 
 describlerObj.prototype.navPrev = function () {
   // console.log( "tabPrev: " + this.focusIndex );
-	this.navDirection = -1;
+  this.navDirection = -1;
   
   this.focusIndex--;
   if (-1 >= this.focusIndex) {
@@ -241,11 +260,11 @@ describlerObj.prototype.showFocus = function () {
   this.focusBox.setAttribute("width", w );
   this.focusBox.setAttribute("height", h );
 
-	// TODO: figure out how to apply matrix transform to this element
+  // TODO: figure out how to apply matrix transform to this element
   this.focusBox.setAttribute("transform", "translate(" + transform.e + ","  + transform.f + ")" );
 
   this.menu.reset();
-	this.getInfo();
+  this.getInfo();
 }   
 
 describlerObj.prototype.trackKeys = function (event) {
@@ -260,9 +279,9 @@ describlerObj.prototype.trackKeys = function (event) {
     || "arrowup" == key
     || "arrowleft" == key ) {
     // tab
-   	event.preventDefault();
+    event.preventDefault();
     event.stopPropagation();
-		// document.activeElement.blur();
+    // document.activeElement.blur();
 
     if ( (event && event.shiftKey) 
       || "arrowup" == key
@@ -271,15 +290,15 @@ describlerObj.prototype.trackKeys = function (event) {
     } else {
       this.navNext();
     }
-	} else if ("d" == key ) {
-		// d
+  } else if ("d" == key ) {
+    // d
 
     // TODO: set "more details"
-		this.getInfo();
-	} else if ("s" == key) {
-		// s
-		this.sonify();
-	} else if ( "0" == key
+    this.getInfo();
+  } else if ("s" == key) {
+    // s
+    this.sonify();
+  } else if ( "0" == key
           ||  "1" == key
           ||  "2" == key 
           ||  "3" == key 
@@ -289,7 +308,7 @@ describlerObj.prototype.trackKeys = function (event) {
           ||  "7" == key 
           ||  "8" == key 
           ||  "9" == key ) {
-		// 1 to 9
+    // 1 to 9
     // var number = parseInt(key.substr(2)) - 30;
     var number = parseInt(key);
     // console.log( "key: " + number);
@@ -316,7 +335,7 @@ describlerObj.prototype.trackKeys = function (event) {
       this.speeches.push( "Invalid option." );
       this.speak();   
     }
-	 } else if ("escape" == key ) {
+   } else if ("escape" == key ) {
     // escape
     if ( speechSynthesis && speechSynthesis.speaking ){
       speechSynthesis.cancel();
@@ -332,21 +351,21 @@ describlerObj.prototype.trackKeys = function (event) {
 }
 
 describlerObj.prototype.click = function (event){
- 	event.preventDefault();
+  event.preventDefault();
   event.stopPropagation();
-	// document.activeElement.blur();	
-	
-	var focusEl = event.target;
-	while ( !focusEl.hasAttribute("tabindex")){
-	  // console.log( focusEl );
-		if ( document == focusEl.parentNode){
-			return false;
-		}
-		focusEl = focusEl.parentNode;
-	}
+  // document.activeElement.blur(); 
+  
+  var focusEl = event.target;
+  while ( !focusEl.hasAttribute("tabindex")){
+    // console.log( focusEl );
+    if ( document == focusEl.parentNode){
+      return false;
+    }
+    focusEl = focusEl.parentNode;
+  }
   // console.log( focusEl );
 
-	focusEl.blur();
+  focusEl.blur();
 
   var new_focus_el = this.focusList.find( function ( element ) {
       return element == this;
@@ -361,61 +380,61 @@ describlerObj.prototype.click = function (event){
 }
 
 describlerObj.prototype.mapToRange = function (val, range1, range2){
-	// affine transformation transforms number x in range [a,b] to number y in range [c,d]
-	// y = (x-a)(d-c/b-a) + c
-	
-	var newVal = ( (val - range1[0]) * ((range2[1] - range2[0]) / (range1[1] - range1[0])) ) + range2[0];
-	return newVal;
+  // affine transformation transforms number x in range [a,b] to number y in range [c,d]
+  // y = (x-a)(d-c/b-a) + c
+  
+  var newVal = ( (val - range1[0]) * ((range2[1] - range2[0]) / (range1[1] - range1[0])) ) + range2[0];
+  return newVal;
 }
 
 
 
 describlerObj.prototype.getFraction = function (decimal){
   console.log("decimal: " + decimal);
-	var msg = "The same as ";
+  var msg = "The same as ";
 
   if ( isNaN(decimal) ){
     return "not a number!";
   }
 
-	if ( 1 != decimal){
-		var fraction = 1;
-		var numerator = 1;
-		var denominator = 1;
+  if ( 1 != decimal){
+    var fraction = 1;
+    var numerator = 1;
+    var denominator = 1;
 
-		while (fraction.toFixed(3) != decimal.toFixed(3)) {
-		  // console.log( fraction + "," + decimal );
-			if (fraction.toFixed(3) < decimal.toFixed(3)){
-				numerator += 1;
-			}
-			else {
-				denominator += 1;
-				numerator = parseInt(decimal * denominator);
-			}
-			fraction = numerator / denominator;
-		}
+    while (fraction.toFixed(3) != decimal.toFixed(3)) {
+      // console.log( fraction + "," + decimal );
+      if (fraction.toFixed(3) < decimal.toFixed(3)){
+        numerator += 1;
+      }
+      else {
+        denominator += 1;
+        numerator = parseInt(decimal * denominator);
+      }
+      fraction = numerator / denominator;
+    }
 
-		msg = numerator + "/" + denominator;
-		if ( numerator > denominator){
-			var number = parseInt( numerator / denominator );
-			var mod = numerator % denominator;
-			
-			/*
-			for (var d = 0; 10 > d; ++d) {
-				var mod2 = denominator % mod;
-				if ( 0 != mod2){
-					
-				}
-			}
-			*/
-			
-			msg = number.toString() + " " + mod + "/" + denominator;
-			if ( 0 == mod){
-				msg = number.toString() + " times ";
-			}
-		}
-	}
-	return msg;
+    msg = numerator + "/" + denominator;
+    if ( numerator > denominator){
+      var number = parseInt( numerator / denominator );
+      var mod = numerator % denominator;
+      
+      /*
+      for (var d = 0; 10 > d; ++d) {
+        var mod2 = denominator % mod;
+        if ( 0 != mod2){
+          
+        }
+      }
+      */
+      
+      msg = number.toString() + " " + mod + "/" + denominator;
+      if ( 0 == mod){
+        msg = number.toString() + " times ";
+      }
+    }
+  }
+  return msg;
 }
 
 describlerObj.prototype.getOrdinalNumber = function (number){
@@ -446,34 +465,34 @@ describlerObj.prototype.getOrdinalNumber = function (number){
 
 describlerObj.prototype.convertNumberToWords = function (number){
 
-	var names = [{"0":"zero", "1":"one", "2":"two", "3":"three", "4":"four", "5":"five", "6":"six", 
-								"7":"seven", "8":"eight", "9":"nine" },{"0":"ten", "1":"eleven", "2":"twelve", 
-								"3":"thirteen", "4":"fourteen", "5":"fifteen", "6":"sixteen", "7":"seventeen", 
-								"8":"eighteen", "9":"nineteen"},{"2":"twenty", "3":"thirty", "4":"forty", "5":"fifty", 
-								"6":"sixty", "7":"seventy", "8":"eighty", "9":"ninety"},["", "thousand", "million", 
-								"billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", 
-								"octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", 
-								"quattuordecillion", "quindecillion", "sexdecillion", "septdecillion", "octdecillion", 
-								"novemdecillion", "vigintillion"]];
-	var to_words = function (s, n){
-	    var ns = s.slice(0,3);
-	    return (ns.length < 1)?"":to_words(s.slice(3,s.length),n+1)
-						 +((ns.length>1)?((ns.length==3&&ns[2]!="0")?names[0][ns[2]]+" hundred "
-						 +((ns[1]=="1")?names[1][ns[0]]+" ":(ns[1]!="0")?names[2][ns[1]]+" "
-						 +((ns[0]!="0")?names[0][ns[0]]+" ":""):(ns[0]!="0"
-						 ?names[0][ns[0]]+" ":"")):((ns[1]=="1")?names[1][ns[0]]+" ":(ns[1]!="0")
-						 ?names[2][ns[1]]+" "+((ns[0]!="0")?names[0][ns[0]]+" ":""):(ns[0]!="0"
-						 ?names[0][ns[0]]+" ":""))) + (((ns.length==3&&(ns[0]!="0"||ns[1]!="0"
-						 ||ns[2]!="0"))||(ns.length==2&&(ns[0]!="0"||ns[1]!="0"))||(ns.length==1&&ns[0]!="0"))
-						?"<span class='magnitude'>"+names[3][n]+"</span> ":""):((ns.length==1&&ns[0]!="0")
-						?names[0][ns[0]]+" ":"") + (((ns.length==3&&(ns[0]!="0"||ns[1]!="0"||ns[2]!="0"))
-						||(ns.length==2&&(ns[0]!="0"||ns[1]!="0"))||(ns.length==1&&ns[0]!="0"))
-						?"<span class='magnitude'>"+names[3][n]+"</span> ":""));
-	}, input;
-	document.getElementById("input").addEventListener("keyup", function (){
-	document.getElementById("output").innerHTML = to_words(this.value.replace(/[^0-9]/g, "")
-					.split("").reverse(), 0);
-	}, false);
+  var names = [{"0":"zero", "1":"one", "2":"two", "3":"three", "4":"four", "5":"five", "6":"six", 
+                "7":"seven", "8":"eight", "9":"nine" },{"0":"ten", "1":"eleven", "2":"twelve", 
+                "3":"thirteen", "4":"fourteen", "5":"fifteen", "6":"sixteen", "7":"seventeen", 
+                "8":"eighteen", "9":"nineteen"},{"2":"twenty", "3":"thirty", "4":"forty", "5":"fifty", 
+                "6":"sixty", "7":"seventy", "8":"eighty", "9":"ninety"},["", "thousand", "million", 
+                "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", 
+                "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", 
+                "quattuordecillion", "quindecillion", "sexdecillion", "septdecillion", "octdecillion", 
+                "novemdecillion", "vigintillion"]];
+  var to_words = function (s, n){
+      var ns = s.slice(0,3);
+      return (ns.length < 1)?"":to_words(s.slice(3,s.length),n+1)
+             +((ns.length>1)?((ns.length==3&&ns[2]!="0")?names[0][ns[2]]+" hundred "
+             +((ns[1]=="1")?names[1][ns[0]]+" ":(ns[1]!="0")?names[2][ns[1]]+" "
+             +((ns[0]!="0")?names[0][ns[0]]+" ":""):(ns[0]!="0"
+             ?names[0][ns[0]]+" ":"")):((ns[1]=="1")?names[1][ns[0]]+" ":(ns[1]!="0")
+             ?names[2][ns[1]]+" "+((ns[0]!="0")?names[0][ns[0]]+" ":""):(ns[0]!="0"
+             ?names[0][ns[0]]+" ":""))) + (((ns.length==3&&(ns[0]!="0"||ns[1]!="0"
+             ||ns[2]!="0"))||(ns.length==2&&(ns[0]!="0"||ns[1]!="0"))||(ns.length==1&&ns[0]!="0"))
+            ?"<span class='magnitude'>"+names[3][n]+"</span> ":""):((ns.length==1&&ns[0]!="0")
+            ?names[0][ns[0]]+" ":"") + (((ns.length==3&&(ns[0]!="0"||ns[1]!="0"||ns[2]!="0"))
+            ||(ns.length==2&&(ns[0]!="0"||ns[1]!="0"))||(ns.length==1&&ns[0]!="0"))
+            ?"<span class='magnitude'>"+names[3][n]+"</span> ":""));
+  }, input;
+  document.getElementById("input").addEventListener("keyup", function (){
+  document.getElementById("output").innerHTML = to_words(this.value.replace(/[^0-9]/g, "")
+          .split("").reverse(), 0);
+  }, false);
 }
 
 
@@ -523,6 +542,18 @@ describlerObj.prototype.getInfo = function (){
       this.handle_legenditem();
       break;
 
+    case "flowchart":
+      this.handle_flowchart();
+      break;
+
+    case "node":
+      this.handle_node();
+      break;
+
+    case "connector":
+      this.handle_connector();
+      break;
+
     default:
       this.handle_default();
       break;
@@ -548,7 +579,7 @@ describlerObj.prototype.handle_chart = function (){
     // console.log(chart);
     // console.log("index: " + chart_index);
 
-    for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
+    for (var d = 0, d_len = chart.datasets.length; d_len > d; ++d) {
       var dataset = chart.datasets[d];
 
       if ( chart.label){
@@ -588,7 +619,7 @@ describlerObj.prototype.handle_chart = function (){
             this.speeches.push( "Highest to lowest: " );
           }
           
-          for (var dp = 0, dpLen = datasort.length; dpLen > dp; ++dp) {
+          for (var dp = 0, dp_len = datasort.length; dp_len > dp; ++dp) {
             var datapoint = datasort[dp];
             this.speeches.push( datapoint.label );
           }
@@ -623,10 +654,10 @@ describlerObj.prototype.handle_datapoint = function (){
   // console.log("handle_datapoint");
   // this.speeches.push( "datapoint" );   
 
-  for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+  for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
     var chart = this.charts[c];
     // if ( this.activeElement == chart.element){
-    for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
+    for (var d = 0, d_len = chart.datasets.length; d_len > d; ++d) {
       var dataset = chart.datasets[d];
       console.log(dataset);
 
@@ -729,7 +760,7 @@ describlerObj.prototype.handle_datapoint = function (){
                         
           } else if ( "compare" == this.menu.selected.id ) {
             var firstItem = true;
-            for (var odp = 0, odpLen = dataset.datapoints.length; odpLen > odp; ++odp) {
+            for (var odp = 0, odp_len = dataset.datapoints.length; odp_len > odp; ++odp) {
               var otherDatapoint = dataset.datapoints[odp];
               if ( datapoint.element != otherDatapoint.element){
                 var otherValue = otherDatapoint.value;
@@ -737,8 +768,8 @@ describlerObj.prototype.handle_datapoint = function (){
                 if (firstItem) {
                   firstItem = false;
                   delta = "This is ";
-                } else if ( odpLen - 1 == odp 
-                          || ( odpLen - 1 == dp_index && odpLen - 2 == odp )){
+                } else if ( odp_len - 1 == odp 
+                          || ( odp_len - 1 == dp_index && odp_len - 2 == odp )){
                   delta = " and ";
                 }
 
@@ -762,7 +793,7 @@ describlerObj.prototype.handle_datapoint = function (){
 
               default_menu = false;
               this.menu.reset();
-              for (var odp = 0, odpLen = dataset.datapoints.length; odpLen > odp; ++odp) {
+              for (var odp = 0, odp_len = dataset.datapoints.length; odp_len > odp; ++odp) {
                 var otherDatapoint = dataset.datapoints[odp];
                 if ( datapoint.element != otherDatapoint.element){
                   var other_label = otherDatapoint.label_text;
@@ -871,7 +902,7 @@ describlerObj.prototype.handle_axis = function (){
   // console.log("handle_axis");
   // this.speeches.push( "axis" );     
 
-  for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+  for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
     var chart = this.charts[c];
       for (var a in chart.axes) {
         // console.log(key, chart[axis]);
@@ -892,7 +923,7 @@ describlerObj.prototype.handle_axis = function (){
                                + axis.items[axis.items.length - 1].label );
             // if ( 1 == option ){
             //  this.speeches.push( ", with the following labels: " );
-            //  for (var l = 0, lLen = axis.labels.length; lLen > l; ++l) {
+            //  for (var l = 0, l_len = axis.labels.length; l_len > l; ++l) {
             //    this.speeches.push( axis.labels[l] );
             //  }
             // } else {
@@ -907,7 +938,7 @@ describlerObj.prototype.handle_axis = function (){
           if ( this.menu.selected ){
             if ( "labels" == this.menu.selected.id ){
               this.speeches.push( ", with the following labels: " );
-              for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
+              for (var l = 0, l_len = axis.items.length; l_len > l; ++l) {
                 this.speeches.push( axis.items[l].label );
               }
             } else if ( "select" == this.menu.selected.id
@@ -919,7 +950,7 @@ describlerObj.prototype.handle_axis = function (){
 
                 default_menu = false;
                 this.menu.reset();
-                for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
+                for (var l = 0, l_len = axis.items.length; l_len > l; ++l) {
                   this.menu.add( axis.items[l].label, axis.items[l].label, "select" );
                 }
               } else if ( "select" == this.menu.selected.context ) {
@@ -932,11 +963,11 @@ describlerObj.prototype.handle_axis = function (){
                 this.menu.reset();
 
                 if (axisitem) {
-                  var refsLength = axisitem.refs.length
+                  var refs_length = axisitem.refs.length
                   var axisitem_msg = axisitem.label + " has " 
                     + axisitem.refs.length + " datapoint";
 
-                  if ( 1 != refsLength){
+                  if ( 1 != refs_length){
                     axisitem_msg += "s"; // make it plural
                   }
                     
@@ -962,7 +993,7 @@ describlerObj.prototype.handle_axis = function (){
 
             // only show "select" option if one of the axis labels has datapoints
             var select_possible = false;
-            for (var l = 0, lLen = axis.items.length; lLen > l; ++l) {
+            for (var l = 0, l_len = axis.items.length; l_len > l; ++l) {
               if (axis.items[l].refs.length) {
                 select_possible = true;
                 break;
@@ -976,7 +1007,7 @@ describlerObj.prototype.handle_axis = function (){
 
           // no need to iterate further
           continue;
-          c = cLen;
+          c = c_len;
         }
 
     }
@@ -996,7 +1027,7 @@ describlerObj.prototype.handle_axisitem = function (){
 
           //     default_menu = false;
           //     this.menu.reset();
-          //     for (var odp = 0, odpLen = dataset.datapoints.length; odpLen > odp; ++odp) {
+          //     for (var odp = 0, odp_len = dataset.datapoints.length; odp_len > odp; ++odp) {
           //       var otherDatapoint = dataset.datapoints[odp];
           //       if ( datapoint.element != otherDatapoint.element){
           //         var other_label = otherDatapoint.label_text;
@@ -1038,9 +1069,9 @@ describlerObj.prototype.handle_legend = function (){
   // console.log("handle_legend");
   // this.speeches.push( "legend" );     
 
-    for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+    for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
       var chart = this.charts[c];
-      for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
+      for (var l = 0, l_len = chart.legends.length; l_len > l; ++l) {
         var eachLegend = chart.legends[ l ]; 
         if ( this.activeElement == eachLegend.element){
           this.activeObject = eachLegend;
@@ -1052,13 +1083,13 @@ describlerObj.prototype.handle_legend = function (){
           
           this.speeches.push( "Legend: " + eachLegend.label + " with " + legendItemsCount );  
           // if ( !1 == option ){
-          //  this.speeches.push( "Legend item " + (li + 1) + " of " + liLen );
+          //  this.speeches.push( "Legend item " + (li + 1) + " of " + li_len );
           // }
           
           // no need to iterate further
           continue;
-          l = lLen;
-          c = cLen;
+          l = l_len;
+          c = c_len;
         }
       }
     }
@@ -1070,9 +1101,9 @@ describlerObj.prototype.handle_legenditem = function (){
   // console.log("handle_legenditem");
   // this.speeches.push( "legenditem" );
 
-  for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
+  for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
     var chart = this.charts[c];
-    for (var l = 0, lLen = chart.legends.length; lLen > l; ++l) {
+    for (var l = 0, l_len = chart.legends.length; l_len > l; ++l) {
       var eachLegend = chart.legends[ l ]; 
 
       var legenditem = eachLegend.items.find( matchElement, this.activeElement );
@@ -1089,16 +1120,16 @@ describlerObj.prototype.handle_legenditem = function (){
         if ( this.menu.selected ) {
           if ( "datapoints" == this.menu.selected.id ){
             var total = 0;
-            var refsLength = legenditem.refs.length;
+            var refs_length = legenditem.refs.length;
             
-            var refsCount = refsLength + " datapoint";
-            if ( 1 != refsLength){
+            var refsCount = refs_length + " datapoint";
+            if ( 1 != refs_length){
               refsCount += "s"; // make it plural
             }
             
             this.speeches.push( "This legend item applies to " + refsCount);  
 
-            for (var r = 0; refsLength > r; ++r) {
+            for (var r = 0; refs_length > r; ++r) {
               var eachRef = legenditem.refs[ r ];
               this.speeches.push( eachRef.label );  
               // TODO: make sure the value is numeric
@@ -1114,11 +1145,29 @@ describlerObj.prototype.handle_legenditem = function (){
 
         // no need to iterate further
         continue;
-        l = lLen;
-        c = cLen;
+        l = l_len;
+        c = c_len;
       }
     }
   }
+}
+
+
+describlerObj.prototype.handle_flowchart = function (){
+  console.log("handle_flowchart");
+  this.speeches.push( "flowchart" );     
+}
+
+
+describlerObj.prototype.handle_node = function (){
+  console.log("handle_node");
+  this.speeches.push( "node" );     
+}
+
+
+describlerObj.prototype.handle_connector = function (){
+  console.log("handle_connector");
+  this.speeches.push( "connector" );     
 }
 
 
@@ -1185,7 +1234,7 @@ describlerObj.prototype.speak = function ( callback, callbackObj ) {
     }
     console.log( "speak: " + msg );
 
-  	var voice = new SpeechSynthesisUtterance();
+    var voice = new SpeechSynthesisUtterance();
     voice.text = msg;
     voice.lang = "en-US";
     voice.rate = 1.1;
@@ -1222,59 +1271,59 @@ describlerObj.prototype.speak = function ( callback, callbackObj ) {
   //   // this.voice.rate = 1.2;
   //   // speechSynthesis.speak( this.voice );
   // 
-  // 		// for (var s = 0, sLen = this.speeches.length; sLen > s; ++s) {
-  // 		// 	msg = this.speeches[s];
-  // 		//   // console.log( msg );
-  // 		// 	    this.voice.text = msg;
-  // 		// 	    speechSynthesis.speak( this.voice );
-  // 		// }
+  //    // for (var s = 0, s_len = this.speeches.length; s_len > s; ++s) {
+  //    //  msg = this.speeches[s];
+  //    //   // console.log( msg );
+  //    //      this.voice.text = msg;
+  //    //      speechSynthesis.speak( this.voice );
+  //    // }
   // }      
 }
 
 
 describlerObj.prototype.sonify = function () {
-	// Create sonfication lines
+  // Create sonfication lines
   var datapoints = document.querySelectorAll("*[role='datapoint']");
-	for (var c = 0, cLen = this.charts.length; cLen > c; ++c) {
-		var chart = this.charts[c];
-		for (var d = 0, dLen = chart.datasets.length; dLen > d; ++d) {
-			var dataset = chart.datasets[d];
+  for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
+    var chart = this.charts[c];
+    for (var d = 0, d_len = chart.datasets.length; d_len > d; ++d) {
+      var dataset = chart.datasets[d];
       var datalinePoints = "";
-			for (var dp = 0, dpLen = dataset.datapoints.length; dpLen > dp; ++dp) {
-				var datapoint = dataset.datapoints[dp].element;
-			  var bbox = datapoint.getBBox();
-		    datalinePoints += (bbox.x + (bbox.width/2)) + "," + bbox.y + " "; 
-			}
-			
-		  console.log(datalinePoints);
+      for (var dp = 0, dp_len = dataset.datapoints.length; dp_len > dp; ++dp) {
+        var datapoint = dataset.datapoints[dp].element;
+        var bbox = datapoint.getBBox();
+        datalinePoints += (bbox.x + (bbox.width/2)) + "," + bbox.y + " "; 
+      }
+      
+      console.log(datalinePoints);
 
-		  // draw line plot
-		  var dataline = document.createElementNS(this.svgns, "polyline");
-		  //line.setAttribute("id", dataset);
-		  dataline.setAttribute("id", "dataLine");
-		  dataline.setAttribute("role", "trend-line");
-		  dataline.setAttribute("points", datalinePoints);
-		  dataline.setAttribute("fill", "none");
-		  // dataline.setAttribute("stroke", "none");
-		  dataline.setAttribute("stroke", "red");
-		  this.metaGroup.appendChild( dataline );  
+      // draw line plot
+      var dataline = document.createElementNS(this.svgns, "polyline");
+      //line.setAttribute("id", dataset);
+      dataline.setAttribute("id", "dataLine");
+      dataline.setAttribute("role", "trend-line");
+      dataline.setAttribute("points", datalinePoints);
+      dataline.setAttribute("fill", "none");
+      // dataline.setAttribute("stroke", "none");
+      dataline.setAttribute("stroke", "red");
+      this.metaGroup.appendChild( dataline );  
 
-			// 		  this.x = 0;
-			// this.y = 0;
-			// this.width = 0;
-			// this.height = 0;
-		  // var xAxisRange = [yearlabels[0], yearlabels[ yearlabels.length - 1]];
-		  var xAxisRange = [chart.axes["x"].min, chart.axes["x"].max];
-		  var yAxisRange = [chart.axes["y"].min, chart.axes["y"].max];
-			var xAxisPos = chart.x;
-			var yAxisPos = chart.y + chart.height;
+      //      this.x = 0;
+      // this.y = 0;
+      // this.width = 0;
+      // this.height = 0;
+      // var xAxisRange = [yearlabels[0], yearlabels[ yearlabels.length - 1]];
+      var xAxisRange = [chart.axes["x"].min, chart.axes["x"].max];
+      var yAxisRange = [chart.axes["y"].min, chart.axes["y"].max];
+      var xAxisPos = chart.x;
+      var yAxisPos = chart.y + chart.height;
 
-		  this.sonifier.init( this.root, this.metaGroup, dataline, 
-													chart.x, chart.y, 
-													chart.width, chart.height, 
-													xAxisRange, yAxisRange, 
-													xAxisPos, yAxisPos, "red" );
-		}
+      this.sonifier.init( this.root, this.metaGroup, dataline, 
+                          chart.x, chart.y, 
+                          chart.width, chart.height, 
+                          xAxisRange, yAxisRange, 
+                          xAxisPos, yAxisPos, "red" );
+    }
   }      
 }
 
@@ -1396,7 +1445,7 @@ function taskAssessmentObj( app, doc, chart ) {
   this.app = app;
   this.doc = doc;
   this.chart = chart;
-  this.element = this.doc.querySelector("metadata[role='assessment']");;
+  this.element = this.doc.querySelector("metadata[role='assessment']");
   this.tasks = [];
 
   this.scores = [];
@@ -1579,59 +1628,60 @@ function randomNumber(min, max) {
 *  Chart Object
 */
 
-function chartObj() {
-	this.element = null;
-	this.type = null;
-	this.label = null;
-	this.axes = [];
-	this.datasets = [];
-	this.legends = [];
-	this.x = null;
-	this.y = null;
-	this.width = null;
-	this.height = null;
+function chartObj(el) {
+  this.element = el;
+  this.type = null;
+  this.label = null;
+  this.axes = [];
+  this.datasets = [];
+  this.legends = [];
+  this.x = null;
+  this.y = null;
+  this.width = null;
+  this.height = null;
+
+  this.init();
 }
 
-chartObj.prototype.init = function (el){
-	this.element = el;
-	this.type = this.element.getAttribute("aria-charttype");
-	
-	// get chart title
-	var title = this.element.querySelector("[role='chart'] > [role='heading']");
-	if ( title){
-		this.label = title.textContent;
-	}
+chartObj.prototype.init = function (){
+  this.type = this.element.getAttribute("aria-charttype");
+  
+  // get chart title
+  var title = this.element.querySelector("[role='chart'] > [role='heading']");
+  if ( title){
+    this.label = title.textContent;
+  }
     
-	// find the dimensions of the chart area
-	var chartarea = this.element.querySelector("[role='chartarea']");
-	if ( chartarea){
-		this.x = +chartarea.getAttribute("x");
-		this.y = +chartarea.getAttribute("y");
-		this.width = +chartarea.getAttribute("width");
-		this.height = +chartarea.getAttribute("height");
-	}
-	
-	if ( "pie" != this.type){
-		// get chart axes
-		this.axes["x"] = new axisObj( this.element, "x", "horizontal" );
-		this.axes["y"] = new axisObj( this.element, "y", "vertical" );
-	}
+  // find the dimensions of the chart area
+  var chartarea = this.element.querySelector("[role='chartarea']");
+  if ( chartarea){
+    this.x = +chartarea.getAttribute("x");
+    this.y = +chartarea.getAttribute("y");
+    this.width = +chartarea.getAttribute("width");
+    this.height = +chartarea.getAttribute("height");
+  }
+  
+  if ( "pie" != this.type){
+    // get chart axes
+    this.axes["x"] = new axisObj( this.element, "x", "horizontal" );
+    this.axes["y"] = new axisObj( this.element, "y", "vertical" );
+  }
 
   var datasetEls = this.element.querySelectorAll("[role='dataset']");
-	for (var d = 0, dLen = datasetEls.length; dLen > d; ++d) {
-		var eachDataset = datasetEls[d];
-	  var datapoints = eachDataset.querySelectorAll("[role='datapoint']");
-	
-		var dataset = this.extractDataset( datapoints );
-		this.datasets.push( dataset );
+  for (var d = 0, d_len = datasetEls.length; d_len > d; ++d) {
+    var eachDataset = datasetEls[d];
+    var datapoints = eachDataset.querySelectorAll("[role='datapoint']");
+  
+    var dataset = this.extractDataset( datapoints );
+    this.datasets.push( dataset );
   }
 
   var legendEls = this.element.querySelectorAll("[role='legend']");
-	for (var l = 0, lLen = legendEls.length; lLen > l; ++l) {
-		var eachLegend = legendEls[ l ]; 
-		var legend = new legendObj( eachLegend );
-		this.legends.push( legend );
-	}
+  for (var l = 0, l_len = legendEls.length; l_len > l; ++l) {
+    var eachLegend = legendEls[ l ]; 
+    var legend = new legendObj( eachLegend );
+    this.legends.push( legend );
+  }
 }   
 
 chartObj.prototype.extractDataset = function (datapoints){
@@ -1639,7 +1689,7 @@ chartObj.prototype.extractDataset = function (datapoints){
   // dataset.values = [];
   var dataset = new datasetObj();
 
-  for (var dp = 0, dpLen = datapoints.length; dpLen > dp; ++dp) {
+  for (var dp = 0, dp_len = datapoints.length; dp_len > dp; ++dp) {
     var eachDatapoint = datapoints[dp];
     var datapoint = new datapointObj( eachDatapoint );
     // datapoint.init( eachDatapoint ); 
@@ -1941,19 +1991,19 @@ axisObj.prototype.init = function (){
     this.label = title.textContent;
   }
 
-	// first extract all the axis labels
-	var axislabels = this.element.querySelectorAll("[role='axislabel']");
-	if ( axislabels.length){
-		// var axisTexts = [];
-		// var axisValues = [];
-		for (var a = 0, aLen = axislabels.length; aLen > a; ++a) {
-			var eachLabel = axislabels[ a ]; 
-			// this.labels.push( eachLabel.textContent );
+  // first extract all the axis labels
+  var axislabels = this.element.querySelectorAll("[role='axislabel']");
+  if ( axislabels.length){
+    // var axisTexts = [];
+    // var axisValues = [];
+    for (var a = 0, a_len = axislabels.length; a_len > a; ++a) {
+      var eachLabel = axislabels[ a ]; 
+      // this.labels.push( eachLabel.textContent );
       this.items.push( new axisItemObj( eachLabel, this ) );
-			// axisValues.push( parseFloat(eachLabel.textContent) );
-		}
-	  // console.log( min + ", " + max );
-	}
+      // axisValues.push( parseFloat(eachLabel.textContent) );
+    }
+    // console.log( min + ", " + max );
+  }
 }
 
 function axisItemObj( el, axis ) {
@@ -1971,7 +2021,7 @@ axisItemObj.prototype.init = function (){
   // TODO: populate datapoints 
 
   var allRefs = document.querySelectorAll("[aria-labelledby~='" + this.element.id + "']");
-  for (var r = 0, rLen = allRefs.length; rLen > r; ++r) {
+  for (var r = 0, r_len = allRefs.length; r_len > r; ++r) {
     var eachRef = allRefs[ r ]; 
     
     var ref = eachRef;
@@ -1991,26 +2041,26 @@ axisItemObj.prototype.init = function (){
 
 function legendObj( el ) {
   this.element = el;
-	this.label = null;
-	this.items = []; // each item has: element, label, list of referencing datapoints
+  this.label = null;
+  this.items = []; // each item has: element, label, list of referencing datapoints
 
   this.init();
 }
 
 legendObj.prototype.init = function (){
-	// get legend title
-	var title = this.element.querySelector("[role='legend'] > [role='heading']");
-	if ( title){
-		this.label = title.textContent;
-	}
-	
-	// first extract all the legend items
-	var legendItems = this.element.querySelectorAll("[role='legenditem']");
-	for (var l = 0, lLen = legendItems.length; lLen > l; ++l) {
-		var eachItem = legendItems[ l ]; 
-		var legendItem = new legendItemObj( eachItem );
-		this.items.push( legendItem );
-	}
+  // get legend title
+  var title = this.element.querySelector("[role='legend'] > [role='heading']");
+  if ( title){
+    this.label = title.textContent;
+  }
+  
+  // first extract all the legend items
+  var legendItems = this.element.querySelectorAll("[role='legenditem']");
+  for (var l = 0, l_len = legendItems.length; l_len > l; ++l) {
+    var eachItem = legendItems[ l ]; 
+    var legendItem = new legendItemObj( eachItem );
+    this.items.push( legendItem );
+  }
 }
 
 function legendItemObj(el) {
@@ -2031,7 +2081,7 @@ legendItemObj.prototype.init = function (){
   
   /// find all the datapoints which reference this legend item
   var allRefs = document.querySelectorAll("[aria-labelledby~='" + this.element.id + "']");
-  for (var r = 0, rLen = allRefs.length; rLen > r; ++r) {
+  for (var r = 0, r_len = allRefs.length; r_len > r; ++r) {
     var eachRef = allRefs[ r ]; 
     
     var ref = eachRef;
@@ -2060,7 +2110,208 @@ legendItemObj.prototype.init = function (){
 
 }
 
+/*
+*  Flowchart Object
+*/
 
+function flowchartObj(el) {
+  this.element = el;
+  this.type = null;
+  this.label = null;
+  this.nodes = [];
+  this.connectors = [];
+}
+
+flowchartObj.prototype.init = function (){
+  this.type = this.element.getAttribute("aria-charttype");
+  
+  // get chart title
+  var title = this.element.querySelector("[role='flowchart'] > [role='heading']");
+  if ( title){
+    this.label = title.textContent;
+  }
+
+  var node_els = this.element.querySelectorAll("[role='node']");
+  for (var n = 0, n_len = node_els.length; n_len > n; ++n) {
+    var each_node = node_els[n];
+    var node = new nodeObj( each_node, this.element );
+    dataset.datapoints.push( datapoint );
+  }
+
+  // var legendEls = this.element.querySelectorAll("[role='legend']");
+  // for (var l = 0, l_len = legendEls.length; l_len > l; ++l) {
+  //   var eachLegend = legendEls[ l ]; 
+  //   var legend = new legendObj( eachLegend );
+  //   this.legends.push( legend );
+  // }
+}
+
+
+
+function nodeObj( el, root ) {
+  this.element = el;
+  this.root = root;
+  this.id = this.el.id;
+  this.type = "";
+  this.label = null;
+  this.label_els = [];
+  this.label_text = "";
+
+  this.connectors = {
+    "all": [],
+    "to": [],
+    "from": []
+  };
+
+  this.shape = ""; // flowchart symbol
+  this.colors = [];
+
+  this.init();
+}
+
+nodeObj.prototype.init = function (){  
+  // compose accessible name
+  var aria_labels = this.element.getAttribute("aria-labelledby");
+  var aria_label_array = aria_labels.match(/\S+/g) || [];
+
+  // var aria_labels = datavalue_el.getAttribute("aria-labelledby").match(/\S+/g) || [];
+  // console.log(aria_labels)
+  for (var l = 0, l_len = aria_label_array.length; l_len > l; ++l) {
+    var each_label = aria_label_array[ l ]; 
+    var label_el = document.getElementById( each_label );
+
+    // don't include this element text, in case it's included as an AT hack
+    if (label_el && this.element != label_el) {
+      this.label_text += label_el.textContent.trim();
+      this.label_els.push(label_el);
+      if ( l_len != l + 1 ) {
+        this.label_text += ", ";
+      }
+    }
+  } 
+  this.label = this.label_text + ": " + data_text;
+
+  // get related connectors
+  var from_connector_els = this.root.querySelectorAll("[aria-flowfrom='" + this.id + "']");
+  this.connectors["from"] = this.find_connectors(from_connector_els);
+  
+  var to_connector_els = this.root.querySelectorAll("[aria-flowto='" + this.id + "']");
+  this.connectors["to"] = this.find_connectors(from_connector_els);
+
+  this.connectors["all"] = this.connectors["from"].concat( this.connectors["to"]);
+  
+  // get colors
+  if ( "g" == this.element.localName ) {
+    var shapes = this.element
+              .querySelectorAll("circle, ellipse, rect, line, polyline, polygon, path, use");
+    for (var s = 0, s_len = shapes.length; s_len > s; ++s) {
+      var eachShape = shapes[ s ]; 
+      var colorItem = new colorObj(eachShape);
+      // console.log( this.element.id + ": " + eachShape.localName 
+      //               + "\n fill: " + colorItem.fill 
+      //               + "\n stroke: " + colorItem.stroke 
+      //             );
+      this.colors.push(colorItem);
+    }  
+  } else {
+    var colorItem = new colorObj(this.element);
+    this.colors.push(colorItem);
+  }
+}
+
+nodeObj.prototype.find_connectors = function ( connectors ){  
+  var connector_array = [];
+  for (var c = 0, c_len = connectors.length; c_len > c; ++c) {
+    var each_connector = connectors[c];
+    var connector = new connectorObj( each_connector );
+    connector_array.push( connector );
+  }
+  return connector_array;
+}
+
+
+function connectorObj( el ) {
+  this.element = el;
+  this.label = null;
+  this.nodes = []; // each item has: element, label, list of referencing datapoints
+  this.from_el = null;
+  this.to_el = null;
+
+  this.init();
+}
+
+connectorObj.prototype.init = function (){
+  var from_value = this.element.getAttribute("aria-flowfrom");
+  this.from_el = document.getElementById( from_value )
+
+  var to_value = this.element.getAttribute("aria-flowto");
+  this.to_el = document.getElementById( to_value )
+
+  // TODO: get label
+  // compose accessible name
+  var aria_labels = this.element.getAttribute("aria-labelledby");
+  var aria_label_array = aria_labels.match(/\S+/g) || [];
+
+  // var aria_labels = datavalue_el.getAttribute("aria-labelledby").match(/\S+/g) || [];
+  // console.log(aria_labels)
+  for (var l = 0, l_len = aria_label_array.length; l_len > l; ++l) {
+    var each_label = aria_label_array[ l ]; 
+    var label_el = document.getElementById( each_label );
+
+    // don't include this element text, in case it's included as an AT hack
+    if (label_el && this.element != label_el) {
+      this.label_text += label_el.textContent.trim();
+      this.label_els.push(label_el);
+      if ( l_len != l + 1 ) {
+        this.label_text += ", ";
+      }
+    }
+  } 
+  this.label = this.label_text + ": " + data_text;
+
+  // var allRefs = document.querySelectorAll("[aria-labelledby~='" + this.element.id + "']");
+  // for (var r = 0, r_len = allRefs.length; r_len > r; ++r) {
+  //   var eachRef = allRefs[ r ]; 
+    
+  //   var ref = eachRef;
+  //   var role = eachRef.getAttribute("role");
+  //   while ( "datapoint" != role){
+  //     ref = ref.parentNode;
+  //     role = ref.getAttribute("role");
+  //   }   
+
+  //   // var datapoint = new datapointObj( ref );
+  //   // datapoint.init( ref ); 
+  //   // dataset.values.push( datapoint.value );
+  //   // dataset.push( datapoint );
+    
+    
+  //   this.refs.push(datapoint); // list of referencing datapoints
+  // }
+
+
+
+
+  // // get legend title
+  // var title = this.element.querySelector("[role='legend'] > [role='heading']");
+  // if ( title){
+  //   this.label = title.textContent;
+  // }
+  
+  // // first extract all the legend items
+  // var legendItems = this.element.querySelectorAll("[role='legenditem']");
+  // for (var l = 0, l_len = legendItems.length; l_len > l; ++l) {
+  //   var eachItem = legendItems[ l ]; 
+  //   var legendItem = new legendItemObj( eachItem );
+  //   this.items.push( legendItem );
+  // }
+}
+
+
+
+/*
+*  Color Object
+*/
 function colorObj( el ) {
   this.element = el;
   this.fill = null;
@@ -2223,19 +2474,19 @@ function Sonifier() {
 
   this.coords = null;
 
-	// constants
+  // constants
   this.svgns = "http://www.w3.org/2000/svg";
 }
 
 Sonifier.prototype.init = function (svgroot, metaGroup, dataLine, 
-																		 x, y, width, height, xAxis, yAxis, xAxisPos, yAxisPos, color){	
+                                     x, y, width, height, xAxis, yAxis, xAxisPos, yAxisPos, color){ 
   this.svgroot = svgroot;
-	this.metaGroup = metaGroup;
-	this.dataLine = dataLine;
-	this.minx = x;
-	this.miny = y;
-	this.maxx = x + width;
-	this.maxy = y + height;
+  this.metaGroup = metaGroup;
+  this.dataLine = dataLine;
+  this.minx = x;
+  this.miny = y;
+  this.maxx = x + width;
+  this.maxy = y + height;
   this.coords = this.svgroot.createSVGPoint();
   this.axisX = new Axis( xAxis[0], xAxis[1], xAxisPos, 0, width);
   this.axisY = new Axis( yAxis[0], yAxis[1], yAxisPos, 0, height);
@@ -2250,23 +2501,23 @@ Sonifier.prototype.init = function (svgroot, metaGroup, dataLine,
   this.timer = null;
   this.cursorDirection = 1;
   this.cursorIntersect = false;
-	this.setDetune(0);
-	this.dataLinePoints = null;
+  this.setDetune(0);
+  this.dataLinePoints = null;
 
-	// // create frame, debugging
-	//   var frame = document.createElementNS(this.svgns, "path");
-	//   frame.setAttribute("d", "M" + this.minx + "," + this.miny 
-	// 															 + " " + this.maxx + "," + this.miny
-	// 															 + " " + this.maxx + "," + this.maxy
-	// 															 + " " + this.minx + "," + this.maxy
-	// 															 + " z");
-	//   frame.setAttribute("fill", "lime");
-	//   frame.setAttribute("opacity", "0.5");
-	//   frame.setAttribute("pointer-events", "none");
-	//   this.metaGroup.appendChild( frame );
+  // // create frame, debugging
+  //   var frame = document.createElementNS(this.svgns, "path");
+  //   frame.setAttribute("d", "M" + this.minx + "," + this.miny 
+  //                               + " " + this.maxx + "," + this.miny
+  //                               + " " + this.maxx + "," + this.maxy
+  //                               + " " + this.minx + "," + this.maxy
+  //                               + " z");
+  //   frame.setAttribute("fill", "lime");
+  //   frame.setAttribute("opacity", "0.5");
+  //   frame.setAttribute("pointer-events", "none");
+  //   this.metaGroup.appendChild( frame );
 
 
-	// create cursor line and point
+  // create cursor line and point
   this.cursor = document.createElementNS(this.svgns, "path");
   this.cursor.setAttribute("id", "cursor");
   this.cursor.setAttribute("d", "M" + this.minx + "," + this.miny + " " + this.minx + "," + this.maxy);
@@ -2293,17 +2544,17 @@ Sonifier.prototype.init = function (svgroot, metaGroup, dataLine,
   this.metaGroup.addEventListener("mousemove", bind(this, this.trackPointer), false );
   // document.documentElement.addEventListener("click", this.toggleAudio, false );
 
-	if ( !this.isReady){
-		// only register key listener on first initialization
-	  document.documentElement.addEventListener("keydown", bind(this, this.trackKeys), false );
-	}
-	
-	// indicate first initialization
+  if ( !this.isReady){
+    // only register key listener on first initialization
+    document.documentElement.addEventListener("keydown", bind(this, this.trackKeys), false );
+  }
+  
+  // indicate first initialization
   this.isReady = true;
 
-	// var axisMsg = "X-axis: " + this.axisX.min 
-	// 								+ " to " + this.axisX.max + ". Y-axis: " + this.axisY.min + " to " + this.axisY.max;
-	// this.speak( axisMsg, false );
+  // var axisMsg = "X-axis: " + this.axisX.min 
+  //                + " to " + this.axisX.max + ". Y-axis: " + this.axisY.min + " to " + this.axisY.max;
+  // this.speak( axisMsg, false );
 }
 
 Sonifier.prototype.trackKeys = function (event) {
@@ -2348,72 +2599,72 @@ Sonifier.prototype.trackKeys = function (event) {
         this.setPlayRate( -10 );
         break;
 
-  		case "m":
-  			this.toggleVolume();
-  			break;
+      case "m":
+        this.toggleVolume();
+        break;
 
-  		case "o":
-  			this.setDirection();
-  			break;
+      case "o":
+        this.setDirection();
+        break;
     }
   }
 }   
 
 
 Sonifier.prototype.togglePlay = function (forcePause){
-	console.log("togglePlay")
-	if ( this.timer || forcePause){
-		this.stopPlay();
-	} else {
-	  this.isPlaying = true;
-		var t = this; 
+  console.log("togglePlay")
+  if ( this.timer || forcePause){
+    this.stopPlay();
+  } else {
+    this.isPlaying = true;
+    var t = this; 
     
-		this.timer = setInterval( function () { 
-			t.coords.x += t.cursorDirection;
-		  t.updateCursor();
-		}, t.cursorSpeed);
-	}
+    this.timer = setInterval( function () { 
+      t.coords.x += t.cursorDirection;
+      t.updateCursor();
+    }, t.cursorSpeed);
+  }
 }   
 
 Sonifier.prototype.stopPlay = function () { 
-	clearInterval( this.timer );
-	this.timer = null;
+  clearInterval( this.timer );
+  this.timer = null;
 }   
 
 Sonifier.prototype.resetPlay = function () { 
-	this.stopPlay( 1, 1 );
+  this.stopPlay( 1, 1 );
   this.isPlaying = false;
-	this.coords.x = 0;
-	this.coords.y = 0;
-	this.positionCursor( this.coords.x, this.coords.y, true );
-	this.setVolume( 0 );
+  this.coords.x = 0;
+  this.coords.y = 0;
+  this.positionCursor( this.coords.x, this.coords.y, true );
+  this.setVolume( 0 );
 }   
 
 Sonifier.prototype.setPlayRate = function (rateDelta){ 
-	this.cursorSpeed += rateDelta;
-	if ( this.timer){
-		this.stopPlay();
-		this.togglePlay();
-	}
+  this.cursorSpeed += rateDelta;
+  if ( this.timer){
+    this.stopPlay();
+    this.togglePlay();
+  }
 }   
 
 Sonifier.prototype.stepCursor = function (direction){ 
-	var x = parseFloat( this.cursorpoint.getAttribute( "cx" ) );
-	this.coords.x = x + direction;
-	// this.coords.y = 0;
-	this.updateCursor();	
+  var x = parseFloat( this.cursorpoint.getAttribute( "cx" ) );
+  this.coords.x = x + direction;
+  // this.coords.y = 0;
+  this.updateCursor();  
 }   
 
 Sonifier.prototype.setDirection = function () { 
   if ( 1 == this.cursorDirection){
-		this.cursorDirection = -1;
-	} else {
-		this.cursorDirection = 1;
-	}
-	
-	if ( !this.timer){
-		this.togglePlay();
-	}
+    this.cursorDirection = -1;
+  } else {
+    this.cursorDirection = 1;
+  }
+  
+  if ( !this.timer){
+    this.togglePlay();
+  }
 }   
 
 
@@ -2422,117 +2673,117 @@ Sonifier.prototype.setRange = function (xAxis, yAxis){
 }   
 
 Sonifier.prototype.trackPointer = function (event) { 
-	if ( this.cursor){
+  if ( this.cursor){
     this.coords.x = event.clientX;
     this.coords.y = event.clientY;
-    this.coords = this.coords.matrixTransform( this.cursor.getScreenCTM().inverse() );			
+    this.coords = this.coords.matrixTransform( this.cursor.getScreenCTM().inverse() );      
 
-	  this.updateCursor();
-	}
+    this.updateCursor();
+  }
 }   
 
 Sonifier.prototype.updateCursor = function () { 
   // clip to range
   var x = Math.max( Math.min( this.maxx, this.coords.x ), this.minx );
 
-	if ( ( this.maxx == x && 1 == this.cursorDirection ) 
-		|| ( 0 == x && -1 == this.cursorDirection )){
-		this.stopPlay();
-	} else {
-	  var cursor_p1 = new Point2D(x, this.miny);
-	  var cursor_p2 = new Point2D(x, this.maxy);
+  if ( ( this.maxx == x && 1 == this.cursorDirection ) 
+    || ( 0 == x && -1 == this.cursorDirection )){
+    this.stopPlay();
+  } else {
+    var cursor_p1 = new Point2D(x, this.miny);
+    var cursor_p2 = new Point2D(x, this.maxy);
 
-	  if (!this.dataLinePoints) {
-	    this.dataLinePoints = [];
-	    var dataLineArray = null;
-			if ("path" == this.dataLine.localName) {
-				dataLineArray = this.dataLine.getAttribute("d").split("L");
-			} else if ("polyline" == this.dataLine.localName || "polygon" == this.dataLine.localName) {
-				dataLineArray = this.dataLine.getAttribute("points").split(" ");
-				// dataLineArray = 
-			}
-			console.log(dataLineArray)
-			
-	    for (var vp in dataLineArray){
-				if ("function" != typeof dataLineArray[vp]) { 
-		      var values = dataLineArray[vp].replace(/[A-Za-z]+/g, "").split(/[ ,]+/);
-		      this.dataLinePoints.push( 
-						new Point2D( 
-							parseFloat(values[0]), 
-							parseFloat(values[1]) 
-						)
-					);
-				}
-	    }
-	  }
+    if (!this.dataLinePoints) {
+      this.dataLinePoints = [];
+      var dataLineArray = null;
+      if ("path" == this.dataLine.localName) {
+        dataLineArray = this.dataLine.getAttribute("d").split("L");
+      } else if ("polyline" == this.dataLine.localName || "polygon" == this.dataLine.localName) {
+        dataLineArray = this.dataLine.getAttribute("points").split(" ");
+        // dataLineArray = 
+      }
+      console.log(dataLineArray)
+      
+      for (var vp in dataLineArray){
+        if ("function" != typeof dataLineArray[vp]) { 
+          var values = dataLineArray[vp].replace(/[A-Za-z]+/g, "").split(/[ ,]+/);
+          this.dataLinePoints.push( 
+            new Point2D( 
+              parseFloat(values[0]), 
+              parseFloat(values[1]) 
+            )
+          );
+        }
+      }
+    }
 
-	  // update cursor line
-	  this.cursor.setAttribute("d", "M" + x + "," + this.miny + " " + x + "," + this.maxy);
+    // update cursor line
+    this.cursor.setAttribute("d", "M" + x + "," + this.miny + " " + x + "," + this.maxy);
 
-	  // find intersection
-	  var intersections = Intersection.intersectLinePolygon(
-	    cursor_p1, cursor_p2, this.dataLinePoints
-	  );
+    // find intersection
+    var intersections = Intersection.intersectLinePolygon(
+      cursor_p1, cursor_p2, this.dataLinePoints
+    );
 
-	  this.valuePoint = intersections.points[0];
-		if (this.valuePoint) {
-			if (!this.cursorIntersect) {
-				this.cursorIntersect = true;
-				this.setVolume( 1 );
-			  this.cursorpoint.setAttribute( "stroke", this.cursorColor );
-			}
-		} else {
-			this.valuePoint = {x:0, y:0};
-			if (this.cursorIntersect) {
-				this.cursorIntersect = false;				
-				this.setVolume( 0 );
-			  this.cursorpoint.setAttribute( "stroke", "none" );
-			}
-		}
+    this.valuePoint = intersections.points[0];
+    if (this.valuePoint) {
+      if (!this.cursorIntersect) {
+        this.cursorIntersect = true;
+        this.setVolume( 1 );
+        this.cursorpoint.setAttribute( "stroke", this.cursorColor );
+      }
+    } else {
+      this.valuePoint = {x:0, y:0};
+      if (this.cursorIntersect) {
+        this.cursorIntersect = false;       
+        this.setVolume( 0 );
+        this.cursorpoint.setAttribute( "stroke", "none" );
+      }
+    }
 
-		this.positionCursor( x, this.valuePoint.y, false );
-		
-		/*
-		affine transformation:
-		to transform number x in range [a,b] to	number y in range [c,d], use this formula:
-		y = (x−a)(d−c/b−a) + c
-		*/
-		this.panValue = ((x - this.axisX.chartMin) * (2 / (this.axisX.chartMax - this.axisX.chartMin))) - 1;
-		this.pan();
+    this.positionCursor( x, this.valuePoint.y, false );
+    
+    /*
+    affine transformation:
+    to transform number x in range [a,b] to number y in range [c,d], use this formula:
+    y = (x−a)(d−c/b−a) + c
+    */
+    this.panValue = ((x - this.axisX.chartMin) * (2 / (this.axisX.chartMax - this.axisX.chartMin))) - 1;
+    this.pan();
 
-		var detune = (this.valuePoint.y - this.axisY.chartMin) * ((1000 - -1000) / 
-								 (this.axisY.chartMin - this.axisY.chartMax)) + 1000;
-	  this.setDetune ( detune );		
-	}
-	
-	if ( this.axisX.pos == x 
-		|| this.axisX.chartMin == x
-		|| this.axisX.chartMax == x){
-			console.log("tick")
-			
-			//this.playTickmark(); /// buggy right now, doesn't turn off
-			
-			
-		// 	var msg = "";
-		// 	if (  this.axisX.pos == x){
-		// 		msg = "axis marker: " + x;
-		// 	} else if (  this.axisX.chartMin == x){
-		// 		msg = "min: " + x;
-		// 	}	else if (  this.axisX.chartMax == x){
-		// 		msg = "max: " + x;
-		// 	}
-		// console.log(msg)
-	}
+    var detune = (this.valuePoint.y - this.axisY.chartMin) * ((1000 - -1000) / 
+                 (this.axisY.chartMin - this.axisY.chartMax)) + 1000;
+    this.setDetune ( detune );    
+  }
+  
+  if ( this.axisX.pos == x 
+    || this.axisX.chartMin == x
+    || this.axisX.chartMax == x){
+      console.log("tick")
+      
+      //this.playTickmark(); /// buggy right now, doesn't turn off
+      
+      
+    //  var msg = "";
+    //  if (  this.axisX.pos == x){
+    //    msg = "axis marker: " + x;
+    //  } else if (  this.axisX.chartMin == x){
+    //    msg = "min: " + x;
+    //  } else if (  this.axisX.chartMax == x){
+    //    msg = "max: " + x;
+    //  }
+    // console.log(msg)
+  }
 }   
 
 Sonifier.prototype.positionCursor = function (x, y, setLine){ 
   this.cursorpoint.setAttribute( "cx", x );
   this.cursorpoint.setAttribute( "cy", y );
 
-	if ( setLine){
-	  // update cursor line
-	  this.cursor.setAttribute("d", "M" + x + "," + this.miny + " " + x + "," + this.maxy);
-	}
+  if ( setLine){
+    // update cursor line
+    this.cursor.setAttribute("d", "M" + x + "," + this.miny + " " + x + "," + this.maxy);
+  }
 }
 
 Sonifier.prototype.setDetune = function (detune){ 
@@ -2541,7 +2792,7 @@ Sonifier.prototype.setDetune = function (detune){
 
     this.oscillator = this.audioContext.createOscillator();
     // this.oscillator.detune.value = -50; //min="-100" max="100"
-	  this.oscillator.frequency.value = 280; // 220
+    this.oscillator.frequency.value = 280; // 220
 
     this.oscillator.start(0);
 
@@ -2550,113 +2801,113 @@ Sonifier.prototype.setDetune = function (detune){
     this.volume.gain.value = 0;
     // this.volume.connect(this.audioContext.destination);
 
-		this.panner = this.audioContext.createPanner();
+    this.panner = this.audioContext.createPanner();
     this.volume.connect(this.panner);
-		this.panner.panningModel = "equalpower";
-		this.panner.distanceModel = "exponential";
-		// this.panner.refDistance = 1000;
-		this.panner.coneOuterGain = 1;
-		this.panner.coneOuterAngle = 180;
-		this.panner.coneInnerAngle = 0;
+    this.panner.panningModel = "equalpower";
+    this.panner.distanceModel = "exponential";
+    // this.panner.refDistance = 1000;
+    this.panner.coneOuterGain = 1;
+    this.panner.coneOuterAngle = 180;
+    this.panner.coneInnerAngle = 0;
     this.panner.connect(this.audioContext.destination);
   }
 
   this.oscillator.detune.value = Math.pow(2, 1/12) * detune;
 
-	// oscillator.frequency.value = 440; // Set waveform frequency to 440 Hz
-	// oscillator.detune.value = Math.pow(2, 1/12) * 10; // Offset sound by 10 semitones
+  // oscillator.frequency.value = 440; // Set waveform frequency to 440 Hz
+  // oscillator.detune.value = Math.pow(2, 1/12) * 10; // Offset sound by 10 semitones
 }
 
 Sonifier.prototype.setVolume = function (gain){ 
-	if (this.volume) {
-	  this.volume.gain.value = gain;		
-	}
+  if (this.volume) {
+    this.volume.gain.value = gain;    
+  }
 }
 
 Sonifier.prototype.toggleVolume = function (forceMute){ 
   if ( this.volume && this.audioContext.destination ){
     if ( !this.isMute || forceMute){
-  		this.isMute = true;
+      this.isMute = true;
       this.volume.disconnect(this.audioContext.destination);
-  	} else {
-  		this.isMute = false;
+    } else {
+      this.isMute = false;
       this.volume.connect(this.audioContext.destination);
     }
   }
 }
 
 // panVal is a float between -1 and 1: -1 == left; 1 == right
-Sonifier.prototype.pan = function () { 	
-	var panAngle = this.panValue * Math.PI / 2;
-	this.panner.setPosition(Math.sin(panAngle), Math.cos(panAngle), 1, 0, 0.5)
+Sonifier.prototype.pan = function () {  
+  var panAngle = this.panValue * Math.PI / 2;
+  this.panner.setPosition(Math.sin(panAngle), Math.cos(panAngle), 1, 0, 0.5)
 }
 
 Sonifier.prototype.playTickmark = function () { 
-	
+  
   if (!this.tickTone) {
     this.tickContext = new AudioContext();
 
     this.tickTone = this.tickContext.createOscillator();
-	  this.tickTone.type = "square";
-	  this.tickTone.frequency.value = 880;
+    this.tickTone.type = "square";
+    this.tickTone.frequency.value = 880;
   }
 
   this.tickTone.connect(this.tickContext.destination);
   this.tickTone.start(0);
-	
-	/// buggy right now, doesn't turn off
-	var t = this; 
-	setTimeout( function () { 
+  
+  /// buggy right now, doesn't turn off
+  var t = this; 
+  setTimeout( function () { 
     t.tickTone.disconnect(t.tickContext.destination);
-	}, 100);
+  }, 100);
 }
 
 
 Sonifier.prototype.speak = function (msg){ 
   if ( "undefined" != typeof speechSynthesis){
-	  if ( speechSynthesis.speaking){
-	    speechSynthesis.cancel();
-	  }
-	
-		if ( !msg){
-			msg = "x = " + this.axisX.scale( this.valuePoint.x );
-			msg += ", y = " + this.axisY.scale( this.valuePoint.y );
-		}
-		
-		var t = this;
-		t.toggleVolume( true );
-		if ( t.isPlaying){
-			t.togglePlay( true );
-		}
+    if ( speechSynthesis.speaking){
+      speechSynthesis.cancel();
+    }
+  
+    if ( !msg){
+      msg = "x = " + this.axisX.scale( this.valuePoint.x );
+      msg += ", y = " + this.axisY.scale( this.valuePoint.y );
+    }
+    
+    var t = this;
+    t.toggleVolume( true );
+    if ( t.isPlaying){
+      t.togglePlay( true );
+    }
 
     var voice = new SpeechSynthesisUtterance();
     voice.text = msg;
     voice.lang = "en-US";
     voice.rate = 1.2;
-		voice.onend = function () { 
-			t.toggleVolume(); 
-			if ( t.isPlaying){
-				t.togglePlay();
-			}
-		}
+    voice.onend = function () { 
+      t.toggleVolume(); 
+      if ( t.isPlaying){
+        t.togglePlay();
+      }
+    }
     speechSynthesis.speak( voice );
   }
 }
 
 function Axis(min, max, pos, chartMin, chartMax) {
-	if ( arguments.length > 0){
-		this.min = min;
-		this.max = max;
-		this.pos = pos; // position of the axis line along the axis
-		this.chartMin = chartMin;
-		this.chartMax = chartMax;
-	}
+  if ( arguments.length > 0){
+    this.min = min;
+    this.max = max;
+    this.pos = pos; // position of the axis line along the axis
+    this.chartMin = chartMin;
+    this.chartMax = chartMax;
+  }
 }
 
 Axis.prototype.scale = function ( val){
-	var newVal = (val / ((this.chartMax - this.chartMin) / (this.max - this.min))) + this.min;
-	newVal = Math.round( newVal * 10 ) / 10;
-	return newVal;
+  var newVal = (val / ((this.chartMax - this.chartMin) / (this.max - this.min))) + this.min;
+  newVal = Math.round( newVal * 10 ) / 10;
+  return newVal;
 };
 
 
@@ -2673,9 +2924,9 @@ Array.prototype.min = function () {
 }
 
 function bind (scope, fn) {
-	return function () {
-		return fn.apply( scope, arguments );
-	}
+  return function () {
+    return fn.apply( scope, arguments );
+  }
 }
 
 
@@ -2688,77 +2939,77 @@ function bind (scope, fn) {
 ******/
 
 function Point2D(x, y) {
-	if ( arguments.length > 0){
-		this.x = x;
-		this.y = y;
-	}
+  if ( arguments.length > 0){
+    this.x = x;
+    this.y = y;
+  }
 }
 
 function Intersection(status) {
-	if ( arguments.length > 0){
-		this.init(status);
-	}
+  if ( arguments.length > 0){
+    this.init(status);
+  }
 }
 
 Intersection.prototype.init = function (status) {
-	this.status = status;
-	this.points = new Array();
+  this.status = status;
+  this.points = new Array();
 };
 
 Intersection.prototype.appendPoints = function (points) {
-	this.points = this.points.concat(points);
+  this.points = this.points.concat(points);
 };
 
 Intersection.intersectLineLine = function (a1, a2, b1, b2) {
-	var result;
+  var result;
 
-	var ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
-	var ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
-	var u_b  = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
+  var ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
+  var ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
+  var u_b  = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
 
-	if ( u_b != 0){
-		var ua = ua_t / u_b;
-		var ub = ub_t / u_b;
+  if ( u_b != 0){
+    var ua = ua_t / u_b;
+    var ub = ub_t / u_b;
 
-		if ( 0 <= ua && ua <= 1 && 0 <= ub && ub <= 1){
-			result = new Intersection("Intersection");
-			result.points.push(
-				new Point2D(
-					a1.x + ua * (a2.x - a1.x),
-					a1.y + ua * (a2.y - a1.y)
-				)
-			);
-		} else {
-			result = new Intersection("No Intersection");
-		}
-	} else {
-		if ( ua_t == 0 || ub_t == 0){
-			result = new Intersection("Coincident");
-		} else {
-			result = new Intersection("Parallel");
-		}
-	}
+    if ( 0 <= ua && ua <= 1 && 0 <= ub && ub <= 1){
+      result = new Intersection("Intersection");
+      result.points.push(
+        new Point2D(
+          a1.x + ua * (a2.x - a1.x),
+          a1.y + ua * (a2.y - a1.y)
+        )
+      );
+    } else {
+      result = new Intersection("No Intersection");
+    }
+  } else {
+    if ( ua_t == 0 || ub_t == 0){
+      result = new Intersection("Coincident");
+    } else {
+      result = new Intersection("Parallel");
+    }
+  }
 
-	return result;
+  return result;
 };
 
 Intersection.intersectLinePolygon = function (a1, a2, points) {
-	var result = new Intersection("No Intersection");
-	var length = points.length;
+  var result = new Intersection("No Intersection");
+  var length = points.length;
 
-	for ( var i = 0; i < length; ++i){
-		var b1 = points[i];
-		var b2 = points[(i+1) % length];
-		var inter = Intersection.intersectLineLine(a1, a2, b1, b2);
+  for ( var i = 0; i < length; ++i){
+    var b1 = points[i];
+    var b2 = points[(i+1) % length];
+    var inter = Intersection.intersectLineLine(a1, a2, b1, b2);
 
-		result.appendPoints(inter.points);
-	}
+    result.appendPoints(inter.points);
+  }
 
-	if ( result.points.length > 0){
-		result.status = "Intersection";
-	}
-	
-	return result;
+  if ( result.points.length > 0){
+    result.status = "Intersection";
+  }
+  
+  return result;
 };
 
 /*
