@@ -630,7 +630,7 @@
       this.showText("File loaded");
       this.populateOptions( [] );
 
-      if ( this.file & history.pushState ) {
+      if ( this.file && history.pushState ) {
         var query_str = "?filename=" + encodeURIComponent(this.file.name);
         var new_url = window.location.protocol + "//" + window.location.host + window.location.pathname 
                     + query_str + window.location.hash;
