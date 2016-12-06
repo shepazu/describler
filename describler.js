@@ -1218,7 +1218,24 @@ describlerObj.prototype.handle_node = function (){
         }
 
         if (all_followed) {
-          this.speeches.push( "You have followed all of the connectors!" );
+          this.speeches.push( "You have followed all of the connectors" );
+        }
+
+        var all_visited = true;
+        for (var n = 0, n_len = flowchart.nodes.length; n_len > n; ++n) {
+          var each_node = flowchart.nodes[n];
+          if ( 0 == each_node.visit_count ) {
+            all_visited = false;
+            break;
+          }
+        }
+
+        if (all_visited) {
+          var visited_msg = "You have ";
+          if (all_followed) {
+            visited_msg = " and";
+          }
+          this.speeches.push( visited_msg + " visited all of the nodes" );
         }
       }
 
