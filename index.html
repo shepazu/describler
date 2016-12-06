@@ -532,14 +532,6 @@
       this.nextButton.addEventListener("click", bind(this, this.next), false);
 
       window.location.hash = "#intro";
-
-      // console.log("url: " + window.location.search)
-      var filename = window.location.search;
-      if (filename) {
-        filename = filename.split("=")[1];
-        this.loadFileFromServer( null, filename );
-        // assessment-demo.svg
-      }
     }
 
     appObj.prototype.loadFileFromServer = function ( event, filename ){
@@ -633,6 +625,17 @@
 
         this.describler.app = this;
       }
+
+ 
+      this.showText("File loaded");
+      this.populateOptions( [] );
+
+      if ( this.file & history.pushState ) {
+        var query_str = "?filename=" + encodeURIComponent(this.file.name);
+        var new_url = window.location.protocol + "//" + window.location.host + window.location.pathname 
+                    + query_str + window.location.hash;
+        window.history.pushState( {path:new_url}, "", new_url );       
+      }      
     }
 
     appObj.prototype.setFileInfo = function ( name, filesize, lastMod ){
