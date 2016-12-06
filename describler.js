@@ -13,8 +13,12 @@ function showEvent(event) {
   console.log(event.type)
 }
 
-function matchElement( obj ) { 
+function match_element( obj ) { 
   return obj.element === this;
+}
+
+function match_id( obj ) { 
+  return obj.id === this;
 }
 
 
@@ -571,9 +575,9 @@ describlerObj.prototype.handle_chart = function (){
   // console.log("handle_chart");
   // this.speeches.push( "chart" );     
 
-  var chart = this.charts.find( matchElement, this.activeElement );
+  var chart = this.charts.find( match_element, this.activeElement );
   if (chart) {
-    var chart_index = this.charts.findIndex( matchElement, this.activeElement );
+    var chart_index = this.charts.findIndex( match_element, this.activeElement );
     this.activeObject = chart;
 
     // console.log("chart:");
@@ -662,9 +666,9 @@ describlerObj.prototype.handle_datapoint = function (){
       var dataset = chart.datasets[d];
       console.log(dataset);
 
-      var datapoint = dataset.datapoints.find( matchElement, this.activeElement );
+      var datapoint = dataset.datapoints.find( match_element, this.activeElement );
       if (datapoint) {
-        var dp_index = dataset.datapoints.findIndex( matchElement, this.activeElement );
+        var dp_index = dataset.datapoints.findIndex( match_element, this.activeElement );
         this.activeObject = datapoint;
 
         // console.log("datapoint:");
@@ -687,7 +691,7 @@ describlerObj.prototype.handle_datapoint = function (){
 
             // describe change of value from previous datapoint
             if ( this.previous_datapoint ) {
-              var prev_datapoint = dataset.datapoints.find( matchElement, this.previous_datapoint );
+              var prev_datapoint = dataset.datapoints.find( match_element, this.previous_datapoint );
               var lastValue = prev_datapoint.value;
               var lastField = prev_datapoint.label_text;
 
@@ -1107,9 +1111,9 @@ describlerObj.prototype.handle_legenditem = function (){
     for (var l = 0, l_len = chart.legends.length; l_len > l; ++l) {
       var eachLegend = chart.legends[ l ]; 
 
-      var legenditem = eachLegend.items.find( matchElement, this.activeElement );
+      var legenditem = eachLegend.items.find( match_element, this.activeElement );
       if (legenditem) {
-        var legenditem_index = eachLegend.items.findIndex( matchElement, this.activeElement );
+        var legenditem_index = eachLegend.items.findIndex( match_element, this.activeElement );
         this.activeObject = legenditem;
 
         if ( !this.menu.selected ){
@@ -1168,15 +1172,17 @@ describlerObj.prototype.handle_node = function (){
   // console.log("handle_node");
   // this.speeches.push( "node" );  
 
-  for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
-    var flowchart = this.charts[c];
+  for (var f = 0, f_len = this.charts.length; f_len > f; ++f) {
+    var flowchart = this.charts[f];
 
-    var node = flowchart.nodes.find( matchElement, this.activeElement );
+    var node = flowchart.nodes.find( match_element, this.activeElement );
     if (node) {
-      var node_index = flowchart.nodes.findIndex( matchElement, this.activeElement );
+      var node_index = flowchart.nodes.findIndex( match_element, this.activeElement );
+
       this.speeches.push( '"' +  node.label + '"' );
 
       if ( !this.menu.selected ){
+        node.visit_count++;
         var from_length = node.connectors["from"].length;
         var from_msg = from_length + " outgoing connector";
         if ( 1 != from_length ){
@@ -1191,9 +1197,33 @@ describlerObj.prototype.handle_node = function (){
         }
         
         this.speeches.push( type_msg + node.type + " node, with " + from_msg );
+
+        if ( 1 < node.visit_count ) {
+          var visit_msg = node.visit_count
+          if ( 1 != node.visit_count ){
+            from_msg += "s"; // make it plural
+          }
+
+          var visit_msg = this.getOrdinalNumber( node.visit_count );
+          this.speeches.push( "This is the " + visit_msg + " time you have visited this node." );      
+        }
+
+        var all_followed = true;
+        for (var c = 0, c_len = flowchart.connectors.length; c_len > c; ++c) {
+          var each_connector = flowchart.connectors[c];
+          if ( !each_connector.is_followed ) {
+            all_followed = false;
+            break;
+          }
+        }
+
+        if (all_followed) {
+          this.speeches.push( "You have followed all of the connectors!" );
+        }
       }
 
       // TODO: let user know when they've followed all connectors
+      // TODO: tell user when they've already visited this node
 
       // TODO: let user jump immediately to selecting outgoing node if it's the only choice?
 
@@ -1210,7 +1240,8 @@ describlerObj.prototype.handle_node = function (){
 
             this.menu.reset();
             for (var c = 0, c_len = node.connectors["from"].length; c_len > c; ++c) {
-              var connector = node.connectors["from"][c];
+              var connector_id = node.connectors["from"][c];
+              var connector = flowchart.connectors.find( match_id, connector_id );
               var option_label = connector.label;
               if (connector.is_followed) {
                 option_label += " (already followed)";
@@ -1224,10 +1255,10 @@ describlerObj.prototype.handle_node = function (){
             // this.menu.reset();
             var connector_el = document.getElementById( this.menu.selected.id );
 
-            var connector = flowchart.connectors.find( matchElement, connector_el );
+            var connector = flowchart.connectors.find( match_element, connector_el );
             if (connector) {
               connector.is_followed = true;
-              // var connector_index = flowchart.connectors.findIndex( matchElement, connector_el );
+              // var connector_index = flowchart.connectors.findIndex( match_element, connector_el );
               this.setActiveElement( connector.to_el );
             }
           }
@@ -1240,7 +1271,8 @@ describlerObj.prototype.handle_node = function (){
             // this.speeches.push( "Select incoming connector: " );
             this.menu.reset();
             for (var c = 0, c_len = node.connectors["to"].length; c_len > c; ++c) {
-              var connector = node.connectors["to"][c];
+              var connector_id = node.connectors["to"][c];
+              var connector = flowchart.connectors.find( match_id, connector_id );
               var option_label = connector.label;
               if (connector.is_followed) {
                 option_label += " (already followed)";
@@ -1253,12 +1285,12 @@ describlerObj.prototype.handle_node = function (){
 
             var connector_el = document.getElementById( this.menu.selected.id );
 
-            var connector = flowchart.connectors.find( matchElement, connector_el );
+            var connector = flowchart.connectors.find( match_element, connector_el );
             if (connector) {
               // TODO: decide if following a directed link backward is "following"
               connector.is_followed = true;
 
-              // var connector_index = flowchart.connectors.findIndex( matchElement, connector_el );
+              // var connector_index = flowchart.connectors.findIndex( match_element, connector_el );
               this.setActiveElement( connector.from_el );
             }
           }
@@ -1284,7 +1316,10 @@ describlerObj.prototype.handle_node = function (){
                     
           this.speeches.push( type_msg + node.type + " node, with " + from_msg + ", and " +  to_msg );
 
-          this.speeches.push( "Node " + (node_index + 1) + " of " + flowchart.nodes.length );
+          var visit_msg = this.getOrdinalNumber( node.visit_count );
+          this.speeches.push( "This is the " + visit_msg + " time you have visited this node." );      
+
+          this.speeches.push( "Node " + (node_index + 1) + " of " + flowchart.nodes.length + "." );
         } else if ( "return" == this.menu.selected.id ){
           if ( this.previous_node ) {
             default_menu = false;
@@ -1303,7 +1338,15 @@ describlerObj.prototype.handle_node = function (){
             this.menu.reset();
             for (var n = 0, n_len = flowchart.nodes.length; n_len > n; ++n) {
               var node = flowchart.nodes[n];
-              this.menu.add( node.id, node.type + "node: " + node.label, "jump" );
+
+              var type_msg = "";
+              if ( node.is_start ) {
+                type_msg += "Starting "
+              } else if ( node.is_terminal ) {
+                type_msg += "Terminal "
+              }
+
+              this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump" );
             }
           } else if ( "jump" == this.menu.selected.context ) {
             var node_el = document.getElementById( this.menu.selected.id );
@@ -2303,26 +2346,26 @@ flowchartObj.prototype.init = function (){
     this.label = title.textContent;
   }
 
+  this.find_nodes();
+  this.find_connectors();
+}
+
+flowchartObj.prototype.find_nodes = function (){
   var node_els = this.element.querySelectorAll("[role='node']");
   for (var n = 0, n_len = node_els.length; n_len > n; ++n) {
     var each_node = node_els[n];
     var node = new nodeObj( each_node, this.element );
     this.nodes.push( node );
   }
+}
 
+flowchartObj.prototype.find_connectors = function (){
   var connector_els = this.element.querySelectorAll("[role='connector']");
   for (var c = 0, c_len = connector_els.length; c_len > c; ++c) {
     var each_connector = connector_els[c];
     var connector = new connectorObj( each_connector );
     this.connectors.push( connector );
   }
-
-  // var legendEls = this.element.querySelectorAll("[role='legend']");
-  // for (var l = 0, l_len = legendEls.length; l_len > l; ++l) {
-  //   var eachLegend = legendEls[ l ]; 
-  //   var legend = new legendObj( eachLegend );
-  //   this.legends.push( legend );
-  // }
 }
 
 
@@ -2337,6 +2380,7 @@ function nodeObj( el, root ) {
   this.label_text = "";
   this.is_start = false;
   this.is_terminal = false;
+  this.visit_count = 0;
 
   this.connectors = {
     "all": [],
@@ -2402,10 +2446,17 @@ nodeObj.prototype.find_connectors = function ( connectors ){
   var connector_array = [];
   for (var c = 0, c_len = connectors.length; c_len > c; ++c) {
     var each_connector = connectors[c];
-    var connector = new connectorObj( each_connector );
-    connector_array.push( connector );
+    connector_array.push( each_connector.id );
   }
   return connector_array;
+
+  // var connector_array = [];
+  // for (var c = 0, c_len = connectors.length; c_len > c; ++c) {
+  //   var each_connector = connectors[c];
+  //   var connector = new connectorObj( each_connector );
+  //   connector_array.push( connector );
+  // }
+  // return connector_array;
 }
 
 
