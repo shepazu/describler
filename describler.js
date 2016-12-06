@@ -1202,14 +1202,20 @@ describlerObj.prototype.handle_node = function (){
       if ( this.menu.selected ){
         if ( "connector-out" == this.menu.selected.id
           ||  "connector-out" == this.menu.selected.context ) {
+          
+          default_menu = false;
+
           if ( "connector-out" == this.menu.selected.id ){
             // this.speeches.push( "Select outgoing connector: " );
 
-            default_menu = false;
             this.menu.reset();
             for (var c = 0, c_len = node.connectors["from"].length; c_len > c; ++c) {
               var connector = node.connectors["from"][c];
-              this.menu.add( connector.element.id, connector.label, "connector-out" );
+              var option_label = connector.label;
+              if (connector.is_followed) {
+                option_label += " (already followed)";
+              }
+              this.menu.add( connector.element.id, option_label, "connector-out" );
             }
             this.menu.add( "_menu", "other options" );
           } else if ( "connector-out" == this.menu.selected.context ) {
@@ -1220,21 +1226,26 @@ describlerObj.prototype.handle_node = function (){
 
             var connector = flowchart.connectors.find( matchElement, connector_el );
             if (connector) {
-              this.is_followed = true;
+              connector.is_followed = true;
               // var connector_index = flowchart.connectors.findIndex( matchElement, connector_el );
               this.setActiveElement( connector.to_el );
             }
           }
         } else if ( "connector-in" == this.menu.selected.id
           ||  "connector-in" == this.menu.selected.context ) {
+
+          default_menu = false;
+
           if ( "connector-in" == this.menu.selected.id ){
             // this.speeches.push( "Select incoming connector: " );
-
-            default_menu = false;
             this.menu.reset();
             for (var c = 0, c_len = node.connectors["to"].length; c_len > c; ++c) {
               var connector = node.connectors["to"][c];
-              this.menu.add( connector.element.id, connector.label, "connector-in" );
+              var option_label = connector.label;
+              if (connector.is_followed) {
+                option_label += " (already followed)";
+              }
+              this.menu.add( connector.element.id, option_label, "connector-in" );
             }
             this.menu.add( "_menu", "other options" );
           } else if ( "connector-in" == this.menu.selected.context ) {
@@ -1245,7 +1256,7 @@ describlerObj.prototype.handle_node = function (){
             var connector = flowchart.connectors.find( matchElement, connector_el );
             if (connector) {
               // TODO: decide if following a directed link backward is "following"
-              this.is_followed = true;
+              connector.is_followed = true;
 
               // var connector_index = flowchart.connectors.findIndex( matchElement, connector_el );
               this.setActiveElement( connector.from_el );
@@ -1276,15 +1287,19 @@ describlerObj.prototype.handle_node = function (){
           this.speeches.push( "Node " + (node_index + 1) + " of " + flowchart.nodes.length );
         } else if ( "return" == this.menu.selected.id ){
           if ( this.previous_node ) {
+            default_menu = false;
+
             // TODO: keep full navigation path, give option to step back
             this.setActiveElement( this.previous_node );
           }           
         } else if ( "jump" == this.menu.selected.id
           ||  "jump" == this.menu.selected.context ) {
+
+          default_menu = false;
+
           if ( "jump" == this.menu.selected.id ){
             this.speeches.push( "Select outgoing connector: " );
 
-            default_menu = false;
             this.menu.reset();
             for (var n = 0, n_len = flowchart.nodes.length; n_len > n; ++n) {
               var node = flowchart.nodes[n];
