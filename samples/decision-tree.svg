@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  
-  width="100%" height="100%" viewBox="0 0 460 430" role="flowchart" tabindex="0">
+  width="100%" height="100%" viewBox="0 0 460 430" role="flowchart" aria-charttype="decisiontree" tabindex="0">
   <title>Decision Tree</title>  
   <desc>A proof-of-concept demo of a decision tree flowchart</desc>
 
@@ -72,29 +72,30 @@
   <g id="decision-tree" transform="translate(0,20)">
     <g id="start" transform="translate(230,34)" role="node" aria-nodetype="state" tabindex="0">
       <use xlink:href="#state-node" />
-      <text y="3" tabindex="-1">Start</text> 
+      <text y="3">Start</text> 
     </g>  
 
-    <path d="M230,52 V83" 
-      role="connector" aria-flowfrom="want" aria-flowto="dont-do-it" aria-directed="true" 
+    <path id="start-to-want" d="M230,52 V83" 
+      role="connector" aria-flowfrom="start" aria-flowto="want" aria-directed="true" 
       tabindex="0"/>   
 
     <g id="want" transform="translate(230,122)" role="node" aria-nodetype="decision" tabindex="0">
       <use xlink:href="#decision-node" />
-      <text x="0" y="-2" tabindex="-1">Do I want to<tspan x="0" dy="1.1em">do this?</tspan></text> 
+      <text x="0" y="-2">Do I want to <tspan x="0" dy="1.1em">do this?</tspan></text> 
     </g>  
 
     <g id="want-no-connector" class="connector">
       <path id="want-to-dont" d="M170,122 H65 V188" 
         role="connector" aria-flowfrom="want" aria-flowto="dont-do-it" aria-directed="true" 
         aria-labelledby="want-no" tabindex="0"/>   
-      <text id="want-no" x="155" y="116" tabindex="-1">No</text>
+      <text id="want-no" x="155" y="116">No</text>
     </g>
+
     <g id="want-yes-connector" class="connector">
       <path id="want-to-disaster" d="M230,156 V193" 
             role="connector" aria-flowfrom="want" aria-flowto="disaster" aria-directed="true" 
             aria-labelledby="want-yes" tabindex="0"/>   
-      <text id="want-yes" x="212" y="172" tabindex="-1">Yes</text>
+      <text id="want-yes" x="212" y="172">Yes</text>
     </g>
 
     <g id="disaster" transform="translate(230,232)" role="node" aria-nodetype="decision" tabindex="0">

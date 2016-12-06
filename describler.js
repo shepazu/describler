@@ -47,17 +47,19 @@ function describlerObj(root) {
 
 
   // create a list of all focusable elements, including the root
-  var focusList = this.root.parentNode.querySelectorAll("[tabindex]");
+  var focusList = this.root.parentNode.querySelectorAll("[tabindex='0']");
   this.focusList = Array.from( focusList );
+  console.log("this.focusList");
+  console.log(this.focusList);
 
   // focus properties
-  this.focusIndex = 0;
+  this.focusIndex = -1;
   this.activeElement = null;
   this.previous_datapoint = null;
+  this.previous_node = null; // flowcharts
   this.activeObject = null;
   this.padding = 0;
   this.strokewidth = 0;
-  this.navDirection = 0;
 
   // find appropriate sizes
   var vb = root.getAttribute("viewBox").split(" ");
@@ -77,8 +79,6 @@ function describlerObj(root) {
   this.root.addEventListener("click", bind(this, this.click), false );
   this.root.addEventListener("keydown", bind(this, this.trackKeys), false );
 
-
-  console.log( this.focusList );
   this.createModel();
   
   this.sonifier = new Sonifier();
@@ -127,7 +127,7 @@ describlerObj.prototype.createModel = function () {
   }
   // console.log( charts );
 
-  // parse all charts
+  // parse all flowcharts
   for (var f = 0, f_len = flowcharts.length; f_len > f; ++f) {
     var flowchart_el = flowcharts[f];
     var flowchart = new flowchartObj(flowchart_el);
@@ -137,7 +137,7 @@ describlerObj.prototype.createModel = function () {
  */
 
   // generic unstructured graphics/text content
-  if (!charts.length) {
+  if ( 0 == this.charts.length) {
     this.findTextContent();
     // console.log( charts );
   }
@@ -189,6 +189,7 @@ describlerObj.prototype.exportCSV = function () {
 }
 
 describlerObj.prototype.findTextContent = function () {
+  console.log("findTextContent")
   var textContents = document.querySelectorAll("text,title");
   for (var t = 0, t_len = textContents.length; t_len > t; ++t) {
     var eachTextContent= textContents[t];
@@ -199,14 +200,12 @@ describlerObj.prototype.findTextContent = function () {
     
     el.setAttribute("tabindex", 0 );
   }
-  this.focusList = this.root.parentNode.querySelectorAll("[tabindex]");
+  this.focusList = this.root.parentNode.querySelectorAll("[tabindex='0']");
   // console.log(this.focusList)
 }   
 
 describlerObj.prototype.navNext = function () {
-  // console.log( "tabNext: " + focus.index );
-  this.navDirection = 1;
-  
+  // console.log( "tabNext: " + focus.index );  
   this.focusIndex++;
   if (this.focusList.length - 1 < this.focusIndex) {
     this.focusIndex = 0;
@@ -217,8 +216,6 @@ describlerObj.prototype.navNext = function () {
 
 describlerObj.prototype.navPrev = function () {
   // console.log( "tabPrev: " + this.focusIndex );
-  this.navDirection = -1;
-  
   this.focusIndex--;
   if (-1 >= this.focusIndex) {
     this.focusIndex = this.focusList.length - 1;
@@ -228,9 +225,13 @@ describlerObj.prototype.navPrev = function () {
 
 describlerObj.prototype.setActiveElement = function ( el ) {
   if ( this.activeElement ) {
-    if ( "datapoint" == this.activeElement.getAttribute("role") ) {
+    var last_role = this.activeElement.getAttribute("role");
+    if ( "datapoint" == last_role ) {
       this.previous_datapoint = this.activeElement;
       console.log( this.previous_datapoint );
+    } else if ( "node" == last_role ) {
+      this.previous_node = this.activeElement;
+      console.log( this.previous_node );
     }
   }
   this.activeElement = el;
@@ -1155,13 +1156,166 @@ describlerObj.prototype.handle_legenditem = function (){
 
 describlerObj.prototype.handle_flowchart = function (){
   console.log("handle_flowchart");
-  this.speeches.push( "flowchart" );     
+  this.speeches.push( "flowchart" );
+
+  this.menu.reset();
+  this.menu.add( "desc", "flowchart description" );
+  this.menu.add( "jump", "jump to a specific node" );
 }
 
 
 describlerObj.prototype.handle_node = function (){
-  console.log("handle_node");
-  this.speeches.push( "node" );     
+  // console.log("handle_node");
+  // this.speeches.push( "node" );  
+
+  for (var c = 0, c_len = this.charts.length; c_len > c; ++c) {
+    var flowchart = this.charts[c];
+
+    var node = flowchart.nodes.find( matchElement, this.activeElement );
+    if (node) {
+      var node_index = flowchart.nodes.findIndex( matchElement, this.activeElement );
+      this.speeches.push( '"' +  node.label + '"' );
+
+      if ( !this.menu.selected ){
+        var from_length = node.connectors["from"].length;
+        var from_msg = from_length + " outgoing connector";
+        if ( 1 != from_length ){
+          from_msg += "s"; // make it plural
+        }
+
+        var type_msg = "";
+        if ( node.is_start ) {
+          type_msg += "Starting "
+        } else if ( node.is_terminal ) {
+          type_msg += "Terminal "
+        }
+        
+        this.speeches.push( type_msg + node.type + " node, with " + from_msg );
+      }
+
+      // TODO: let user know when they've followed all connectors
+
+      // TODO: let user jump immediately to selecting outgoing node if it's the only choice?
+
+
+      var default_menu = true;
+      if ( this.menu.selected ){
+        if ( "connector-out" == this.menu.selected.id
+          ||  "connector-out" == this.menu.selected.context ) {
+          if ( "connector-out" == this.menu.selected.id ){
+            // this.speeches.push( "Select outgoing connector: " );
+
+            default_menu = false;
+            this.menu.reset();
+            for (var c = 0, c_len = node.connectors["from"].length; c_len > c; ++c) {
+              var connector = node.connectors["from"][c];
+              this.menu.add( connector.element.id, connector.label, "connector-out" );
+            }
+            this.menu.add( "_menu", "other options" );
+          } else if ( "connector-out" == this.menu.selected.context ) {
+            console.log(this.menu.selected.id)
+
+            // this.menu.reset();
+            var connector_el = document.getElementById( this.menu.selected.id );
+
+            var connector = flowchart.connectors.find( matchElement, connector_el );
+            if (connector) {
+              this.is_followed = true;
+              // var connector_index = flowchart.connectors.findIndex( matchElement, connector_el );
+              this.setActiveElement( connector.to_el );
+            }
+          }
+        } else if ( "connector-in" == this.menu.selected.id
+          ||  "connector-in" == this.menu.selected.context ) {
+          if ( "connector-in" == this.menu.selected.id ){
+            // this.speeches.push( "Select incoming connector: " );
+
+            default_menu = false;
+            this.menu.reset();
+            for (var c = 0, c_len = node.connectors["to"].length; c_len > c; ++c) {
+              var connector = node.connectors["to"][c];
+              this.menu.add( connector.element.id, connector.label, "connector-in" );
+            }
+            this.menu.add( "_menu", "other options" );
+          } else if ( "connector-in" == this.menu.selected.context ) {
+            console.log(this.menu.selected.id)
+
+            var connector_el = document.getElementById( this.menu.selected.id );
+
+            var connector = flowchart.connectors.find( matchElement, connector_el );
+            if (connector) {
+              // TODO: decide if following a directed link backward is "following"
+              this.is_followed = true;
+
+              // var connector_index = flowchart.connectors.findIndex( matchElement, connector_el );
+              this.setActiveElement( connector.from_el );
+            }
+          }
+        } else if ( "desc" == this.menu.selected.id ){
+          var from_length = node.connectors["from"].length;
+          var from_msg = from_length + " outgoing connector";
+          if ( 1 != from_length ){
+            from_msg += "s"; // make it plural
+          }
+          
+          var to_length = node.connectors["to"].length;
+          var to_msg = to_length + " incoming connector";
+          if ( 1 != to_length ){
+            to_msg += "s"; // make it plural
+          }
+
+          var type_msg = "";
+          if ( node.is_start ) {
+            type_msg += "Starting "
+          } else if ( node.is_terminal ) {
+            type_msg += "Terminal "
+          }
+                    
+          this.speeches.push( type_msg + node.type + " node, with " + from_msg + ", and " +  to_msg );
+
+          this.speeches.push( "Node " + (node_index + 1) + " of " + flowchart.nodes.length );
+        } else if ( "return" == this.menu.selected.id ){
+          if ( this.previous_node ) {
+            // TODO: keep full navigation path, give option to step back
+            this.setActiveElement( this.previous_node );
+          }           
+        } else if ( "jump" == this.menu.selected.id
+          ||  "jump" == this.menu.selected.context ) {
+          if ( "jump" == this.menu.selected.id ){
+            this.speeches.push( "Select outgoing connector: " );
+
+            default_menu = false;
+            this.menu.reset();
+            for (var n = 0, n_len = flowchart.nodes.length; n_len > n; ++n) {
+              var node = flowchart.nodes[n];
+              this.menu.add( node.id, node.type + "node: " + node.label, "jump" );
+            }
+          } else if ( "jump" == this.menu.selected.context ) {
+            var node_el = document.getElementById( this.menu.selected.id );
+            if (node_el) {
+              this.setActiveElement( node_el );
+            }
+          }
+        }
+      }
+
+ 
+      if (default_menu) {
+        this.menu.reset();
+        if (node.connectors["from"].length) {
+          this.menu.add( "connector-out", "following an outgoing connector" );
+        }  
+        if (node.connectors["to"].length) {
+          this.menu.add( "connector-in", "following an incoming connector" );
+        }
+        this.menu.add( "desc", "node description" );
+        if ( this.previous_node ) {
+          this.menu.add( "return", "return to the last node" );
+        }    
+        this.menu.add( "jump", "jump to a specific node" );
+      }
+    }
+  }
 }
 
 
@@ -1602,6 +1756,7 @@ taskObj.prototype.shuffle = function (){
     this.choices[i] = t;
   }
 }
+
 
 //generates a quasi-random number in the ranges between the two parameters
 randomNumber.today = new Date();
@@ -2120,6 +2275,8 @@ function flowchartObj(el) {
   this.label = null;
   this.nodes = [];
   this.connectors = [];
+
+  this.init();
 }
 
 flowchartObj.prototype.init = function (){
@@ -2135,7 +2292,14 @@ flowchartObj.prototype.init = function (){
   for (var n = 0, n_len = node_els.length; n_len > n; ++n) {
     var each_node = node_els[n];
     var node = new nodeObj( each_node, this.element );
-    dataset.datapoints.push( datapoint );
+    this.nodes.push( node );
+  }
+
+  var connector_els = this.element.querySelectorAll("[role='connector']");
+  for (var c = 0, c_len = connector_els.length; c_len > c; ++c) {
+    var each_connector = connector_els[c];
+    var connector = new connectorObj( each_connector );
+    this.connectors.push( connector );
   }
 
   // var legendEls = this.element.querySelectorAll("[role='legend']");
@@ -2151,11 +2315,13 @@ flowchartObj.prototype.init = function (){
 function nodeObj( el, root ) {
   this.element = el;
   this.root = root;
-  this.id = this.el.id;
+  this.id = this.element.id;
   this.type = "";
   this.label = null;
   this.label_els = [];
   this.label_text = "";
+  this.is_start = false;
+  this.is_terminal = false;
 
   this.connectors = {
     "all": [],
@@ -2170,36 +2336,34 @@ function nodeObj( el, root ) {
 }
 
 nodeObj.prototype.init = function (){  
-  // compose accessible name
-  var aria_labels = this.element.getAttribute("aria-labelledby");
-  var aria_label_array = aria_labels.match(/\S+/g) || [];
-
-  // var aria_labels = datavalue_el.getAttribute("aria-labelledby").match(/\S+/g) || [];
-  // console.log(aria_labels)
-  for (var l = 0, l_len = aria_label_array.length; l_len > l; ++l) {
-    var each_label = aria_label_array[ l ]; 
-    var label_el = document.getElementById( each_label );
-
-    // don't include this element text, in case it's included as an AT hack
-    if (label_el && this.element != label_el) {
-      this.label_text += label_el.textContent.trim();
-      this.label_els.push(label_el);
-      if ( l_len != l + 1 ) {
-        this.label_text += ", ";
-      }
-    }
-  } 
-  this.label = this.label_text + ": " + data_text;
+  this.type = this.element.getAttribute("aria-nodetype");
+  var name = new accessibleNameObj( this.element, this.root );
+  this.label_els = name.label_els;
+  this.label_text = name.label_text;
+  this.label = name.label;
 
   // get related connectors
   var from_connector_els = this.root.querySelectorAll("[aria-flowfrom='" + this.id + "']");
-  this.connectors["from"] = this.find_connectors(from_connector_els);
+  this.connectors["from"] = this.find_connectors( from_connector_els );
   
   var to_connector_els = this.root.querySelectorAll("[aria-flowto='" + this.id + "']");
-  this.connectors["to"] = this.find_connectors(from_connector_els);
+  this.connectors["to"] = this.find_connectors( to_connector_els );
 
   this.connectors["all"] = this.connectors["from"].concat( this.connectors["to"]);
+
+  // TODO: if this.is_directed is false, add connector to both "to" and "from" lists
+  // TODO: indicate to user if connection is undirected
+
   
+  if ( 0 != this.connectors["from"].length && 0 == this.connectors["to"].length ) {
+    this.is_start = true;
+  }  
+  
+  if ( 0 == this.connectors["from"].length && 0 != this.connectors["to"].length ) {
+    this.is_terminal = true;
+  }  
+
+
   // get colors
   if ( "g" == this.element.localName ) {
     var shapes = this.element
@@ -2232,31 +2396,64 @@ nodeObj.prototype.find_connectors = function ( connectors ){
 
 function connectorObj( el ) {
   this.element = el;
+  this.id = this.element.id;
   this.label = null;
   this.nodes = []; // each item has: element, label, list of referencing datapoints
   this.from_el = null;
   this.to_el = null;
+  this.is_directed = false;
+  this.is_followed = false;
 
   this.init();
 }
 
 connectorObj.prototype.init = function (){
+  var directed = this.element.getAttribute("aria-directed");
+  if ( "true" == directed ) {
+    this.is_directed = true;
+  }
+
+  // TODO: if this.is_directed is false, add connector to both "to" and "from" lists
+
   var from_value = this.element.getAttribute("aria-flowfrom");
   this.from_el = document.getElementById( from_value )
 
   var to_value = this.element.getAttribute("aria-flowto");
   this.to_el = document.getElementById( to_value )
 
-  // TODO: get label
+  var name = new accessibleNameObj( this.element );
+  this.label_els = name.label_els;
+  this.label_text = name.label_text;
+  this.label = name.label;
+}
+
+
+
+
+function accessibleNameObj ( el, root ) { 
+  this.element = el;
+  this.root = root; // root document node to search in
+  this.label_els = [];
+  this.label_text = "";
+  this.label = null;
+
+  this.init();
+}
+
+accessibleNameObj.prototype.init = function (){
   // compose accessible name
-  var aria_labels = this.element.getAttribute("aria-labelledby");
-  var aria_label_array = aria_labels.match(/\S+/g) || [];
+  var aria_label_ids = this.element.getAttribute("aria-labelledby");
+  var aria_label_id_array = [];
+  if (aria_label_ids) {
+    aria_label_id_array = aria_label_ids.match(/\S+/g) || [];
+  } 
 
   // var aria_labels = datavalue_el.getAttribute("aria-labelledby").match(/\S+/g) || [];
   // console.log(aria_labels)
-  for (var l = 0, l_len = aria_label_array.length; l_len > l; ++l) {
-    var each_label = aria_label_array[ l ]; 
-    var label_el = document.getElementById( each_label );
+  var l_len = aria_label_id_array.length
+  for (var l = 0; l_len > l; ++l) {
+    var each_label_id = aria_label_id_array[ l ]; 
+    var label_el = document.getElementById( each_label_id );
 
     // don't include this element text, in case it's included as an AT hack
     if (label_el && this.element != label_el) {
@@ -2267,47 +2464,34 @@ connectorObj.prototype.init = function (){
       }
     }
   } 
-  this.label = this.label_text + ": " + data_text;
 
-  // var allRefs = document.querySelectorAll("[aria-labelledby~='" + this.element.id + "']");
-  // for (var r = 0, r_len = allRefs.length; r_len > r; ++r) {
-  //   var eachRef = allRefs[ r ]; 
-    
-  //   var ref = eachRef;
-  //   var role = eachRef.getAttribute("role");
-  //   while ( "datapoint" != role){
-  //     ref = ref.parentNode;
-  //     role = ref.getAttribute("role");
-  //   }   
+  // if there's no aria-labelledby, use the child title and text elements
+  if ( 0 == l_len ) {
+    var title_el = this.element.querySelector("[role='node'] > [role='heading']");
+    if ( title_el ){
+      this.label_els.push( title_el );
+      if ( "" != this.label_text ) {
+        this.label_text += ", ";
+      }
+      this.label_text += title_el.textContent;
+    }   
 
-  //   // var datapoint = new datapointObj( ref );
-  //   // datapoint.init( ref ); 
-  //   // dataset.values.push( datapoint.value );
-  //   // dataset.push( datapoint );
-    
-    
-  //   this.refs.push(datapoint); // list of referencing datapoints
-  // }
+    var text_el = this.element.querySelector("[role='node'] > text");
+    if ( text_el ){
+      this.label_els.push( text_el );
+      if ( "" != this.label_text ) {
+        this.label_text += ", ";
+      }
+      this.label_text += text_el.textContent;
+    }
+  }
 
+  this.label = this.label_text;
 
-
-
-  // // get legend title
-  // var title = this.element.querySelector("[role='legend'] > [role='heading']");
-  // if ( title){
-  //   this.label = title.textContent;
-  // }
-  
-  // // first extract all the legend items
-  // var legendItems = this.element.querySelectorAll("[role='legenditem']");
-  // for (var l = 0, l_len = legendItems.length; l_len > l; ++l) {
-  //   var eachItem = legendItems[ l ]; 
-  //   var legendItem = new legendItemObj( eachItem );
-  //   this.items.push( legendItem );
-  // }
+  if (!this.label) {
+    this.label = "unlabeled";
+  }
 }
-
-
 
 /*
 *  Color Object
