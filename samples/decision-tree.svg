@@ -45,6 +45,11 @@
       filter: url(#dropshadow);
     }
 
+      *[role="node"]:focus use {
+        fill: gold;
+        stroke-width: 2px;
+      }
+
   </style>
 
   <defs>
