@@ -542,6 +542,8 @@
 
       this.volumeControl.addEventListener("input", bind(this, this.set_voice_volume), false);
 
+      this.imageContent.addEventListener("focus", bind(this, this.focus_content), false);
+
       window.location.hash = "#intro";
     }
 
@@ -841,6 +843,14 @@
     }
 
 
+
+    appObj.prototype.focus_content = function (){
+      console.log("focus!");
+      
+      if (this.describler) {
+        this.describler.setActiveElement( this.svgroot );
+      }
+    }
 
     appObj.prototype.showText = function ( text ){
       this.detailText.value = text;

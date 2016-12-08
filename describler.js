@@ -243,18 +243,28 @@ describlerObj.prototype.navPrev = function () {
 }
 
 describlerObj.prototype.setActiveElement = function ( el ) {
-  if ( this.activeElement ) {
-    var last_role = this.activeElement.getAttribute("role");
-    if ( "datapoint" == last_role ) {
-      this.previous_datapoint = this.activeElement;
-      // console.log( this.previous_datapoint );
-    } else if ( "node" == last_role ) {
-      this.previous_node = this.activeElement;
-      // console.log( this.previous_node );
+  if (el) {
+    if ( this.activeElement ) {
+      var last_role = this.activeElement.getAttribute("role");
+      if ( "datapoint" == last_role ) {
+        this.previous_datapoint = this.activeElement;
+        // console.log( this.previous_datapoint );
+      } else if ( "node" == last_role ) {
+        this.previous_node = this.activeElement;
+        // console.log( this.previous_node );
+      }
+    } else {
+      var focus_index = this.focusList.findIndex( function ( element ) {
+          return element == this;
+        }, el );
+      if (focus_index) {
+        this.focusIndex = focus_index;
+      }
     }
+
+    this.activeElement = el;
+    this.showFocus();
   }
-  this.activeElement = el;
-  this.showFocus();
 }
 
 describlerObj.prototype.showFocus = function () {
