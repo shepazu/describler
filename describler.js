@@ -96,6 +96,8 @@ function describlerObj(root) {
 
   this.createModel();
   
+  this.speech_volume = 0.3;
+  this.sonifier_volume = 1;
   this.sonifier = new Sonifier();
 
   this.metaGroup = document.createElementNS(this.svgns, "g");
@@ -245,10 +247,10 @@ describlerObj.prototype.setActiveElement = function ( el ) {
     var last_role = this.activeElement.getAttribute("role");
     if ( "datapoint" == last_role ) {
       this.previous_datapoint = this.activeElement;
-      console.log( this.previous_datapoint );
+      // console.log( this.previous_datapoint );
     } else if ( "node" == last_role ) {
       this.previous_node = this.activeElement;
-      console.log( this.previous_node );
+      // console.log( this.previous_node );
     }
   }
   this.activeElement = el;
@@ -654,13 +656,13 @@ describlerObj.prototype.handle_chart = function (){
     }
 
     this.menu.reset();
-    this.menu.add( "stats", "chart statistics" );
-    this.menu.add( "low-high", "datapoints from lowest to highest" );
-    this.menu.add( "high-low", "datapoints from highest to lowest" );
-    this.menu.add( "sonification", "trend sonification" );
+    this.menu.add( "stats", "chart statistics", null, null, false );
+    this.menu.add( "low-high", "datapoints from lowest to highest", null, null, false );
+    this.menu.add( "high-low", "datapoints from highest to lowest", null, null, false );
+    this.menu.add( "sonification", "trend sonification", null, null, false );
 
     if ( this.taskAssessments.length ) {
-      this.menu.add( "task-assessment", "starting the test", null, "assessment" );
+      this.menu.add( "task-assessment", "start the test", null, "assessment", true );
     }
 
     // console.log(this.menu);
@@ -815,7 +817,7 @@ describlerObj.prototype.handle_datapoint = function (){
                 var otherDatapoint = dataset.datapoints[odp];
                 if ( datapoint.element != otherDatapoint.element){
                   var other_label = otherDatapoint.label_text;
-                  this.menu.add( other_label, other_label, "compare-single" );
+                  this.menu.add( other_label, other_label, "compare-single", null, false  );
                 }
               }
             } else if ( "compare-single" == this.menu.selected.context) {
@@ -900,10 +902,10 @@ describlerObj.prototype.handle_datapoint = function (){
 
         if ( default_menu ) {
           this.menu.reset();
-          this.menu.add( "details", "more details" );
-          this.menu.add( "compare", "comparison to all other data points" );        
-          this.menu.add( "compare-single", "comparison to a specific data point" );        
-          this.menu.add( "stats", "datapoint statistics" );
+          this.menu.add( "details", "more details", null, null, false );
+          this.menu.add( "compare", "comparison to all other data points", null, null, false );        
+          this.menu.add( "compare-single", "comparison to a specific data point", null, null, false );        
+          this.menu.add( "stats", "datapoint statistics", null, null, false );
         }
       }
     }
@@ -969,7 +971,7 @@ describlerObj.prototype.handle_axis = function (){
                 default_menu = false;
                 this.menu.reset();
                 for (var l = 0, l_len = axis.items.length; l_len > l; ++l) {
-                  this.menu.add( axis.items[l].label, axis.items[l].label, "select" );
+                  this.menu.add( axis.items[l].label, axis.items[l].label, "select", null, false );
                 }
               } else if ( "select" == this.menu.selected.context ) {
                 var axisitem = axis.items.find( function (axis) {
@@ -1007,7 +1009,7 @@ describlerObj.prototype.handle_axis = function (){
 
           if ( default_menu ) {
             this.menu.reset();
-            this.menu.add( "labels", "axis labels" );
+            this.menu.add( "labels", "axis labels", null, null, false );
 
             // only show "select" option if one of the axis labels has datapoints
             var select_possible = false;
@@ -1019,7 +1021,7 @@ describlerObj.prototype.handle_axis = function (){
             }
 
             if ( select_possible ) {
-              this.menu.add( "select", "select datapoints by axis label" );
+              this.menu.add( "select", "select datapoints by axis label", null, null, true );
             }
           }
 
@@ -1151,7 +1153,7 @@ describlerObj.prototype.handle_legenditem = function (){
               var eachRef = legenditem.refs[ r ];
               this.speeches.push( eachRef.label );  
               // TODO: make sure the value is numeric
-              total += eachRef.value
+              total += eachRef.value;
             }
             
             this.speeches.push( "The total of all items is " + total ); 
@@ -1159,7 +1161,7 @@ describlerObj.prototype.handle_legenditem = function (){
         }
       
         this.menu.reset();
-        this.menu.add( "datapoints", "a list of all applicable data points" );
+        this.menu.add( "datapoints", "a list of all applicable data points", null, null, false );
 
         // no need to iterate further
         continue;
@@ -1173,16 +1175,26 @@ describlerObj.prototype.handle_legenditem = function (){
 
 describlerObj.prototype.handle_flowchart = function (){
   console.log("handle_flowchart");
-  this.speeches.push( "Flowchart" );
 
   var flowchart = this.charts.find( match_element, this.activeElement );
   // this.node_types = {};
   // this.connector_types = {};
 
+  this.speeches.push( );
+  var node_message = this.objectToSentence( flowchart.node_types, "node", "nodes" );
+  var connector_message = this.objectToSentence( flowchart.connector_types, "connector", "connectors" );
+
+  // flowchart.nodes.length
+  var types_msg = node_message.replace(/There are|There is/, ", with") 
+                + connector_message.replace(/There are|There is/, ", connected by") + ".";
+
+  this.speeches.push( 'Flowchart, labeled "' + flowchart.label + '"' + types_msg );
 
   var default_menu = true;
   if ( this.menu.selected ){
     if ( "desc" == this.menu.selected.id ){
+      // TODO: describe number of starting and terminal nodes, directed connectors, etc.
+
       var node_message = this.objectToSentence( flowchart.node_types, "node", "nodes" );
       var connector_message = this.objectToSentence( flowchart.connector_types, "connector", "connectors" );
 
@@ -1210,7 +1222,7 @@ describlerObj.prototype.handle_flowchart = function (){
             type_msg += "Terminal "
           }
 
-          this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump" );
+          this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
         }
       } else if ( "jump" == this.menu.selected.context ) {
         var node_el = document.getElementById( this.menu.selected.id );
@@ -1224,8 +1236,8 @@ describlerObj.prototype.handle_flowchart = function (){
 
   if (default_menu) {
     this.menu.reset();
-    this.menu.add( "desc", "flowchart description" );
-    this.menu.add( "jump", "jump to a specific node" );
+    this.menu.add( "desc", "description of flowchart", null, null, false );
+    this.menu.add( "jump", "jump to a specific node", null, null, true );
   }
 
 
@@ -1263,10 +1275,10 @@ describlerObj.prototype.handle_node = function (){
         this.speeches.push( type_msg + node.type + " node, with " + from_msg );
 
         if ( 1 < node.visit_count ) {
-          var visit_msg = node.visit_count
-          if ( 1 != node.visit_count ){
-            from_msg += "s"; // make it plural
-          }
+          // var visit_msg = node.visit_count
+          // if ( 1 != node.visit_count ){
+          //   from_msg += "s"; // make it plural
+          // }
 
           var visit_msg = this.getOrdinalNumber( node.visit_count );
           this.speeches.push( "This is the " + visit_msg + " time you have visited this node." );      
@@ -1275,7 +1287,8 @@ describlerObj.prototype.handle_node = function (){
         var all_followed = true;
         for (var c = 0, c_len = flowchart.connectors.length; c_len > c; ++c) {
           var each_connector = flowchart.connectors[c];
-          if ( !each_connector.is_followed ) {
+          // if ( !each_connector.is_followed ) {
+          if ( 0 == each_connector.follow_count ) {
             all_followed = false;
             break;
           }
@@ -1303,9 +1316,6 @@ describlerObj.prototype.handle_node = function (){
         }
       }
 
-      // TODO: let user know when they've followed all connectors
-      // TODO: tell user when they've already visited this node
-
       // TODO: let user jump immediately to selecting outgoing node if it's the only choice?
 
 
@@ -1324,12 +1334,15 @@ describlerObj.prototype.handle_node = function (){
               var connector_id = node.connectors["from"][c];
               var connector = flowchart.connectors.find( match_id, connector_id );
               var option_label = connector.label;
-              if (connector.is_followed) {
-                option_label += " (already followed)";
+              if ( 0 != connector.follow_count ) {
+                option_label += " (already followed " + connector.follow_count + " times)";
+                if ( 1 == connector.follow_count ){
+                  option_label = option_label.replace("times", "time"); // make it singular
+                }
               }
-              this.menu.add( connector.element.id, option_label, "connector-out" );
+              this.menu.add( connector.element.id, option_label, "connector-out", null, false );
             }
-            this.menu.add( "_menu", "other options" );
+            this.menu.add( "_default_menu", "other options", null, null, false );
           } else if ( "connector-out" == this.menu.selected.context ) {
             console.log(this.menu.selected.id)
 
@@ -1338,7 +1351,8 @@ describlerObj.prototype.handle_node = function (){
 
             var connector = flowchart.connectors.find( match_element, connector_el );
             if (connector) {
-              connector.is_followed = true;
+              connector.follow_count++;
+              // connector.is_followed = true;
               // var connector_index = flowchart.connectors.findIndex( match_element, connector_el );
               this.setActiveElement( connector.to_el );
             }
@@ -1349,18 +1363,24 @@ describlerObj.prototype.handle_node = function (){
           default_menu = false;
 
           if ( "connector-in" == this.menu.selected.id ){
-            // this.speeches.push( "Select incoming connector: " );
+            this.speeches.push( "Select incoming connector: " );
             this.menu.reset();
             for (var c = 0, c_len = node.connectors["to"].length; c_len > c; ++c) {
               var connector_id = node.connectors["to"][c];
               var connector = flowchart.connectors.find( match_id, connector_id );
               var option_label = connector.label;
-              if (connector.is_followed) {
-                option_label += " (already followed)";
+
+              // TODO: add label of start node for each outgoing connector
+
+              if ( 0 != connector.follow_count ) {
+                option_label += " (already followed " + connector.follow_count + " times)";
+                if ( 1 == connector.follow_count ){
+                  option_label = option_label.replace("times", "time"); // make it singular
+                }
               }
-              this.menu.add( connector.element.id, option_label, "connector-in" );
+              this.menu.add( connector.element.id, option_label, "connector-in", null, false );
             }
-            this.menu.add( "_menu", "other options" );
+            this.menu.add( "_default_menu", "other options", null, null, false );
           } else if ( "connector-in" == this.menu.selected.context ) {
             console.log(this.menu.selected.id)
 
@@ -1369,7 +1389,8 @@ describlerObj.prototype.handle_node = function (){
             var connector = flowchart.connectors.find( match_element, connector_el );
             if (connector) {
               // TODO: decide if following a directed link backward is "following"
-              connector.is_followed = true;
+              connector.follow_count++;
+              // connector.is_followed = true;
 
               // var connector_index = flowchart.connectors.findIndex( match_element, connector_el );
               this.setActiveElement( connector.from_el );
@@ -1427,7 +1448,7 @@ describlerObj.prototype.handle_node = function (){
                 type_msg += "Terminal "
               }
 
-              this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump" );
+              this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
             }
           } else if ( "jump" == this.menu.selected.context ) {
             var node_el = document.getElementById( this.menu.selected.id );
@@ -1438,20 +1459,21 @@ describlerObj.prototype.handle_node = function (){
         }
       }
 
- 
       if (default_menu) {
+        // TODO: add option for more details on each connector, such as
+        //      desc (if any) and label of end node
         this.menu.reset();
         if (node.connectors["from"].length) {
-          this.menu.add( "connector-out", "following an outgoing connector" );
+          this.menu.add( "connector-out", "follow an outgoing connector", null, null, true );
         }  
         if (node.connectors["to"].length) {
-          this.menu.add( "connector-in", "following an incoming connector" );
+          this.menu.add( "connector-in", "follow an incoming connector", null, null, true );
         }
-        this.menu.add( "desc", "node description" );
+        this.menu.add( "desc", "description of node", null, null, false );
         if ( this.previous_node ) {
-          this.menu.add( "return", "return to the last node" );
+          this.menu.add( "return", "return to the last node", null, null, true );
         }    
-        this.menu.add( "jump", "jump to a specific node" );
+        this.menu.add( "jump", "jump to a specific node", null, null, true );
       }
     }
   }
@@ -1460,7 +1482,137 @@ describlerObj.prototype.handle_node = function (){
 
 describlerObj.prototype.handle_connector = function (){
   console.log("handle_connector");
-  this.speeches.push( "connector" );     
+
+  for (var f = 0, f_len = this.charts.length; f_len > f; ++f) {
+    var flowchart = this.charts[f];
+
+    var connector = flowchart.connectors.find( match_element, this.activeElement );
+    if (connector) {
+      var connector_index = flowchart.connectors.findIndex( match_element, this.activeElement );
+      connector.follow_count++;
+  
+      var from_node = flowchart.nodes.find( match_element, connector.from_el );
+      var to_node = flowchart.nodes.find( match_element, connector.to_el );
+
+      /*
+      var msg = "Connector, with the label ";
+      msg += '"' + connector.label + '". ';
+      msg += " This is a ";
+      if ( connector.is_directed ) {
+        msg += "one-way connector starting at the node ";
+        msg += '"' + from_node.label + '"';
+        msg += ' and ending at the node "' + to_node.label + '".';
+      } else {
+        msg += "two-way connector between the nodes " ;
+        msg += '"' + from_node.label + '" and ';
+        msg += '"' + to_node.label + '". ';
+      }
+      this.speeches.push( msg );  
+      */
+
+      this.speeches.push( connector.get_info( flowchart ) ); 
+
+      // count how many time connector has been followed (like with nodes visited)
+      // this.speeches.push( connector.get_visit_count( flowchart ) ); 
+      if ( 0 != connector.follow_count ) {
+          var follow_msg = this.getOrdinalNumber( connector.follow_count );
+          this.speeches.push( "This is the " + follow_msg + " time you have followed this connector." );      
+      }     
+
+
+      var default_menu = true;
+      if ( this.menu.selected ){
+        if ( "desc" == this.menu.selected.id ){
+          // var from_length = node.connectors["from"].length;
+          // var from_msg = from_length + " outgoing connector";
+          // if ( 1 != from_length ){
+          //   from_msg += "s"; // make it plural
+          // }
+          
+          // var to_length = node.connectors["to"].length;
+          // var to_msg = to_length + " incoming connector";
+          // if ( 1 != to_length ){
+          //   to_msg += "s"; // make it plural
+          // }
+
+          // var type_msg = "";
+          // if ( node.is_start ) {
+          //   type_msg += "Starting "
+          // } else if ( node.is_terminal ) {
+          //   type_msg += "Terminal "
+          // }
+                    
+          // this.speeches.push( type_msg + node.type + " node, with " + from_msg + ", and " +  to_msg );
+
+          // var visit_msg = this.getOrdinalNumber( node.visit_count );
+          // this.speeches.push( "This is the " + visit_msg + " time you have visited this node." );      
+
+          // this.speeches.push( "Node " + (node_index + 1) + " of " + flowchart.nodes.length + "." );
+        } else if ( "from_node" == this.menu.selected.id ){
+          default_menu = false;
+          this.setActiveElement( connector.from_el );
+        } else if ( "to_node" == this.menu.selected.id ){
+          default_menu = false;
+          this.setActiveElement( connector.to_el );
+        } else if ( "return" == this.menu.selected.id ){
+          if ( this.previous_node ) {
+            default_menu = false;
+
+            // TODO: keep full navigation path, give option to step back
+            this.setActiveElement( this.previous_node );
+          }           
+        } else if ( "jump" == this.menu.selected.id
+          ||  "jump" == this.menu.selected.context ) {
+
+          default_menu = false;
+
+          if ( "jump" == this.menu.selected.id ){
+            this.speeches.push( "Select node: " );
+
+            this.menu.reset();
+            for (var n = 0, n_len = flowchart.nodes.length; n_len > n; ++n) {
+              var node = flowchart.nodes[n];
+
+              var type_msg = "";
+              if ( node.is_start ) {
+                type_msg += "Starting "
+              } else if ( node.is_terminal ) {
+                type_msg += "Terminal "
+              }
+
+              this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
+            }
+          } else if ( "jump" == this.menu.selected.context ) {
+            var node_el = document.getElementById( this.menu.selected.id );
+            if (node_el) {
+              this.setActiveElement( node_el );
+            }
+          }
+        }
+      }
+
+      // TODO: provide option to follow connector to either end
+      if (default_menu) {
+        this.menu.reset();
+        this.menu.add( "desc", "description of connector", null, null, false );
+
+        var from_msg = "navigate to the first node";
+        var to_msg = "navigate to the second node";
+        if ( connector.is_directed ) {
+          from_msg = "navigate to the starting node";
+          to_msg = "navigate to the ending node";
+        }
+        this.menu.add( "from_node", from_msg, null, null, true );
+        this.menu.add( "to_node", to_msg, null, null, true );
+
+        if ( this.previous_node ) {
+          this.menu.add( "return", "return to the last node", null, null, true );
+        }    
+        this.menu.add( "jump", "jump to a specific node", null, null, true );
+      }
+
+    }
+  }
 }
 
 
@@ -1496,7 +1648,7 @@ describlerObj.prototype.handle_default = function (){
   this.menu.reset();
   var desc = this.activeElement.querySelector("[tabindex] > desc");
   if ( desc ){
-    this.menu.add( "details", "more details" );
+    this.menu.add( "details", "more details", null, null, false );
   }
 }
 
@@ -1586,6 +1738,7 @@ describlerObj.prototype.speak = function ( callback, callbackObj ) {
     voice.text = msg;
     voice.lang = "en-US";
     voice.rate = 1.1;
+    voice.volume = this.speech_volume;
     speechSynthesis.speak( voice );
 
     this.app.showText( msg );
@@ -1594,14 +1747,15 @@ describlerObj.prototype.speak = function ( callback, callbackObj ) {
     this.app.populateOptions( this.menu.options.slice() );
 
     if (options_msg) {
-      voice.onend = (function (options_msg) {
+      voice.onend = (function (options_msg, volume) {
         var voice = new SpeechSynthesisUtterance();
         voice.text = options_msg;
         voice.lang = "en-US";
         voice.rate = 1.1;
+        voice.volume = volume;
         speechSynthesis.speak( voice );
         // console.log( options_msg );
-      })( options_msg );
+      })( options_msg, this.speech_volume );
     }
 
     if ( "function" === typeof callback ) {
@@ -1643,6 +1797,7 @@ describlerObj.prototype.sonify = function () {
         datalinePoints += (bbox.x + (bbox.width/2)) + "," + bbox.y + " "; 
       }
       
+      console.log("datalinePoints:");
       console.log(datalinePoints);
 
       // draw line plot
@@ -1702,6 +1857,11 @@ describlerObj.prototype.selectOption = function ( option_id, option_context, opt
 }   
 
 
+describlerObj.prototype.set_voice_volume = function ( volume ) {
+  this.speech_volume = volume;
+}   
+
+
 describlerObj.prototype.getStat = function ( dataset, stat ) {
   var value = +dataset.statistics[ stat ];
   
@@ -1731,8 +1891,8 @@ menuObj.prototype.init = function (){
   //       use "repeat" in options menu
 }
 
-menuObj.prototype.add = function ( id, label, context, type ){
-  var option = new optionObj( id, label, context, type );
+menuObj.prototype.add = function ( id, label, context, type, is_verb ){
+  var option = new optionObj( id, label, context, type, is_verb );
   this.options.push(option);
 }
 
@@ -1744,7 +1904,12 @@ menuObj.prototype.list = function (){
     options_msg = "Options: ";
 
     for (var o = 0, o_len = this.options.length; o_len > o; ++o) {
-      options_msg += "Press " + (o + 1) + " for " + this.options[o].label + ". \n";
+      var option = this.options[o];
+      var preposition = " to ";
+      if ( !option.is_verb ) {
+        preposition = " for ";
+      }
+      options_msg += "Press " + (o + 1) + preposition + option.label + ". \n";
     }
   }
 
@@ -1774,11 +1939,12 @@ menuObj.prototype.reset = function (){
 }
 
 
-function optionObj( id, label, context, type ) {
+function optionObj( id, label, context, type, is_verb ) {
   this.id = id;
   this.label = label;
   this.context = context;
   this.type = type;
+  this.is_verb = is_verb; // use "for" for nouns, "to" for verbs
 }
 
 
@@ -1833,11 +1999,11 @@ taskAssessmentObj.prototype.runTest = function (){
     var task = this.tasks[t];
     this.current_task = task;
     // if ( task && taskObj === typeof task && null == task.selection ) {
-    console.log(typeof task);
+    // console.log(typeof task);
     if ( task && null == task.selection && task.choices ) {
       for (var c = 0, c_len = task.choices.length; c_len > c; ++c) {
         var choice = task.choices[c];
-        this.app.menu.add( choice, choice, "answer", "assessment" );
+        this.app.menu.add( choice, choice, "answer", "assessment", false );
       }
 
       this.app.speeches.length = 0;
@@ -1884,7 +2050,7 @@ taskAssessmentObj.prototype.evaluateAnswer = function ( option_id, option_contex
     this.app.speeches.push( msg );
 
     this.app.menu.reset();
-    this.app.menu.add( "next", "next question", "next", "assessment" );
+    this.app.menu.add( "next", "next question", "next", "assessment", false );
 
     if ( this.app.speeches.length){
       var self = this;
@@ -2046,8 +2212,6 @@ chartObj.prototype.extractDataset = function (datapoints){
     dataset.values.push( datapoint.value );
     dataset.datapoints.push( datapoint );
   };
-
-  // TODO: switch to generateStats
 
   // sort values
   dataset.values.sort( function (a, b) {
@@ -2537,7 +2701,8 @@ function connectorObj( el ) {
   this.from_el = null;
   this.to_el = null;
   this.is_directed = false;
-  this.is_followed = false;
+  // this.is_followed = false;
+  this.follow_count = 0;
 
   this.init();
 }
@@ -2568,6 +2733,26 @@ connectorObj.prototype.init = function (){
   this.label_els = name.label_els;
   this.label_text = name.label_text;
   this.label = name.label;
+}
+
+connectorObj.prototype.get_info = function ( flowchart ){
+  var from_node = flowchart.nodes.find( match_element, this.from_el );
+  var to_node = flowchart.nodes.find( match_element, this.to_el );
+
+  var msg = "Connector, with the label ";
+  msg += '"' + this.label + '". ';
+  msg += " This is a ";
+  if ( this.is_directed ) {
+    msg += "one-way connector starting at the node ";
+    msg += '"' + from_node.label + '"';
+    msg += ' and ending at the node "' + to_node.label + '".';
+  } else {
+    msg += "two-way connector between the nodes " ;
+    msg += '"' + from_node.label + '" and ';
+    msg += '"' + to_node.label + '". ';
+  }
+
+  return msg;
 }
 
 
@@ -3119,6 +3304,7 @@ Sonifier.prototype.updateCursor = function () {
         dataLineArray = this.dataLine.getAttribute("points").split(" ");
         // dataLineArray = 
       }
+      console.log("Sonifier.updateCursor:")
       console.log(dataLineArray)
       
       for (var vp in dataLineArray){

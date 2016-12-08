@@ -176,6 +176,12 @@
           content: "◀";
         }
 
+    #volume_control {
+      color: #4D4D4F;
+      background-color: #4D4D4F;
+      width: 100%;
+    }    
+
     textarea#details {
       font-size: 0.8em;
       width: 100%;
@@ -491,6 +497,9 @@
       this.previousButton = document.getElementById("previous_button");
       this.nextButton = document.getElementById("next_button");
 
+      this.volumeControl = document.getElementById("volume_control");
+      this.volumeLevel = document.getElementById("volume_level");
+
       this.elIndex = 0;
       this.lang = "en-US";
 
@@ -530,6 +539,8 @@
 
       this.previousButton.addEventListener("click", bind(this, this.previous), false);
       this.nextButton.addEventListener("click", bind(this, this.next), false);
+
+      this.volumeControl.addEventListener("input", bind(this, this.set_voice_volume), false);
 
       window.location.hash = "#intro";
     }
@@ -861,14 +872,21 @@
       this.describler.selectOption( value, context, type );
     }
 
-    appObj.prototype.next = function (){
+    appObj.prototype.next = function (event){
       event.target.blur();
       this.describler.navNext();
     }
 
-    appObj.prototype.previous = function (){
+    appObj.prototype.previous = function (event){
       event.target.blur();
       this.describler.navPrev();
+    }
+
+    appObj.prototype.set_voice_volume = function (event){
+      // TODO: add mute control that turns on aria-live
+      var volume = this.volumeControl.value;
+      this.volumeLevel.value = volume + "%";
+      this.describler.set_voice_volume( (volume / 100) );
     }
 
     function bind (scope, fn) {
@@ -908,8 +926,16 @@
 
         <a id="download-button" class="button icon-download download" href="#"><span>Download…</span></a>     
 
+        <section id="sound_control">
+          <label for="volume_control">volume:</label> 
+          <output for="volume_control" id="volume_level">50%</output>
+          <br>
+          <input id="volume_control" type="range"  min="0" max="100" value="50"/>
+        </section>
+
         <section id="io">
-          <section id="output-options" aria-live="polite">
+          <!--  aria-live="polite" -->
+          <section id="output-options"> 
             <textarea id="details" readonly>
               
             </textarea>
@@ -921,6 +947,7 @@
           <button id="previous_button"><span>previous</span></button>
           <button id="next_button"><span>next</span></button>
         </section>
+
 
 
       </section>
