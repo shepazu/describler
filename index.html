@@ -635,6 +635,8 @@
         this.describler = new describlerObj(this.svgroot); 
 
         this.describler.app = this;
+        this.describler.set_voice_volume( (this.volumeControl.value / 100) );
+
       }
 
  
@@ -869,24 +871,38 @@
       var value = option.value;
       var context = option.getAttribute( "data-context" );
       var type = option.getAttribute( "data-type" );
-      this.describler.selectOption( value, context, type );
+      if (this.describler) {
+        this.describler.selectOption( value, context, type );
+      }
     }
 
     appObj.prototype.next = function (event){
       event.target.blur();
-      this.describler.navNext();
+      if (this.describler) {
+        this.describler.navNext();
+      }
     }
 
     appObj.prototype.previous = function (event){
       event.target.blur();
-      this.describler.navPrev();
+      if (this.describler) {
+        this.describler.navPrev();
+      }
     }
 
     appObj.prototype.set_voice_volume = function (event){
       // TODO: add mute control that turns on aria-live
       var volume = this.volumeControl.value;
       this.volumeLevel.value = volume + "%";
-      this.describler.set_voice_volume( (volume / 100) );
+      if (this.describler) {
+        this.describler.set_voice_volume( (volume / 100) );
+      }
+
+      if ( 0 == volume ) {
+        this.detailText.setAttribute("aria-live", "polite");
+      } else {
+        this.detailText.setAttribute("aria-live", "off");
+      }
     }
 
     function bind (scope, fn) {
@@ -930,7 +946,7 @@
           <label for="volume_control">volume:</label> 
           <output for="volume_control" id="volume_level">50%</output>
           <br>
-          <input id="volume_control" type="range"  min="0" max="100" value="50"/>
+          <input id="volume_control" type="range" min="0" max="100" value="50"> 
         </section>
 
         <section id="io">
