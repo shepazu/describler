@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  
+  width="100%" height="100%" viewBox="0 0 760 570" role="flowchart" aria-charttype="flowchart" tabindex="0">
+  <title>Patent Flowchart</title>  
+  <desc>A proof-of-concept demo of a process flowchart</desc>
+
+  <style type="text/css">
+    #tree {
+      stroke: black;
+      stroke-width: 2px;
+      fill: lightblue;
+    }
+
+    *[role="connector"] {
+      fill: none;
+      stroke: black;
+      stroke-width: 2px;
+      stroke-linecap: round;
+      marker-end: url(#endArrow);
+    }
+
+    text, text[role="connector"] {
+      fill: black;
+      text-anchor: middle;
+      stroke: none;
+      font-family: Helvetica, sans-serif;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    marker#endArrow {
+      fill: black;
+      stroke: black;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+  </style>
+
+
+  <defs>
+    <marker id="endArrow" viewBox="-21 -8 40 32" markerUnits="strokeWidth"
+      refX="-7" refY="0" markerWidth="10" markerHeight="20" orient="auto">
+      <path id="endArrow-path" d="M-18,-7 L0,0 -18,7 Z"/>
+    </marker>
+  </defs>
+
+  <g id="tree">
+    <g id="invention" transform="translate(415,25)" role="node" aria-nodetype="state" tabindex="0">
+      <rect x="-71" y="-15" width="142" height="30" rx="5" ry="5"/> 
+      <text x="0" y="5">Invention</text> 
+    </g>  
+
+    <g id="invention-provisional-connector" class="connector">
+      <path id="invention-to-provisional" d="M415,45 V56" 
+        role="connector" aria-flowfrom="invention" aria-flowto="provisional" aria-directed="true" tabindex="0"/>   
+    </g>
+
+    <g id="invention-pct_utility-connector" class="connector">
+      <path id="invention-to-pct_utility" d="M495,25 A30,30 0 0,1 580,175" 
+        role="connector" aria-flowfrom="invention" aria-flowto="pct_utility" aria-directed="true" 
+        aria-labelledby="invention-pct_utility" tabindex="0"/>   
+      <text id="invention-pct_utility" x="675" y="60">File directly 
+        <tspan x="675" dy="1.1em">as Utility if</tspan>
+        <tspan x="675" dy="1.1em">invention is</tspan>
+        <tspan x="675" dy="1.1em">sufficiently</tspan>
+        <tspan x="675" dy="1.1em">developed</tspan>
+      </text>
+    </g>
+
+    <g id="provisional" transform="translate(415,95)" role="node" aria-nodetype="state" tabindex="0">
+      <rect x="-71" y="-30" width="142" height="60" rx="9" ry="9"/> 
+      <text x="0" y="-10">Provisional <tspan x="0" dy="1.1em">Patent</tspan> <tspan x="0" dy="1.1em">Application</tspan></text> 
+    </g>  
+
+    <text id="12_months" x="415" y="147">12 Months</text> 
+
+    <g id="provisional-us_utility-connector" class="connector">
+      <path id="provisional-to-us_utility" d="M368,132 L336,152" 
+        role="connector" aria-flowfrom="provisional" aria-flowto="us_utility" aria-directed="true" 
+        aria-labelledby="12_months" tabindex="0"/>   
+    </g>
+
+    <g id="us_utility" transform="translate(315,194)" role="node" aria-nodetype="state" tabindex="0">
+      <rect x="-57" y="-30" width="114" height="60" rx="9" ry="9"/> 
+      <text x="0" y="-10">U.S. Utility <tspan x="0" dy="1.1em">Patent</tspan> <tspan x="0" dy="1.1em">Application</tspan></text> 
+    </g>  
+
+    <g id="provisional-pct_utility-connector" class="connector">
+      <path id="provisional-to-pct_utility" d="M462,132 L494,152" 
+        role="connector" aria-flowfrom="provisional" aria-flowto="pct_utility" aria-directed="true" 
+        aria-labelledby="12_months" tabindex="0"/>   
+    </g>
+
+    <g id="pct_utility" transform="translate(515,194)" role="node" aria-nodetype="state" tabindex="0">
+      <rect x="-57" y="-30" width="114" height="60" rx="9" ry="9"/> 
+      <text x="0" y="-10">PCT Utility <tspan x="0" dy="1.1em">Patent</tspan> <tspan x="0" dy="1.1em">Application</tspan></text> 
+    </g>  
+
+    <text id="us_utility-pct_utility-connector" x="415" y="199"
+      role="connector" aria-flowfrom="us_utility" aria-flowto="pct_utility" aria-directed="false" tabindex="0">and/or</text> 
+
+    <g id="us_utility-first_examination-connector" class="connector">
+      <path id="us_utility-to-first_examination" d="M315,230 V258" 
+        role="connector" aria-flowfrom="us_utility" aria-flowto="first_examination" aria-directed="true" 
+        aria-labelledby="us_utility-first_examination" tabindex="0"/>   
+      <text id="us_utility-first_examination" x="260" y="245">6–36 Months</text>
+    </g>
+
+    <g id="pct_utility-jurisdiction-connector" class="connector">
+      <path id="pct_utility-to-jurisdiction" d="M515,230 V246" 
+        role="connector" aria-flowfrom="pct_utility" aria-flowto="jurisdiction" aria-directed="true" 
+        aria-labelledby="pct_utility-jurisdiction" tabindex="0"/>   
+      <text id="pct_utility-jurisdiction" x="570" y="245">18–30 Months</text>
+    </g>
+
+    <g id="jurisdiction" transform="translate(515,294)" role="node" aria-nodetype="state" tabindex="0">
+      <path d="M-62,-39 H62 L80,39 H-80 Z"/>
+      <text x="0" y="-18">File Patents in <tspan x="0" dy="1.1em">Jurisdiction of</tspan> 
+      <tspan x="0" dy="1.1em">Interest</tspan> <tspan x="0" dy="1.1em">(Including U.S.)</tspan></text> 
+    </g>  
+
+    <g id="jurisdiction-first_examination-connector" class="connector">
+      <path id="jurisdiction-to-first_examination" d="M435,290 H395" 
+        role="connector" aria-flowfrom="jurisdiction" aria-flowto="first_examination" aria-directed="true" 
+        aria-labelledby="jurisdiction-first_examination" tabindex="0"/>   
+      <text id="jurisdiction-first_examination" x="415" y="260">6–60 <tspan x="415" dy="1.1em">Months</tspan></text>
+    </g>
+
+    <g id="first_examination" transform="translate(315,290)" role="node" aria-nodetype="state" tabindex="0">
+      <ellipse cx="0" cy="0" rx="67" ry="23"/>
+      <text x="0" y="-5">First <tspan x="0" dy="1.1em">Examination</tspan></text> 
+    </g>  
+
+    <g id="first_examination-office-connector" class="connector">
+      <path id="first_examination-to-office" d="M315,318 V338" 
+        role="connector" aria-flowfrom="first_examination" aria-flowto="office" aria-directed="true" 
+        aria-labelledby="first_examination-office" tabindex="0"/>   
+    </g>
+
+    <g id="office" transform="translate(315,370)" role="node" aria-nodetype="state" tabindex="0">
+      <ellipse cx="0" cy="0" rx="67" ry="23"/>
+      <text x="0" y="5">Office Actions</text> 
+    </g>  
+
+    <g id="office-office-connector" class="connector">
+      <path id="office-to-office" d="M390,380 A14,14 0 1,0 390,360" 
+        role="connector" aria-flowfrom="office" aria-flowto="office" aria-directed="true" 
+        aria-labelledby="office-office" tabindex="0"/>   
+      <text id="office-office" x="530" y="366">Recurrent 3–6 month intervals 
+        <tspan x="530" dy="1.1em">until final rejection or allowance</tspan>
+      </text>
+    </g>
+
+    <g id="office-rejection-connector" class="connector">
+      <path id="office-to-rejection" d="M272,396 L236,424" 
+        role="connector" aria-flowfrom="office" aria-flowto="rejection" aria-directed="true" 
+        aria-labelledby="office-rejection" tabindex="0"/>   
+      <text id="office-rejection" x="85" y="450">12–24 months from 
+        <tspan x="85" dy="1.1em">first Office Action</tspan>
+      </text>
+    </g>
+
+    <g id="office-allowance-connector" class="connector">
+      <path id="office-to-allowance" d="M358,396 L394,424" 
+        role="connector" aria-flowfrom="office" aria-flowto="allowance" aria-directed="true" 
+        aria-labelledby="office-allowance" tabindex="0"/>   
+      <text id="office-allowance" x="545" y="450">0–24 months from 
+        <tspan x="545" dy="1.1em">first Office Action</tspan>
+      </text>
+    </g>
+
+    <g id="rejection" transform="translate(225,455)" role="node" aria-nodetype="state" tabindex="0">
+      <ellipse cx="0" cy="0" rx="67" ry="23"/>
+      <text x="0" y="5">Final Rejection</text> 
+    </g>  
+
+    <g id="rejection-no_patent-connector" class="connector">
+      <path id="rejection-to-no_patent" d="M225,485 V507" 
+        role="connector" aria-flowfrom="rejection" aria-flowto="no_patent" aria-directed="true" tabindex="0"/>   
+    </g>
+
+    <g id="no_patent" transform="translate(225,538)" role="node" aria-nodetype="state" tabindex="0">
+      <rect x="-55" y="-22" width="110" height="44"/> 
+      <text x="0" y="5">No Patent</text> 
+    </g>  
+
+    <g id="allowance" transform="translate(405,455)" role="node" aria-nodetype="state" tabindex="0">
+      <ellipse cx="0" cy="0" rx="67" ry="23"/>
+      <text x="0" y="5">Allowance</text> 
+    </g>  
+
+    <g id="allowance-issued_patent-connector" class="connector">
+      <path id="allowance-to-issued_patent" d="M405,485 V507" 
+        role="connector" aria-flowfrom="allowance" aria-flowto="issued_patent" aria-directed="true" tabindex="0"/>   
+    </g>
+
+    <g id="issued_patent" transform="translate(405,538)" role="node" aria-nodetype="state" tabindex="0">
+      <rect x="-55" y="-22" width="110" height="44"/> 
+      <text x="0" y="5">Issued Patent</text> 
+    </g>  
+  </g>     
+</svg>

@@ -257,7 +257,7 @@ describlerObj.prototype.setActiveElement = function ( el ) {
       var focus_index = this.focusList.findIndex( function ( element ) {
           return element == this;
         }, el );
-      if (focus_index) {
+      if ( null != focus_index) {
         this.focusIndex = focus_index;
       }
     }
@@ -1229,7 +1229,7 @@ describlerObj.prototype.handle_flowchart = function (){
           if ( node.is_start ) {
             type_msg += "Starting "
           } else if ( node.is_terminal ) {
-            type_msg += "Terminal "
+            type_msg += "Ending "
           }
 
           this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
@@ -1269,20 +1269,30 @@ describlerObj.prototype.handle_node = function (){
 
       if ( !this.menu.selected ){
         node.visit_count++;
-        var from_length = node.connectors["from"].length;
-        var from_msg = from_length + " outgoing connector";
-        if ( 1 != from_length ){
-          from_msg += "s"; // make it plural
-        }
 
         var type_msg = "";
         if ( node.is_start ) {
           type_msg += "Starting "
         } else if ( node.is_terminal ) {
-          type_msg += "Terminal "
+          type_msg += "Ending "
         }
         
-        this.speeches.push( type_msg + node.type + " node, with " + from_msg );
+        var connector_msg = "";
+        var from_length = node.connectors["from"].length;
+        connector_msg += from_length + " outgoing connector";
+        if ( 1 != from_length ){
+          connector_msg += "s"; // make it plural
+        }
+
+        var to_length = node.connectors["to"].length;
+        if (to_length) {
+          connector_msg += " and " + to_length + " incoming connector";
+          if ( 1 != to_length ){
+            connector_msg += "s"; // make it plural
+          }
+        }
+
+        this.speeches.push( type_msg + node.type + " node, with " + connector_msg );
 
         if ( 1 < node.visit_count ) {
           // var visit_msg = node.visit_count
@@ -1297,7 +1307,6 @@ describlerObj.prototype.handle_node = function (){
         var all_followed = true;
         for (var c = 0, c_len = flowchart.connectors.length; c_len > c; ++c) {
           var each_connector = flowchart.connectors[c];
-          // if ( !each_connector.is_followed ) {
           if ( 0 == each_connector.follow_count ) {
             all_followed = false;
             break;
@@ -1344,6 +1353,28 @@ describlerObj.prototype.handle_node = function (){
               var connector_id = node.connectors["from"][c];
               var connector = flowchart.connectors.find( match_id, connector_id );
               var option_label = connector.label;
+
+              // indicate if connection is undirected
+              if (!connector.is_directed) {
+                // option_label += ", bidirectional connector";
+                option_label += ", two-way connector";
+              }
+
+              if ( connector.is_loop ) {
+                // handle loop connectors that return to the same node
+                option_label += ", looping back to this node";
+              } else {
+                // give end-node label
+                var to_node = flowchart.nodes.find( match_element, connector.to_el );
+                var to_type_msg = "";
+                if ( to_node.is_start ) {
+                  to_type_msg += " starting "
+                } else if ( to_node.is_terminal ) {
+                  to_type_msg += " ending "
+                }
+                option_label += ', to the ' + to_type_msg + ' node labeled "' + to_node.label + '"';
+              }
+
               if ( 0 != connector.follow_count ) {
                 option_label += " (already followed " + connector.follow_count + " times)";
                 if ( 1 == connector.follow_count ){
@@ -1362,7 +1393,6 @@ describlerObj.prototype.handle_node = function (){
             var connector = flowchart.connectors.find( match_element, connector_el );
             if (connector) {
               connector.follow_count++;
-              // connector.is_followed = true;
               // var connector_index = flowchart.connectors.findIndex( match_element, connector_el );
               this.setActiveElement( connector.to_el );
             }
@@ -1380,13 +1410,36 @@ describlerObj.prototype.handle_node = function (){
               var connector = flowchart.connectors.find( match_id, connector_id );
               var option_label = connector.label;
 
-              // TODO: add label of start node for each outgoing connector
+
+              // indicate if connection is undirected
+              if (!connector.is_directed) {
+                // option_label += ", bidirectional connector";
+                option_label += ", two-way connector";
+              }
+
+              // add label of start node for each incoming connector
+              if ( connector.is_loop ) {
+                // handle loop connectors that return to the same node
+                option_label += ", looping back to this node";
+              } else {
+                // give start-node label
+                var from_node = flowchart.nodes.find( match_element, connector.from_el );
+                var from_type_msg = "";
+                if ( from_node.is_start ) {
+                  from_type_msg += " starting "
+                } else if ( from_node.is_terminal ) {
+                  from_type_msg += " ending "
+                }
+                option_label += ', starting at the ' + from_type_msg + ' node labeled "' + from_node.label + '"';
+              }
+
+
 
               if ( 0 != connector.follow_count ) {
                 option_label += " (already followed " + connector.follow_count + " times)";
                 if ( 1 == connector.follow_count ){
                   option_label = option_label.replace("times", "time"); // make it singular
-                }
+                }  
               }
               this.menu.add( connector.element.id, option_label, "connector-in", null, false );
             }
@@ -1400,7 +1453,6 @@ describlerObj.prototype.handle_node = function (){
             if (connector) {
               // TODO: decide if following a directed link backward is "following"
               connector.follow_count++;
-              // connector.is_followed = true;
 
               // var connector_index = flowchart.connectors.findIndex( match_element, connector_el );
               this.setActiveElement( connector.from_el );
@@ -1423,7 +1475,7 @@ describlerObj.prototype.handle_node = function (){
           if ( node.is_start ) {
             type_msg += "Starting "
           } else if ( node.is_terminal ) {
-            type_msg += "Terminal "
+            type_msg += "Ending "
           }
                     
           this.speeches.push( type_msg + node.type + " node, with " + from_msg + ", and " +  to_msg );
@@ -1455,7 +1507,7 @@ describlerObj.prototype.handle_node = function (){
               if ( node.is_start ) {
                 type_msg += "Starting "
               } else if ( node.is_terminal ) {
-                type_msg += "Terminal "
+                type_msg += "Ending "
               }
 
               this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
@@ -1468,6 +1520,17 @@ describlerObj.prototype.handle_node = function (){
           }
         }
       }
+
+
+
+
+      // TODO: provide way to jump back to last decision point
+
+
+      // TODO: give option to repeat choices?
+
+      // TODO: deal with info overload… add break between info and options?
+
 
       if (default_menu) {
         // TODO: add option for more details on each connector, such as
@@ -1549,7 +1612,7 @@ describlerObj.prototype.handle_connector = function (){
           // if ( node.is_start ) {
           //   type_msg += "Starting "
           // } else if ( node.is_terminal ) {
-          //   type_msg += "Terminal "
+          //   type_msg += "Ending "
           // }
                     
           // this.speeches.push( type_msg + node.type + " node, with " + from_msg + ", and " +  to_msg );
@@ -1587,7 +1650,7 @@ describlerObj.prototype.handle_connector = function (){
               if ( node.is_start ) {
                 type_msg += "Starting "
               } else if ( node.is_terminal ) {
-                type_msg += "Terminal "
+                type_msg += "Ending "
               }
 
               this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
@@ -2669,7 +2732,7 @@ flowchartObj.prototype.init = function (){
 }
 
 flowchartObj.prototype.find_connectors = function (){
-  var connector_els = this.element.querySelectorAll("[role='connector']");
+  var connector_els = this.element.querySelectorAll("[role='connector'][aria-flowfrom][aria-flowto]");
   for (var c = 0, c_len = connector_els.length; c_len > c; ++c) {
     var each_connector = connector_els[c];
     var connector = new connectorObj( each_connector );
@@ -2711,7 +2774,7 @@ function connectorObj( el ) {
   this.from_el = null;
   this.to_el = null;
   this.is_directed = false;
-  // this.is_followed = false;
+  this.is_loop = false;
   this.follow_count = 0;
 
   this.init();
@@ -2732,6 +2795,10 @@ connectorObj.prototype.init = function (){
 
   var to_value = this.element.getAttribute("aria-flowto");
   this.to_el = document.getElementById( to_value )
+
+  if ( from_value == to_value ) {
+    this.is_loop = true;
+  }
 
   // generate ID for connector is there is none
   if ( !this.id || "" == this.id ) {
@@ -2798,17 +2865,22 @@ nodeObj.prototype.init = function (){
   this.label = name.label;
 
   // get related connectors
-  var from_connector_els = this.root.querySelectorAll("[aria-flowfrom='" + this.id + "']");
+  var from_connector_els = this.root.querySelectorAll("[role='connector'][aria-flowfrom='" + this.id + "']");
   this.connectors["from"] = this.find_connectors( from_connector_els );
   
-  var to_connector_els = this.root.querySelectorAll("[aria-flowto='" + this.id + "']");
+  var to_connector_els = this.root.querySelectorAll("[role='connector'][aria-flowto='" + this.id + "']");
   this.connectors["to"] = this.find_connectors( to_connector_els );
 
   this.connectors["all"] = this.connectors["from"].concat( this.connectors["to"]);
 
-  // TODO: if this.is_directed is false, add connector to both "to" and "from" lists
-  // TODO: indicate to user if connection is undirected
-
+  // if this.is_directed is false, add connector to both "to" and "from" lists
+  for (var c = 0, c_len = to_connector_els.length; c_len > c; ++c) {
+    var each_connector = to_connector_els[c];
+    var directed = each_connector.getAttribute( "aria-directed" );
+    if ( "false" == directed ) {
+      this.connectors["from"].push( each_connector.id );
+    }
+  }
   
   if ( 0 != this.connectors["from"].length && 0 == this.connectors["to"].length ) {
     this.is_start = true;
@@ -2864,6 +2936,7 @@ function accessibleNameObj ( el, root ) {
   this.label_els = [];
   this.label_text = "";
   this.label = null;
+  this.role = this.element.getAttribute("role");
 
   this.init();
 }
@@ -2895,7 +2968,7 @@ accessibleNameObj.prototype.init = function (){
 
   // if there's no aria-labelledby, use the child title and text elements
   if ( 0 == l_len ) {
-    var title_el = this.element.querySelector("[role='node'] > [role='heading']");
+    var title_el = this.element.querySelector("[role='" + this.role + "'] > [role='heading']");
     if ( title_el ){
       this.label_els.push( title_el );
       if ( "" != this.label_text ) {
@@ -2904,7 +2977,7 @@ accessibleNameObj.prototype.init = function (){
       this.label_text += title_el.textContent;
     }   
 
-    var text_el = this.element.querySelector("[role='node'] > text");
+    var text_el = this.element.querySelector("[role='" + this.role + "'] > text");
     if ( text_el ){
       this.label_els.push( text_el );
       if ( "" != this.label_text ) {
@@ -2912,6 +2985,15 @@ accessibleNameObj.prototype.init = function (){
       }
       this.label_text += text_el.textContent;
     }
+  }
+
+  if ( "text" == this.element.localName 
+    || "tspan" == this.element.localName 
+    || "textPath" == this.element.localName ) {
+    if ( "" != this.label_text ) {
+      this.label_text += ", ";
+    }    
+    this.label_text += this.element.textContent;
   }
 
   this.label = this.label_text;
