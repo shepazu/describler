@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  
   width="100%" height="100%" viewBox="0 0 760 570" role="flowchart" aria-charttype="flowchart" tabindex="0">
-  <title>Patent Flowchart</title>  
+  <title role="heading">Patent Application Flowchart</title>  
   <desc>A proof-of-concept demo of a process flowchart</desc>
 
   <style type="text/css">
@@ -44,7 +44,7 @@
   </defs>
 
   <g id="tree">
-    <g id="invention" transform="translate(415,25)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="invention" transform="translate(415,25)" role="node" aria-nodetype="applicant" tabindex="0">
       <rect x="-71" y="-15" width="142" height="30" rx="5" ry="5"/> 
       <text x="0" y="5">Invention</text> 
     </g>  
@@ -66,7 +66,7 @@
       </text>
     </g>
 
-    <g id="provisional" transform="translate(415,95)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="provisional" transform="translate(415,95)" role="node" aria-nodetype="applicant" tabindex="0">
       <rect x="-71" y="-30" width="142" height="60" rx="9" ry="9"/> 
       <text x="0" y="-10">Provisional <tspan x="0" dy="1.1em">Patent</tspan> <tspan x="0" dy="1.1em">Application</tspan></text> 
     </g>  
@@ -79,7 +79,7 @@
         aria-labelledby="12_months" tabindex="0"/>   
     </g>
 
-    <g id="us_utility" transform="translate(315,194)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="us_utility" transform="translate(315,194)" role="node" aria-nodetype="applicant" tabindex="0">
       <rect x="-57" y="-30" width="114" height="60" rx="9" ry="9"/> 
       <text x="0" y="-10">U.S. Utility <tspan x="0" dy="1.1em">Patent</tspan> <tspan x="0" dy="1.1em">Application</tspan></text> 
     </g>  
@@ -90,13 +90,15 @@
         aria-labelledby="12_months" tabindex="0"/>   
     </g>
 
-    <g id="pct_utility" transform="translate(515,194)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="pct_utility" transform="translate(515,194)" role="node" aria-nodetype="applicant" tabindex="0">
       <rect x="-57" y="-30" width="114" height="60" rx="9" ry="9"/> 
       <text x="0" y="-10">PCT Utility <tspan x="0" dy="1.1em">Patent</tspan> <tspan x="0" dy="1.1em">Application</tspan></text> 
+      <title>International Patent Cooperation Treaty Utility Patent Application</title>
     </g>  
 
     <text id="us_utility-pct_utility-connector" x="415" y="199"
-      role="connector" aria-flowfrom="us_utility" aria-flowto="pct_utility" aria-directed="false" tabindex="0">and/or</text> 
+      role="connector" aria-flowfrom="us_utility" aria-flowto="pct_utility" aria-directed="false" aria-type="optional"
+      tabindex="0">and/or</text> 
 
     <g id="us_utility-first_examination-connector" class="connector">
       <path id="us_utility-to-first_examination" d="M315,230 V258" 
@@ -112,7 +114,7 @@
       <text id="pct_utility-jurisdiction" x="570" y="245">18–30 Months</text>
     </g>
 
-    <g id="jurisdiction" transform="translate(515,294)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="jurisdiction" transform="translate(515,294)" role="node" aria-nodetype="PCT" tabindex="0">
       <path d="M-62,-39 H62 L80,39 H-80 Z"/>
       <text x="0" y="-18">File Patents in <tspan x="0" dy="1.1em">Jurisdiction of</tspan> 
       <tspan x="0" dy="1.1em">Interest</tspan> <tspan x="0" dy="1.1em">(Including U.S.)</tspan></text> 
@@ -125,7 +127,7 @@
       <text id="jurisdiction-first_examination" x="415" y="260">6–60 <tspan x="415" dy="1.1em">Months</tspan></text>
     </g>
 
-    <g id="first_examination" transform="translate(315,290)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="first_examination" transform="translate(315,290)" role="node" aria-nodetype="issuer" tabindex="0">
       <ellipse cx="0" cy="0" rx="67" ry="23"/>
       <text x="0" y="-5">First <tspan x="0" dy="1.1em">Examination</tspan></text> 
     </g>  
@@ -136,7 +138,7 @@
         aria-labelledby="first_examination-office" tabindex="0"/>   
     </g>
 
-    <g id="office" transform="translate(315,370)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="office" transform="translate(315,370)" role="node" aria-nodetype="issuer" tabindex="0">
       <ellipse cx="0" cy="0" rx="67" ry="23"/>
       <text x="0" y="5">Office Actions</text> 
     </g>  
@@ -168,7 +170,7 @@
       </text>
     </g>
 
-    <g id="rejection" transform="translate(225,455)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="rejection" transform="translate(225,455)" role="node" aria-nodetype="issuer" tabindex="0">
       <ellipse cx="0" cy="0" rx="67" ry="23"/>
       <text x="0" y="5">Final Rejection</text> 
     </g>  
@@ -178,12 +180,12 @@
         role="connector" aria-flowfrom="rejection" aria-flowto="no_patent" aria-directed="true" tabindex="0"/>   
     </g>
 
-    <g id="no_patent" transform="translate(225,538)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="no_patent" transform="translate(225,538)" role="node" aria-nodetype="outcome" tabindex="0">
       <rect x="-55" y="-22" width="110" height="44"/> 
       <text x="0" y="5">No Patent</text> 
     </g>  
 
-    <g id="allowance" transform="translate(405,455)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="allowance" transform="translate(405,455)" role="node" aria-nodetype="issuer" tabindex="0">
       <ellipse cx="0" cy="0" rx="67" ry="23"/>
       <text x="0" y="5">Allowance</text> 
     </g>  
@@ -193,7 +195,7 @@
         role="connector" aria-flowfrom="allowance" aria-flowto="issued_patent" aria-directed="true" tabindex="0"/>   
     </g>
 
-    <g id="issued_patent" transform="translate(405,538)" role="node" aria-nodetype="state" tabindex="0">
+    <g id="issued_patent" transform="translate(405,538)" role="node" aria-nodetype="outcome" tabindex="0">
       <rect x="-55" y="-22" width="110" height="44"/> 
       <text x="0" y="5">Issued Patent</text> 
     </g>  

@@ -10,7 +10,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 };
 
 function showEvent(event) {
-  console.log(event.type)
+  console.log(event.type);
 }
 
 function match_element( obj ) { 
@@ -188,7 +188,7 @@ describlerObj.prototype.exportCSV = function () {
       
       if ( "bar" == chart.type){
         if ( 1 == allies.length){
-          var axis = allies[0]
+          var axis = allies[0];
           csv = axis["label"] + ",values\n";
 
           for (var i = 0, i_len = axis["fields"].length; i_len > i; ++i) {
@@ -208,7 +208,7 @@ describlerObj.prototype.exportCSV = function () {
 }
 
 describlerObj.prototype.findTextContent = function () {
-  console.log("findTextContent")
+  console.log("findTextContent");
   var textContents = document.querySelectorAll("text,title");
   for (var t = 0, t_len = textContents.length; t_len > t; ++t) {
     var eachTextContent= textContents[t];
@@ -220,7 +220,7 @@ describlerObj.prototype.findTextContent = function () {
     el.setAttribute("tabindex", 0 );
   }
   this.focusList = this.root.parentNode.querySelectorAll("[tabindex='0']");
-  // console.log(this.focusList)
+  // console.log(this.focusList);
 }   
 
 describlerObj.prototype.navNext = function () {
@@ -278,7 +278,7 @@ describlerObj.prototype.showFocus = function () {
   var bbox = this.activeElement.getBBox();
   var transform = this.activeElement.getScreenCTM().inverse().multiply(this.root.getScreenCTM()).inverse();
 
-  // console.log(transform)
+  // console.log(transform);
 
   var x = bbox.x - this.padding;
   var y = bbox.y - this.padding;
@@ -298,7 +298,7 @@ describlerObj.prototype.showFocus = function () {
 }   
 
 describlerObj.prototype.trackKeys = function (event) {
-  // console.log("describlerObj.trackKeys")
+  // console.log("describlerObj.trackKeys");
   var key = event.key.toLowerCase();
   // console.log( key );
   // console.log( "key: " + event.key);
@@ -751,12 +751,12 @@ describlerObj.prototype.handle_datapoint = function (){
             }
 
             // indicate datapoint index
-            var index_message = "This is the "
+            var index_message = "This is the ";
             index_message += this.getOrdinalNumber( dp_index + 1 );
             if ( dataset.statistics.count == dp_index + 1 ) {
-              index_message += " and final "
+              index_message += " and final ";
             }
-            index_message += " data point."
+            index_message += " data point.";
             this.speeches.push( index_message );  
             // this.speeches.push( "This is the " + this.getOrdinalNumber( dp_index + 1 ) + " data point." ); 
 
@@ -987,7 +987,7 @@ describlerObj.prototype.handle_axis = function (){
                 var axisitem = axis.items.find( function (axis) {
                   return axis.label == this;
                 }, this.menu.selected.id );
-                console.log(axisitem)
+                console.log(axisitem);
 
                 default_menu = false;
                 this.menu.reset();
@@ -1011,7 +1011,7 @@ describlerObj.prototype.handle_axis = function (){
                       this.setActiveElement( datapoint );
 
                 } else {
-                  console.log("error")
+                  console.log("error");
                 } 
               }
             }
@@ -1188,12 +1188,21 @@ describlerObj.prototype.handle_flowchart = function (){
 
   var flowchart = this.charts.find( match_element, this.activeElement );
 
-  this.speeches.push( 'Flowchart, labeled "' + flowchart.label + '"');
+  var msg = "Flowchart";
+  if (flowchart.label) {
+    msg += ', labeled "' + flowchart.label + '"';
+  }
+  this.speeches.push( msg );
 
   var default_menu = true;
   if ( !this.menu.selected ){
     var node_message = this.objectToSentence( flowchart.node_types, "node", "nodes" );
     var connector_message = this.objectToSentence( flowchart.connector_types, "connector", "connectors" );
+
+    // TODO: get rid of "undefined" in descriptions of nodes and connectors
+    // TODO: make example with different 'type's of connectors
+    
+    // TODO: say how many starting and ending nodes
 
     // flowchart.nodes.length
     var types_msg = node_message.replace(/There are|There is/, ", with") 
@@ -1248,9 +1257,9 @@ describlerObj.prototype.handle_flowchart = function (){
 
           var type_msg = "";
           if ( node.is_initial ) {
-            type_msg += "Starting "
+            type_msg += "Starting ";
           } else if ( node.is_terminal ) {
-            type_msg += "Ending "
+            type_msg += "Ending ";
           }
 
           this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
@@ -1274,7 +1283,7 @@ describlerObj.prototype.handle_flowchart = function (){
         for (var n = 0, n_len = flowchart.nodes.length; n_len > n; ++n) {
           var node = flowchart.nodes[n];
           if ( node.is_initial ) {
-            var initial_msg = "go to a starting " + node.type + " node " + '"' + node.label + '"';
+            var initial_msg = "go to the starting " + node.type + " node " + '"' + node.label + '"';
             // this.menu.add( "initial", initial_msg, null, null, false );
             this.menu.add( node.id, initial_msg, "jump", null, false );
             break;
@@ -1309,9 +1318,9 @@ describlerObj.prototype.handle_node = function (){
 
         var type_msg = "";
         if ( node.is_initial ) {
-          type_msg += "Starting "
+          type_msg += "Starting ";
         } else if ( node.is_terminal ) {
-          type_msg += "Ending "
+          type_msg += "Ending ";
         }
         
         var connector_msg = "";
@@ -1395,7 +1404,7 @@ describlerObj.prototype.handle_node = function (){
             }
             this.menu.add( "_default_menu", "other options", null, null, false );
           } else if ( "connector-out" == this.menu.selected.context ) {
-            console.log(this.menu.selected.id)
+            console.log(this.menu.selected.id);
 
             // this.menu.reset();
             var connector_el = document.getElementById( this.menu.selected.id );
@@ -1425,7 +1434,7 @@ describlerObj.prototype.handle_node = function (){
             }
             this.menu.add( "_default_menu", "other options", null, null, false );
           } else if ( "connector-in" == this.menu.selected.context ) {
-            console.log(this.menu.selected.id)
+            console.log(this.menu.selected.id);
 
             var connector_el = document.getElementById( this.menu.selected.id );
 
@@ -1453,9 +1462,9 @@ describlerObj.prototype.handle_node = function (){
 
           var type_msg = "";
           if ( node.is_initial ) {
-            type_msg += "Starting "
+            type_msg += "Starting ";
           } else if ( node.is_terminal ) {
-            type_msg += "Ending "
+            type_msg += "Ending ";
           }
                     
           this.speeches.push( type_msg + node.type + " node, with " + from_msg + ", and " +  to_msg );
@@ -1485,9 +1494,9 @@ describlerObj.prototype.handle_node = function (){
 
               var type_msg = "";
               if ( node.is_initial ) {
-                type_msg += "Starting "
+                type_msg += "Starting ";
               } else if ( node.is_terminal ) {
-                type_msg += "Ending "
+                type_msg += "Ending ";
               }
 
               this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
@@ -1596,9 +1605,9 @@ describlerObj.prototype.handle_connector = function (){
 
           // var type_msg = "";
           // if ( node.is_initial ) {
-          //   type_msg += "Starting "
+          //   type_msg += "Starting ";
           // } else if ( node.is_terminal ) {
-          //   type_msg += "Ending "
+          //   type_msg += "Ending ";
           // }
                     
           // this.speeches.push( type_msg + node.type + " node, with " + from_msg + ", and " +  to_msg );
@@ -1636,9 +1645,9 @@ describlerObj.prototype.handle_connector = function (){
 
               var type_msg = "";
               if ( node.is_initial ) {
-                type_msg += "Starting "
+                type_msg += "Starting ";
               } else if ( node.is_terminal ) {
-                type_msg += "Ending "
+                type_msg += "Ending ";
               }
 
               this.menu.add( node.id, type_msg + " " + node.type + " node: " + node.label, "jump", null, false );
@@ -1735,9 +1744,34 @@ describlerObj.prototype.objectToSentence = function ( obj, singular_noun, plural
 
   // var count = Object.keys(obj).length;
   var obj_array = Object.keys(obj);
+
+  // console.log("obj_array:");
+  // console.log(obj_array);
+
+  // sort by number of items, with "null" always listed last no matter how many items
+  obj_array = obj_array.sort(function(a, b) {
+    return (a=="null") - (b=="null") || obj[b] - obj[a];
+  });
+  // console.log("obj_array null end:");
+  // console.log(obj_array);
+
+
+    // var type = node.type;
+    // if (!type) {
+    //   type = "uncategorized";
+    // }
+
+  // obj_array[ "uncategorized" ] = obj_array[ "null" ];
+  // delete obj_array[ "null" ];
+
   for (var o = 0, o_len = obj_array.length; o_len > o; ++o) {
     var each_key = obj_array[o];
     var count = obj[ each_key ];
+
+    // rename null 
+    if ( "null" == each_key) {
+      each_key = "uncategorized";
+    }
 
     var noun = plural_noun;
     if ( 1 == count ) {
@@ -1762,25 +1796,6 @@ describlerObj.prototype.objectToSentence = function ( obj, singular_noun, plural
       }
     }
   }
-
-          // var node_types_msg = "";
-          // var n = 0;
-          // for ( var node_type in this.node_types ){
-          //   var count = this.node_types[ node_types ];
-          //   n++;
-
-          //   var verb = " are"
-          //   if ( 1 == count ) {
-          //     verb = " is"
-          //   }
-
-          //   if ( flowchart.node_type_count ) {
-          //   }
-              
-
-          //   node_types_msg +=
-          // }
-
   return msg;
 }
 
@@ -2455,7 +2470,7 @@ datapointObj.prototype.init = function (){
     var aria_label_array = aria_labels.match(/\S+/g) || [];
 
     // var aria_labels = datavalue_el.getAttribute("aria-labelledby").match(/\S+/g) || [];
-    // console.log(aria_labels)
+    // console.log(aria_labels);
     for (var l = 0, l_len = aria_label_array.length; l_len > l; ++l) {
       var each_label = aria_label_array[ l ]; 
       var label_el = document.getElementById( each_label );
@@ -2643,7 +2658,7 @@ function legendItemObj(el) {
   this.label = null;
   this.refs = []; // list of referencing datapoints
 
-  this.init()
+  this.init();
 }
 
 legendItemObj.prototype.init = function (){
@@ -2713,7 +2728,7 @@ flowchartObj.prototype.init = function (){
   
   // get chart title
   var title = this.element.querySelector("[role='flowchart'] > [role='heading']");
-  if ( title){
+  if ( title ){
     this.label = title.textContent;
   }
 
@@ -2769,6 +2784,7 @@ function connectorObj( el ) {
   this.element = el;
   this.id = this.element.id;
   this.label = null;
+  this.type = this.element.getAttribute("aria-type");
   this.nodes = [];
   this.from_el = null;
   this.to_el = null;
@@ -2785,15 +2801,19 @@ connectorObj.prototype.init = function (){
     this.is_directed = true;
   }
 
+  if (!this.type || "" == this.type ) {
+    this.type = null;
+  }
+
   // TODO: if this.is_directed is false, add connector to both "to" and "from" lists
 
-  // TODO: if missing 'to' or 'from', or if element doesn't exist, tell user (what does ARIA do?)
+  // TODO: if missing 'to' or 'from', or if element doesn't exist, tell user (what does ARIA do?);
 
   var from_value = this.element.getAttribute("aria-flowfrom");
-  this.from_el = document.getElementById( from_value )
+  this.from_el = document.getElementById( from_value );
 
   var to_value = this.element.getAttribute("aria-flowto");
-  this.to_el = document.getElementById( to_value )
+  this.to_el = document.getElementById( to_value );
 
   if ( from_value == to_value ) {
     this.is_loop = true;
@@ -2815,9 +2835,11 @@ connectorObj.prototype.get_info = function ( flowchart ){
   var from_node = flowchart.nodes.find( match_element, this.from_el );
   var to_node = flowchart.nodes.find( match_element, this.to_el );
 
-  var msg = "Connector, with the label ";
-  msg += '"' + this.label + '". ';
-  msg += " This is a ";
+  var msg = "Connector";
+  if (this.label) {
+    msg += ', with the label "' + this.label + '". ';
+  }
+  msg += ". This is a ";
   if ( this.is_directed ) {
     msg += "one-way connector starting at the node ";
     msg += '"' + from_node.label + '"';
@@ -2867,9 +2889,9 @@ connectorObj.prototype.make_option_label = function ( flowchart, direction ){
       // give end-node label
       var type_msg = "";
       if ( node.is_initial ) {
-        type_msg += " starting "
+        type_msg += " starting ";
       } else if ( node.is_terminal ) {
-        type_msg += " ending "
+        type_msg += " ending ";
       }
 
       msg += dir_msg + type_msg + ' node labeled "' + node.label + '"';
@@ -2913,6 +2935,10 @@ function nodeObj( el, root ) {
 
 nodeObj.prototype.init = function (){  
   this.type = this.element.getAttribute("aria-nodetype");
+  if (!this.type || "" == this.type ) {
+    this.type = null;
+  }
+
   var name = new accessibleNameObj( this.element, this.root );
   this.label_els = name.label_els;
   this.label_text = name.label_text;
@@ -3004,7 +3030,7 @@ accessibleNameObj.prototype.init = function (){
   } 
 
   // var aria_labels = datavalue_el.getAttribute("aria-labelledby").match(/\S+/g) || [];
-  // console.log(aria_labels)
+  // console.log(aria_labels);
   var l_len = aria_label_id_array.length
   for (var l = 0; l_len > l; ++l) {
     var each_label_id = aria_label_id_array[ l ]; 
@@ -3051,6 +3077,7 @@ accessibleNameObj.prototype.init = function (){
   }
 
   this.label = this.label_text;
+  this.label = this.label.replace(/\n/g, " ").replace(/\s+/g, " ");
 
   if (!this.label) {
     // this.label = "unlabeled";
@@ -3080,8 +3107,8 @@ colorObj.prototype.init = function (){
   this.fill = el_style.getPropertyValue("fill");
   this.stroke = el_style.getPropertyValue("stroke");
 
-  // console.log("this.fill: " + this.fill)
-  // console.log("this.stroke: " + this.stroke)
+  // console.log("this.fill: " + this.fill);
+  // console.log("this.stroke: " + this.stroke);
 
   //TODO: translate color values (hsl, hex, rgb) to named hue
   //TODO: translate complex named colors to simpler hue name
@@ -3307,7 +3334,7 @@ Sonifier.prototype.init = function (svgroot, metaGroup, dataLine,
 }
 
 Sonifier.prototype.trackKeys = function (event) {
-  // console.log("Sonifier.trackKeys")
+  // console.log("Sonifier.trackKeys");
   // var key = event.keyIdentifier.toLowerCase();
   var key = event.key.toLowerCase();
 
@@ -3361,7 +3388,7 @@ Sonifier.prototype.trackKeys = function (event) {
 
 
 Sonifier.prototype.togglePlay = function (forcePause){
-  console.log("togglePlay")
+  console.log("togglePlay");
   if ( this.timer || forcePause){
     this.stopPlay();
   } else {
@@ -3451,8 +3478,8 @@ Sonifier.prototype.updateCursor = function () {
         dataLineArray = this.dataLine.getAttribute("points").split(" ");
         // dataLineArray = 
       }
-      console.log("Sonifier.updateCursor:")
-      console.log(dataLineArray)
+      console.log("Sonifier.updateCursor:");
+      console.log(dataLineArray);
       
       for (var vp in dataLineArray){
         if ("function" != typeof dataLineArray[vp]) { 
@@ -3509,7 +3536,7 @@ Sonifier.prototype.updateCursor = function () {
   if ( this.axisX.pos == x 
     || this.axisX.chartMin == x
     || this.axisX.chartMax == x){
-      console.log("tick")
+      console.log("tick");
       
       //this.playTickmark(); /// buggy right now, doesn't turn off
       
@@ -3589,7 +3616,7 @@ Sonifier.prototype.toggleVolume = function (forceMute){
 // panVal is a float between -1 and 1: -1 == left; 1 == right
 Sonifier.prototype.pan = function () {  
   var panAngle = this.panValue * Math.PI / 2;
-  this.panner.setPosition(Math.sin(panAngle), Math.cos(panAngle), 1, 0, 0.5)
+  this.panner.setPosition(Math.sin(panAngle), Math.cos(panAngle), 1, 0, 0.5);
 }
 
 Sonifier.prototype.playTickmark = function () { 
@@ -3666,11 +3693,11 @@ Axis.prototype.scale = function ( val){
 ****/
 
 Array.prototype.max = function () {
-  return Math.max.apply(null, this)
+  return Math.max.apply(null, this);
 }
 
 Array.prototype.min = function () {
-  return Math.min.apply(null, this)
+  return Math.min.apply(null, this);
 }
 
 function bind (scope, fn) {
@@ -3793,8 +3820,7 @@ var ntc = {
 
   init: function() {
     var color, rgb, hsl;
-    for(var i = 0; i < ntc.names.length; i++)
-    {
+    for(var i = 0; i < ntc.names.length; i++) {
       color = "#" + ntc.names[i][0];
       rgb = ntc.rgb(color);
       hsl = ntc.hsl(color);
@@ -3824,8 +3850,7 @@ var ntc = {
     var ndf1 = 0, ndf2 = 0, ndf = 0;
     var cl = -1, df = -1;
 
-    for(var i = 0; i < ntc.names.length; i++)
-    {
+    for(var i = 0; i < ntc.names.length; i++) {
       if(color == "#" + ntc.names[i][0])
         return ["#" + ntc.names[i][0], ntc.names[i][1], 
                       ntc.shadergb(ntc.names[i][2]), 
