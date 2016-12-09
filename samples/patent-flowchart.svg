@@ -161,15 +161,6 @@
       </text>
     </g>
 
-    <g id="office-allowance-connector" class="connector">
-      <path id="office-to-allowance" d="M358,396 L394,424" 
-        role="connector" aria-flowfrom="office" aria-flowto="allowance" aria-directed="true" 
-        aria-labelledby="office-allowance" tabindex="0"/>   
-      <text id="office-allowance" x="545" y="450">0–24 months from 
-        <tspan x="545" dy="1.1em">first Office Action</tspan>
-      </text>
-    </g>
-
     <g id="rejection" transform="translate(225,455)" role="node" aria-nodetype="issuer" tabindex="0">
       <ellipse cx="0" cy="0" rx="67" ry="23"/>
       <text x="0" y="5">Final Rejection</text> 
@@ -184,6 +175,15 @@
       <rect x="-55" y="-22" width="110" height="44"/> 
       <text x="0" y="5">No Patent</text> 
     </g>  
+
+    <g id="office-allowance-connector" class="connector">
+      <path id="office-to-allowance" d="M358,396 L394,424" 
+        role="connector" aria-flowfrom="office" aria-flowto="allowance" aria-directed="true" 
+        aria-labelledby="office-allowance" tabindex="0"/>   
+      <text id="office-allowance" x="545" y="450">0–24 months from 
+        <tspan x="545" dy="1.1em">first Office Action</tspan>
+      </text>
+    </g>
 
     <g id="allowance" transform="translate(405,455)" role="node" aria-nodetype="issuer" tabindex="0">
       <ellipse cx="0" cy="0" rx="67" ry="23"/>
