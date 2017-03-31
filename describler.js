@@ -77,8 +77,12 @@ function describlerObj(root) {
   this.strokewidth = 0;
 
   // find appropriate sizes
-  var vb = root.getAttribute("viewBox").split(" ");
-  var basesize = (Math.max(vb[2], vb[3]) / 100);
+  var basesize = 10;
+  var vb = root.getAttribute("viewBox");
+  if (vb) {
+    var vb_array = vb.split(" ");
+    basesize = (Math.max(vb_array[2], vb_array[3]) / 100);    
+  }
   this.padding = basesize;
   this.strokewidth = basesize / 2;
   
@@ -144,7 +148,7 @@ describlerObj.prototype.createModel = function () {
       flowcharts = [this.root];     
     }   
   }
-  // console.log( charts );
+  console.log( charts );
 
   // parse all flowcharts
   for (var f = 0, f_len = flowcharts.length; f_len > f; ++f) {
@@ -253,13 +257,20 @@ describlerObj.prototype.setActiveElement = function ( el ) {
         this.previous_node = this.activeElement;
         // console.log( this.previous_node );
       }
-    } else {
-      var focus_index = this.focusList.findIndex( function ( element ) {
-          return element == this;
-        }, el );
-      if ( null != focus_index) {
-        this.focusIndex = focus_index;
-      }
+    // } else {
+    //   var focus_index = this.focusList.findIndex( function ( element ) {
+    //       return element == this;
+    //     }, el );
+    //   if ( null != focus_index) {
+    //     this.focusIndex = focus_index;
+    //   }
+    }
+
+    var focus_index = this.focusList.findIndex( function ( element ) {
+        return element == this;
+      }, el );
+    if ( null != focus_index ) {
+      this.focusIndex = focus_index;
     }
 
     this.activeElement = el;
@@ -845,7 +856,7 @@ describlerObj.prototype.handle_datapoint = function (){
                 if ( 0 > mean_delta ) {
                   mean_delta_comp = " below";
                 }
-                delta_msg += "This is " + Math.abs(mean_delta) + mean_delta_comp 
+                delta_msg += "This is " + Number(Math.abs(mean_delta).toFixed(2)) + mean_delta_comp 
                           + " the value of " + otherValue + " for "
                           + otherDatapoint.label_text;
                 delta_msg += ", which is ";
@@ -867,7 +878,7 @@ describlerObj.prototype.handle_datapoint = function (){
               if ( 0 > mean_delta ) {
                 mean_delta_comp = " below";
               }
-              stats_msg += "This is " + Math.abs(mean_delta) + mean_delta_comp 
+              stats_msg += "This is " + (Math.abs(mean_delta).toFixed(2)) + mean_delta_comp 
                         + " the mean value of " + this.getStat(dataset, "mean") + ", ";
             }
 
@@ -875,19 +886,19 @@ describlerObj.prototype.handle_datapoint = function (){
               stats_msg += "and this is the median value. ";
             } else {
               // describe statistical status of value
-              var median_delta = value - dataset.statistics["median"];
+              var median_delta = (value - dataset.statistics["median"]);
               var median_delta_comp = " above";
               if ( 0 > median_delta ) {
                 median_delta_comp = " below";
               }
-              stats_msg += "and " + Math.abs(median_delta) + median_delta_comp 
+              stats_msg += "and " + (Math.abs(median_delta).toFixed(2)) + median_delta_comp 
                         + " the median value of " + this.getStat(dataset, "median") + ". ";
             }
 
             if ( dataset.statistics["low"] == value){
               stats_msg += "This is the lowest value, ";
             } else {
-              var low_delta = value - dataset.statistics["low"];
+              var low_delta = (value - dataset.statistics["low"]).toFixed(2);
               stats_msg += "This is " + low_delta 
                         + " above the low value of " + this.getStat(dataset, "low") + ", ";
             }
@@ -895,14 +906,14 @@ describlerObj.prototype.handle_datapoint = function (){
             if ( dataset.statistics["high"] == value){
               stats_msg += " and is the highest value. ";
             } else {
-              var high_delta = dataset.statistics["high"] - value;
+              var high_delta = (dataset.statistics["high"] - value).toFixed(2);
               stats_msg += " and " + high_delta 
                         + " below the high value of " + this.getStat(dataset, "high") + ". ";
             }
 
             stats_msg += datapoint.label_text + " is "
                       // + this.getFraction(value/dataset.statistics["sum"])
-                      + ((value/dataset.statistics["sum"]) * 100).toFixed() + "%"
+                      + ((value/dataset.statistics["sum"]) * 100).toFixed(2) + "%"
                       + " of the total value of " + this.getStat(dataset, "sum") + ". ";
 
             this.speeches.push( stats_msg );  
@@ -1204,6 +1215,13 @@ describlerObj.prototype.handle_flowchart = function (){
     
     // TODO: say how many starting and ending nodes
 
+    // TODO: figure out how to represent connector labels that differ based on direction…
+    ////     for example, "south" from one node is "north" from the end node
+    ////     justification or rationale or motivation to move from one node to another differs
+    ////     maybe all connectors are really one-way, just some have connector back
+
+    // TODO: make voice-driven interface
+
     // flowchart.nodes.length
     var types_msg = node_message.replace(/There are|There is/, ", with") 
                   + connector_message.replace(/There are|There is/, ", connected by") + ".";
@@ -1324,15 +1342,38 @@ describlerObj.prototype.handle_node = function (){
         }
         
         var connector_msg = "";
+        var bidi_length = node.connectors["bidi"].length;
         var from_length = node.connectors["from"].length;
-        connector_msg += from_length + " outgoing connector";
-        if ( 1 != from_length ){
-          connector_msg += "s"; // make it plural
-        }
-
         var to_length = node.connectors["to"].length;
-        if (to_length) {
-          connector_msg += " and " + to_length + " incoming connector";
+
+        if ( bidi_length ){
+          connector_msg += bidi_length + " two-way connector";
+          if ( 1 != bidi_length ){
+            connector_msg += "s"; // make it plural
+          }
+        }
+ 
+        if ( from_length ) {
+          if ( bidi_length && to_length ){
+            connector_msg += ", "
+          } else if ( bidi_length ) {
+            connector_msg += " and "
+          }
+          
+          connector_msg += from_length + " outgoing connector";
+          if ( 1 != from_length ){
+            connector_msg += "s"; // make it plural
+          }
+        }
+ 
+        if ( to_length ) {
+          if ( bidi_length && from_length ){
+            connector_msg += ", and "
+          } else if ( bidi_length || from_length ) {
+            connector_msg += " and "
+          }
+          
+          connector_msg += to_length + " incoming connector";
           if ( 1 != to_length ){
             connector_msg += "s"; // make it plural
           }
@@ -1386,7 +1427,41 @@ describlerObj.prototype.handle_node = function (){
 
       var default_menu = true;
       if ( this.menu.selected ){
-        if ( "connector-out" == this.menu.selected.id
+        if ( "connector-bidi" == this.menu.selected.id
+          ||  "connector-bidi" == this.menu.selected.context ) {
+          
+          default_menu = false;
+
+          if ( "connector-bidi" == this.menu.selected.id ){
+            // this.speeches.push( "Select outgoing connector: " );
+
+            this.menu.reset();
+            for (var c = 0, c_len = node.connectors["bidi"].length; c_len > c; ++c) {
+              var connector_id = node.connectors["bidi"][c];
+              var connector = flowchart.connectors.find( match_id, connector_id );
+              var option_label = connector.make_option_label( flowchart, node, "bidi" );
+              // this.menu.add( connector.element.id, option_label, "connector-out", null, false );
+              this.menu.add( connector.id, option_label, "connector-bidi", null, false );
+            }
+            this.menu.add( "_default_menu", "other options", null, null, false );
+          } else if ( "connector-bidi" == this.menu.selected.context ) {
+            console.log(this.menu.selected.id);
+
+            // this.menu.reset();
+            var connector_el = document.getElementById( this.menu.selected.id );
+
+            var connector = flowchart.connectors.find( match_element, connector_el );
+            if (connector) {
+              connector.follow_count++;
+              // var connector_index = flowchart.connectors.findIndex( match_element, connector_el );
+              var target_el = connector.to_el;
+              if ( node.element == connector.to_el ) {
+                target_el = connector.from_el;
+              }
+              this.setActiveElement( target_el ); // TODO: no, figure out which direction
+            }
+          }
+        } else if ( "connector-out" == this.menu.selected.id
           ||  "connector-out" == this.menu.selected.context ) {
           
           default_menu = false;
@@ -1398,7 +1473,7 @@ describlerObj.prototype.handle_node = function (){
             for (var c = 0, c_len = node.connectors["from"].length; c_len > c; ++c) {
               var connector_id = node.connectors["from"][c];
               var connector = flowchart.connectors.find( match_id, connector_id );
-              var option_label = connector.make_option_label( flowchart, "to" );
+              var option_label = connector.make_option_label( flowchart, node, "to" );
               // this.menu.add( connector.element.id, option_label, "connector-out", null, false );
               this.menu.add( connector.id, option_label, "connector-out", null, false );
             }
@@ -1429,7 +1504,7 @@ describlerObj.prototype.handle_node = function (){
               var connector = flowchart.connectors.find( match_id, connector_id );
 
               // this.menu.add( connector.element.id, option_label, "connector-in", null, false );
-             var option_label = connector.make_option_label( flowchart, "from" );
+             var option_label = connector.make_option_label( flowchart, node, "from" );
              this.menu.add( connector.id, option_label, "connector-in", null, false );
             }
             this.menu.add( "_default_menu", "other options", null, null, false );
@@ -1524,13 +1599,29 @@ describlerObj.prototype.handle_node = function (){
         //      desc (if any) and label of end node
         this.menu.reset();
 
+        if ( node.connectors["bidi"].length ) {
+          if ( 1 == node.connectors["bidi"].length ) {
+            // if only one connector, give option to jump to it instead of listing options
+            var connector_id = node.connectors["bidi"][0];
+            var connector = flowchart.connectors.find( match_id, connector_id );
+            var option_label = "follow the two-way connector ";
+            option_label += connector.make_option_label( flowchart, node, "bidi" );
+            // option_label.replace("the connector a two-way connector", "the two-way connector");
+            this.menu.add( connector.to_el.id, option_label, "jump", connector.id, true );
+
+          } else {
+            this.menu.add( "connector-bidi", "follow a two-way connector", null, null, true );
+          }
+        }
+
         if ( node.connectors["from"].length ) {
           if ( 1 == node.connectors["from"].length ) {
             // if only one connector, give option to jump to it instead of listing options
             var connector_id = node.connectors["from"][0];
             var connector = flowchart.connectors.find( match_id, connector_id );
             var option_label = "follow the outgoing connector ";
-            option_label += connector.make_option_label( flowchart, "to" );
+            option_label += connector.make_option_label( flowchart, node, "to" );
+            option_label.replace("the connector a two-way connector", "the two-way connector");
             this.menu.add( connector.to_el.id, option_label, "jump", connector.id, true );
 
           } else {
@@ -1544,7 +1635,8 @@ describlerObj.prototype.handle_node = function (){
             var connector_id = node.connectors["to"][0];
             var connector = flowchart.connectors.find( match_id, connector_id );
             var option_label = "follow the incoming connector ";
-            option_label += connector.make_option_label( flowchart, "from" );
+            option_label += connector.make_option_label( flowchart, node, "from" );
+            option_label.replace("the connector a two-way connector", "the two-way connector");
             this.menu.add( connector.from_el.id, option_label, "jump", connector.id, true );
 
           } else {
@@ -1871,7 +1963,27 @@ describlerObj.prototype.sonify = function () {
         var datapoint = dataset.datapoints[dp].element;
         var bbox = datapoint.getBBox();
         datalinePoints += (bbox.x + (bbox.width/2)) + "," + bbox.y + " "; 
+
+        // var datapoint_origin = this.root.createSVGPoint();
+        // datapoint_origin.x = bbox.x;
+        // datapoint_origin.y = bbox.y;
+        // datapoint_origin = datapoint_origin.matrixTransform( this.root.getScreenCTM().inverse() );      
+        // datalinePoints += (datapoint_origin.x + (bbox.width/2)) + "," + datapoint_origin.y + " "; 
       }
+
+      // TODO: work on this for transforms
+      /*
+      for (var dp = 0, dp_len = dataset.datapoints.length; dp_len > dp; ++dp) {
+        var datapoint = dataset.datapoints[dp].element;
+        var bbox = datapoint.getBBox();
+        var x = (bbox.x + (bbox.width/2));
+        var y = bbox.y;
+        // var bbox = datapoint.getBoundingClientRect();
+        // var x = (bbox.left + (bbox.width/2));
+        // var y = bbox.top;
+        // datalinePoints += x + "," + y + " "; 
+      }
+      */
       
       console.log("datalinePoints:");
       console.log(datalinePoints);
@@ -1939,7 +2051,7 @@ describlerObj.prototype.set_voice_volume = function ( volume ) {
 
 
 describlerObj.prototype.getStat = function ( dataset, stat ) {
-  var value = +dataset.statistics[ stat ];
+  var value = Number((+dataset.statistics[ stat ]).toFixed(2));
   
   // hack, proof of concept 
   if ( this.taskAssessments[0] && this.taskAssessments[0].tasks[ stat ] ) {
@@ -2806,6 +2918,8 @@ connectorObj.prototype.init = function (){
   }
 
   // TODO: if this.is_directed is false, add connector to both "to" and "from" lists
+  // TODO: handle description case where 2-way connector is on the "to" node… reverse "to" and "from"
+  // TODO: fix number of connectors listed… list 2-way connectors only once
 
   // TODO: if missing 'to' or 'from', or if element doesn't exist, tell user (what does ARIA do?);
 
@@ -2853,16 +2967,35 @@ connectorObj.prototype.get_info = function ( flowchart ){
   return msg;
 }
 
-connectorObj.prototype.make_option_label = function ( flowchart, direction ){
-  var el = null;
-  if ( "from" == direction ) {
-    el = this.from_el;
+connectorObj.prototype.make_option_label = function ( flowchart, node, direction ){
+  var start_el = this.from_el;
+  var end_el = this.to_el;
+  if ( "bidi" == direction && node.element == this.to_el ) {
+    start_el = this.to_el;
+    end_el = this.from_el;
+  } else if ( "from" == direction ) {
+    start_el = this.from_el;
   } else if ( "to" == direction ) {
-    el = this.to_el;
+    start_el = this.to_el;
   }
-  var node = flowchart.nodes.find( match_element, el );
 
-  if ( node ) {
+  // if ( "bidi" == direction ) {
+  //   if ( node.element == this.to_el ) {
+  //     start_el = this.from_el;
+  //   } else {
+  //     start_el = this.to_el;
+  //   }
+  // } else if ( "from" == direction ) {
+  //   start_el = this.from_el;
+  // } else if ( "to" == direction ) {
+  //   start_el = this.to_el;
+  // }
+
+  // TODO: handle "outgoing" and "incoming" based on direction and node
+  var start_node = flowchart.nodes.find( match_element, start_el );
+  var end_node = flowchart.nodes.find( match_element, end_el );
+
+  if ( end_node ) {
     var msg = this.label;
     if ( "" != msg ) {
       msg += ", ";
@@ -2888,13 +3021,13 @@ connectorObj.prototype.make_option_label = function ( flowchart, direction ){
 
       // give end-node label
       var type_msg = "";
-      if ( node.is_initial ) {
+      if ( end_node.is_initial ) {
         type_msg += " starting ";
-      } else if ( node.is_terminal ) {
+      } else if ( end_node.is_terminal ) {
         type_msg += " ending ";
       }
 
-      msg += dir_msg + type_msg + ' node labeled "' + node.label + '"';
+      msg += dir_msg + type_msg + ' node labeled "' + end_node.label + '"';
     }
 
     if ( 0 != this.follow_count ) {
@@ -2923,6 +3056,7 @@ function nodeObj( el, root ) {
 
   this.connectors = {
     "all": [],
+    "bidi": [],
     "to": [],
     "from": []
   };
@@ -2952,15 +3086,58 @@ nodeObj.prototype.init = function (){
   this.connectors["to"] = this.find_connectors( to_connector_els );
 
   this.connectors["all"] = this.connectors["from"].concat( this.connectors["to"]);
+  
+  var all_connector_els = Array.from( from_connector_els ).concat( Array.from( to_connector_els ) );
 
-  // if this.is_directed is false, add connector to both "to" and "from" lists
-  for (var c = 0, c_len = to_connector_els.length; c_len > c; ++c) {
-    var each_connector = to_connector_els[c];
+  // if this.is_directed is false, add connector to "bidi" and remove from "to" and "from" lists
+  for (var c = 0, c_len = all_connector_els.length; c_len > c; ++c) {
+    var each_connector = all_connector_els[c];
     var directed = each_connector.getAttribute( "aria-directed" );
-    if ( "false" == directed ) {
-      this.connectors["from"].push( each_connector.id );
+    if ( !directed || "false" == directed ) {
+      var each_connector_id = each_connector.id;
+      this.connectors["bidi"].push( each_connector_id );
+
+      // remove from "from" array
+      var fi = this.connectors["from"].indexOf( each_connector_id );
+      if( -1 != fi ) {
+        this.connectors["from"].splice(fi, 1);
+      }
+
+      // remove from "to" array
+      var ti = this.connectors["to"].indexOf( each_connector_id );
+      if( -1 != ti ) {
+        this.connectors["to"].splice(ti, 1);
+      }
+
     }
   }
+
+
+  // // get related connectors
+  // var from_query = "[role='connector'][aria-flowfrom='" + this.id + "']:not([aria-directed='false'])"
+  // var from_connector_els = this.root.querySelectorAll(from_query);
+  // this.connectors["from"] = this.find_connectors( from_connector_els );
+  
+  // var to_query = "[role='connector'][aria-flowto='" + this.id + "']:not([aria-directed='false'])"
+  // var to_connector_els = this.root.querySelectorAll(to_query);
+  // this.connectors["to"] = this.find_connectors( to_connector_els );
+  
+  // var bidi_query = "[role='connector'][aria-flowto='" + this.id + "']:not([aria-directed='false'])"
+  // var bidi_connector_els = this.root.querySelectorAll(bidi_query);
+  // this.connectors["bidi"] = this.find_connectors( bidi_connector_els );
+
+  // this.connectors["all"] = this.connectors["from"].concat( this.connectors["to"]);
+
+
+  // if this.is_directed is false, add connector to both "to" and "from" lists
+  // for (var c = 0, c_len = to_connector_els.length; c_len > c; ++c) {
+  //   var each_connector = to_connector_els[c];
+  //   var directed = each_connector.getAttribute( "aria-directed" );
+  //   if ( "false" == directed ) {
+  //     this.connectors["from"].push( each_connector.id );
+  //   }
+  // }
+
   
   if ( 0 != this.connectors["from"].length && 0 == this.connectors["to"].length ) {
     this.is_initial = true;

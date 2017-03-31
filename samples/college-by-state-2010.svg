@@ -1,0 +1,361 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 1144 240">
+  <title>Percentage of College Graduates by State, 2010</title>
+ <style type="text/css">
+    text {
+      font-family: Helvetica, sans-serif;
+      font-size: 11px; 
+      fill: rgb(70, 130, 180);
+    }
+
+      text.x-label {
+        font-size: 9px; 
+        text-anchor: middle;
+      }
+
+      text.y-label {
+        font-size: 9px; 
+        text-anchor: end;
+      }
+
+      text.y-axis-label {
+        text-anchor: middle;
+      }
+
+      text[role=heading] {
+        font-size: 13px; 
+        font-weight: bold;         
+        text-anchor: middle;
+      }
+
+    .axis-line {
+      fill: none; 
+      stroke: navy; 
+      stroke-width: 1; 
+      pointer-events: none;
+    }  
+ 
+    .tick {
+      fill: none; 
+      stroke: navy; 
+      stroke-width: 1; 
+      pointer-events: none;
+    }
+
+    .tickline {
+      fill: none; 
+      stroke: gainsboro; 
+      stroke-width: 1; 
+      pointer-events: none;
+    }
+
+    [role=datapoint] {
+       fill: rgb(70, 130, 180);
+    }
+  </style>
+
+  <g transform="translate(0,10)" role="chart" aria-charttype="bar" tabindex="0">
+    <text x="572" y="5" role="heading">Percentage of College Graduates by State, 2010</text>  
+
+    <g transform="translate(45,12)">
+      <rect role="chartarea" x="0" y="0" width="1092" height="200" fill="none"/>
+
+      <g transform="translate(0,0)">
+        <rect class="background" width="1" height="1" style="fill: none;"/>
+        <g class="mark-group root">
+          <g transform="translate(0,0)">
+            <rect class="background" width="1092" height="200" style="fill: none;"/>
+            <g class="mark-group">
+              <g transform="translate(0,200)">
+
+                <g class="x-axis" role="xaxis" aria-axistype="category" tabindex="0">
+                  <title role="heading">States</title>
+                  <path transform="translate(0.5,0.5)" d="M0,6 V0 H1092 V6" class="axis-line"/>
+
+                  <text transform="translate(21.5,12)" class="x-label">AK <title role="axislabel" id="x-AK">Alaska</title></text>
+                  <text transform="translate(42.5,12)" class="x-label">AL <title role="axislabel" id="x-AL">Alabama</title></text>
+                  <text transform="translate(63.5,12)" class="x-label">AR <title role="axislabel" id="x-AR">Arkansas</title></text>
+                  <text transform="translate(84.5,12)" class="x-label">AZ <title role="axislabel" id="x-AZ">Arizona</title></text>
+                  <text transform="translate(105.5,12)" class="x-label">CA <title role="axislabel" id="x-CA">California</title></text>
+                  <text transform="translate(126.5,12)" class="x-label">CO <title role="axislabel" id="x-CO">Colorado</title></text>
+                  <text transform="translate(147.5,12)" class="x-label">CT <title role="axislabel" id="x-CT">Connecticut</title></text>
+                  <text transform="translate(168.5,12)" class="x-label">DC <title role="axislabel" id="x-DC">District of Columbia</title></text>
+                  <text transform="translate(189.5,12)" class="x-label">DE <title role="axislabel" id="x-DE">Delaware</title></text>
+                  <text transform="translate(210.5,12)" class="x-label">FL <title role="axislabel" id="x-FL">Florida</title></text>
+                  <text transform="translate(231.5,12)" class="x-label">GA <title role="axislabel" id="x-GA">Georgia</title></text>
+                  <text transform="translate(252.5,12)" class="x-label">HI <title role="axislabel" id="x-HI">Hawaii</title></text>
+                  <text transform="translate(273.5,12)" class="x-label">IA <title role="axislabel" id="x-IA">Iowa</title></text>
+                  <text transform="translate(294.5,12)" class="x-label">ID <title role="axislabel" id="x-ID">Idaho</title></text>
+                  <text transform="translate(315.5,12)" class="x-label">IL <title role="axislabel" id="x-IL">Illinois</title></text>
+                  <text transform="translate(336.5,12)" class="x-label">IN <title role="axislabel" id="x-IN">Indiana</title></text>
+                  <text transform="translate(357.5,12)" class="x-label">KS <title role="axislabel" id="x-KS">Kansas</title></text>
+                  <text transform="translate(378.5,12)" class="x-label">KY <title role="axislabel" id="x-KY">Kentucky</title></text>
+                  <text transform="translate(399.5,12)" class="x-label">LA <title role="axislabel" id="x-LA">Louisiana</title></text>
+                  <text transform="translate(420.5,12)" class="x-label">MA <title role="axislabel" id="x-MA">Massachusetts</title></text>
+                  <text transform="translate(441.5,12)" class="x-label">MD <title role="axislabel" id="x-MD">Maryland</title></text>
+                  <text transform="translate(462.5,12)" class="x-label">ME <title role="axislabel" id="x-ME">Maine</title></text>
+                  <text transform="translate(483.5,12)" class="x-label">MI <title role="axislabel" id="x-MI">Michigan</title></text>
+                  <text transform="translate(504.5,12)" class="x-label">MN <title role="axislabel" id="x-MN">Minnesota</title></text>
+                  <text transform="translate(525.5,12)" class="x-label">MO <title role="axislabel" id="x-MO">Missouri</title></text>
+                  <text transform="translate(546.5,12)" class="x-label">MS <title role="axislabel" id="x-MS">Mississippi</title></text>
+                  <text transform="translate(567.5,12)" class="x-label">MT <title role="axislabel" id="x-MT">Montana</title></text>
+                  <text transform="translate(588.5,12)" class="x-label">NC <title role="axislabel" id="x-NC">North Carolina</title></text>
+                  <text transform="translate(609.5,12)" class="x-label">ND <title role="axislabel" id="x-ND">North Dakota</title></text>
+                  <text transform="translate(630.5,12)" class="x-label">NE <title role="axislabel" id="x-NE">Nebraska</title></text>
+                  <text transform="translate(651.5,12)" class="x-label">NH <title role="axislabel" id="x-NH">New Hampshire</title></text>
+                  <text transform="translate(672.5,12)" class="x-label">NJ <title role="axislabel" id="x-NJ">New Jersey</title></text>
+                  <text transform="translate(693.5,12)" class="x-label">NM <title role="axislabel" id="x-NM">New Mexico</title></text>
+                  <text transform="translate(714.5,12)" class="x-label">NV <title role="axislabel" id="x-NV">Nevada</title></text>
+                  <text transform="translate(735.5,12)" class="x-label">NY <title role="axislabel" id="x-NY">New York</title></text>
+                  <text transform="translate(756.5,12)" class="x-label">OH <title role="axislabel" id="x-OH">Ohio</title></text>
+                  <text transform="translate(777.5,12)" class="x-label">OK <title role="axislabel" id="x-OK">Oklahoma</title></text>
+                  <text transform="translate(798.5,12)" class="x-label">OR <title role="axislabel" id="x-OR">Oregon</title></text>
+                  <text transform="translate(819.5,12)" class="x-label">PA <title role="axislabel" id="x-PA">Pennsylvania</title></text>
+                  <text transform="translate(840.5,12)" class="x-label">RI <title role="axislabel" id="x-RI">Rhode Island</title></text>
+                  <text transform="translate(861.5,12)" class="x-label">SC <title role="axislabel" id="x-SC">South Carolina</title></text>
+                  <text transform="translate(882.5,12)" class="x-label">SD <title role="axislabel" id="x-SD">South Dakota</title></text>
+                  <text transform="translate(903.5,12)" class="x-label">TN <title role="axislabel" id="x-TN">Tennessee</title></text>
+                  <text transform="translate(924.5,12)" class="x-label">TX <title role="axislabel" id="x-TX">Texas</title></text>
+                  <text transform="translate(945.5,12)" class="x-label">UT <title role="axislabel" id="x-UT">Utah</title></text>
+                  <text transform="translate(966.5,12)" class="x-label">VA <title role="axislabel" id="x-VA">Virginia</title></text>
+                  <text transform="translate(987.5,12)" class="x-label">VT <title role="axislabel" id="x-VT">Vermont</title></text>
+                  <text transform="translate(1008.5,12)" class="x-label">WA <title role="axislabel" id="x-WA">Washington</title></text>
+                  <text transform="translate(1029.5,12)" class="x-label">WI <title role="axislabel" id="x-WI">Wisconsin</title></text>
+                  <text transform="translate(1050.5,12)" class="x-label">WV <title role="axislabel" id="x-WV">West Virginia</title></text>
+                  <text transform="translate(1071.5,12)" class="x-label">WY <title role="axislabel" id="x-WY">Wyoming</title></text>
+                </g> role="axislabel" id="x-"
+              </g>
+            </g>
+
+            <g class="y-axis">
+              <g transform="translate(0,0)" role="yaxis" aria-valuemin="0" aria-valuemax="55" tabindex="0">
+                <!-- <rect class="background" width="0" height="0" style="pointer-events: none; fill: none;"/> -->
+                <text role="heading" transform="translate(-33,100) rotate(-90) translate(0,3)" class="y-axis-label">Percentage of College Graduates</text>
+
+                <g class="mark-text">
+                  <g class="axis-label">
+                    <!-- <line transform="translate(0,200.5)" x2="1092" y2="0" class="tickline"/> -->
+                    <line transform="translate(-6,200.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-0" transform="translate(-9,203.5)" class="y-label" role="axislabel">0</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,182.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,182.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-5" transform="translate(-9,185.5)" class="y-label" role="axislabel">5</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,164.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,164.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-10" transform="translate(-9,167.5)" class="y-label" role="axislabel">10</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,145.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,145.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-15" transform="translate(-9,148.5)" class="y-label" role="axislabel">15</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,127.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,127.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-20" transform="translate(-9,130.5)" class="y-label" role="axislabel">20</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,109.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,109.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-25" transform="translate(-9,112.5)" class="y-label" role="axislabel">25</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,91.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,91.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-30" transform="translate(-9,94.5)" class="y-label" role="axislabel">30</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,73.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,73.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-35" transform="translate(-9,76.5)" class="y-label" role="axislabel">35</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,55.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,55.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-40" transform="translate(-9,58.5)" class="y-label" role="axislabel">40</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,36.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,36.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-45" transform="translate(-9,39.5)" class="y-label" role="axislabel">45</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,18.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,18.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-50" transform="translate(-9,21.5)" class="y-label" role="axislabel">50</text>
+                  </g>
+                  <g class="axis-label">
+                    <line transform="translate(0,0.5)" x2="1092" y2="0" class="tickline"/>
+                    <line transform="translate(-6,0.5)" x2="6" y2="0" class="tick"/>
+                    <text id="y-55" transform="translate(-9,3.5)" class="y-label" role="axislabel">55</text>
+                  </g>
+                </g>
+                <path transform="translate(0.5,0.5)" d="M-6,0H0V200H-6" class="axis-line"/>
+              </g>
+            </g>
+
+            <g id="dataset" role="dataset">
+              <rect transform="translate(11,99)" width="20" height="101" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-AK">27.9</title>
+              </rect>
+              <rect transform="translate(32,120)" width="20" height="80" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-AL">21.9</title>
+              </rect>
+              <rect transform="translate(53,129)" width="20" height="71" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-AR">19.5</title>
+              </rect>
+              <rect transform="translate(74,106)" width="20" height="94" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-AZ">25.9</title>
+              </rect>
+              <rect transform="translate(95,91)" width="20" height="109" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-CA">30.1</title>
+              </rect>
+              <rect transform="translate(116,68)" width="20" height="132" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-CO">36.4</title>
+              </rect>
+              <rect transform="translate(137,71)" width="20" height="129" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-CT">35.5</title>
+              </rect>
+              <rect transform="translate(158,18)" width="20" height="182" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-DC">50.1</title>
+              </rect>
+              <rect transform="translate(179,99)" width="20" height="101" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-DE">27.8</title>
+              </rect>
+              <rect transform="translate(200,106)" width="20" height="94" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-FL">25.8</title>
+              </rect>
+              <rect transform="translate(221,101)" width="20" height="99" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-GA">27.3</title>
+              </rect>
+              <rect transform="translate(242,93)" width="20" height="107" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-HI">29.5</title>
+              </rect>
+              <rect transform="translate(263,109)" width="20" height="91" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-IA">24.9</title>
+              </rect>
+              <rect transform="translate(284,111)" width="20" height="89" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-ID">24.4</title>
+              </rect>
+              <rect transform="translate(305,88)" width="20" height="112" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-IL">30.8</title>
+              </rect>
+              <rect transform="translate(326,117)" width="20" height="83" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-IN">22.7</title>
+              </rect>
+              <rect transform="translate(347,92)" width="20" height="108" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-KS">29.8</title>
+              </rect>
+              <rect transform="translate(368,125)" width="20" height="75" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-KY">20.5</title>
+              </rect>
+              <rect transform="translate(389,122)" width="20" height="78" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-LA">21.4</title>
+              </rect>
+              <rect transform="translate(410,58)" width="20" height="142" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-MA">39</title>
+              </rect>
+              <rect transform="translate(431,69)" width="20" height="131" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-MD">36.1</title>
+              </rect>
+              <rect transform="translate(452,103)" width="20" height="97" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-ME">26.8</title>
+              </rect>
+              <rect transform="translate(473,108)" width="20" height="92" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-MI">25.2</title>
+              </rect>
+              <rect transform="translate(494,84)" width="20" height="116" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-MN">31.8</title>
+              </rect>
+              <rect transform="translate(515,107)" width="20" height="93" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-MO">25.6</title>
+              </rect>
+              <rect transform="translate(536,129)" width="20" height="71" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-MS">19.5</title>
+              </rect>
+              <rect transform="translate(557,95)" width="20" height="105" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-MT">28.8</title>
+              </rect>
+              <rect transform="translate(578,104)" width="20" height="96" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-NC">26.5</title>
+              </rect>
+              <rect transform="translate(599,100)" width="20" height="100" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-ND">27.6</title>
+              </rect>
+              <rect transform="translate(620,96)" width="20" height="104" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-NE">28.6</title>
+              </rect>
+              <rect transform="translate(641,81)" width="20" height="119" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-NH">32.8</title>
+              </rect>
+              <rect transform="translate(662,71)" width="20" height="129" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-NJ">35.4</title>
+              </rect>
+              <rect transform="translate(683,109)" width="20" height="91" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-NM">25</title>
+              </rect>
+              <rect transform="translate(704,121)" width="20" height="79" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-NV">21.7</title>
+              </rect>
+              <rect transform="translate(725,82)" width="20" height="118" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-NY">32.5</title>
+              </rect>
+              <rect transform="translate(746,111)" width="20" height="89" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-OH">24.6</title>
+              </rect>
+              <rect transform="translate(767,117)" width="20" height="83" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-OK">22.9</title>
+              </rect>
+              <rect transform="translate(788,95)" width="20" height="105" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-OR">28.8</title>
+              </rect>
+              <rect transform="translate(809,101)" width="20" height="99" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-PA">27.1</title>
+              </rect>
+              <rect transform="translate(830,90)" width="20" height="110" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-RI">30.2</title>
+              </rect>
+              <rect transform="translate(851,111)" width="20" height="89" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-SC">24.5</title>
+              </rect>
+              <rect transform="translate(872,104)" width="20" height="96" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-SD">26.3</title>
+              </rect>
+              <rect transform="translate(893,116)" width="20" height="84" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-TN">23.1</title>
+              </rect>
+              <rect transform="translate(914,106)" width="20" height="94" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-TX">25.9</title>
+              </rect>
+              <rect transform="translate(935,93)" width="20" height="107" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-UT">29.3</title>
+              </rect>
+              <rect transform="translate(956,76)" width="20" height="124" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-VA">34.2</title>
+              </rect>
+              <rect transform="translate(977,78)" width="20" height="122" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-VT">33.6</title>
+              </rect>
+              <rect transform="translate(998,87)" width="20" height="113" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-WA">31.1</title>
+              </rect>
+              <rect transform="translate(1019,104)" width="20" height="96" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-WI">26.3</title>
+              </rect>
+              <rect transform="translate(1040,136)" width="20" height="64" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-WV">17.5</title>
+              </rect>
+              <rect transform="translate(1061,112)" width="20" height="88" role="datapoint" tabindex="0">
+                <title role="datavalue" aria-labelledby="x-WY">24.1</title>
+              </rect>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+
+  </g>
+</svg>

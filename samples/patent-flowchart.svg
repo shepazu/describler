@@ -15,8 +15,11 @@
       stroke: black;
       stroke-width: 2px;
       stroke-linecap: round;
-      marker-end: url(#endArrow);
     }
+
+      *[role="connector"][aria-directed="true"] {
+        marker-end: url(#endArrow);
+      }
 
     text, text[role="connector"] {
       fill: black;
